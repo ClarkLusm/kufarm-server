@@ -1,26 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
-import { CreateBalanceTransactionDto } from './dto/create-balance-transaction.dto';
+import { BaseService } from 'src/server/common/base/base.service';
 import { BalanceTransaction } from './balance-transaction.entity';
 
 @Injectable()
-export class BalanceTransactionService {
+export class BalanceTransactionService extends BaseService<BalanceTransaction> {
   constructor(
     @InjectRepository(BalanceTransaction)
-    private btRepository: Repository<BalanceTransaction>,
-  ) {}
-
-  create(user: CreateBalanceTransactionDto) {
-    return this.btRepository.save(user);
-  }
-
-  findOne(params: FindOneOptions<BalanceTransaction> = {}) {
-    return this.btRepository.findOne(params);
-  }
-
-  findAll(params: FindManyOptions<BalanceTransaction> = {}) {
-    return this.btRepository.find(params);
+    public repository: Repository<BalanceTransaction>,
+  ) {
+    super(repository);
   }
 }

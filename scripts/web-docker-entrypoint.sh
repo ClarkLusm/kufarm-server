@@ -14,6 +14,6 @@ yarn install
 
 # yarn typeorm migration:run
 
-yarn console seed
+# yarn console seed
 
 exec "$@"

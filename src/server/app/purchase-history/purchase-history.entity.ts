@@ -26,11 +26,11 @@ export class PurchaseHistory {
   @Column({ name: 'hash_power' })
   hashPower: number;
 
-  @Column({ name: 'daily_income', nullable: false })
-  dailyIncome: BigInt;
+  @Column({ name: 'daily_income', type: 'bigint', nullable: false })
+  dailyIncome: number;
 
-  @Column({ name: 'monthly_income', nullable: false })
-  monthlyIncome: BigInt;
+  @Column({ name: 'monthly_income', type: 'bigint', nullable: false })
+  monthlyIncome: number;
 
   @Column()
   status: number;

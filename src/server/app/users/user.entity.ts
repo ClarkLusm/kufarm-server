@@ -16,11 +16,23 @@ export class User {
   @Column({ nullable: false })
   username: string;
 
-  @Column()
-  balance: BigInt;
+  @Column({ nullable: false })
+  email: string;
 
-  @Column({ name: 'referral_balance' })
-  referralBalance: BigInt;
+  @Column({ name: 'btc_address', nullable: false })
+  btcAddress: string;
+
+  @Column({ name: 'password_hash', nullable: false })
+  passwordHash: string;
+
+  @Column({ name: 'salt', nullable: false })
+  salt: string;
+
+  @Column({ type: 'bigint' })
+  balance: any;
+
+  @Column({ name: 'referral_balance', type: 'bigint' })
+  referralBalance: any;
 
   @Column({ name: 'count_referral' })
   countReferral?: number;
@@ -30,6 +42,12 @@ export class User {
 
   @Column({ name: 'email_verified' })
   emailVerified?: boolean;
+
+  @Column()
+  banned?: boolean;
+
+  @Column({ name: 'ban_reason' })
+  banReason?: string;
 
   @Column()
   @CreateDateColumn()

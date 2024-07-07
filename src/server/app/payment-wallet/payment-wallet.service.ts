@@ -4,23 +4,14 @@ import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 
 import { CreatePaymentWalletDto } from './dto/create-payment-wallet.dto';
 import { PaymentWallet } from './payment-wallet.entity';
+import { BaseService } from 'src/server/common/base/base.service';
 
 @Injectable()
-export class PaymentWalletService {
+export class PaymentWalletService extends BaseService<PaymentWallet> {
   constructor(
     @InjectRepository(PaymentWallet)
-    private paymentWalletRepository: Repository<PaymentWallet>,
-  ) {}
-
-  create(user: CreatePaymentWalletDto) {
-    return this.paymentWalletRepository.save(user);
-  }
-
-  findOne(params: FindOneOptions<PaymentWallet> = {}) {
-    return this.paymentWalletRepository.findOne(params);
-  }
-
-  findAll(params: FindManyOptions<PaymentWallet> = {}) {
-    return this.paymentWalletRepository.find(params);
+    public repository: Repository<PaymentWallet>,
+  ) {
+    super(repository);
   }
 }

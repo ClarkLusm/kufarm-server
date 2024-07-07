@@ -4,23 +4,15 @@ import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 
 import { CreateProductDto } from './dto/create-product.dto';
 import { Product } from './product.entity';
+import { ProductHelper } from './product.helper';
+import { BaseService } from 'src/server/common/base/base.service';
 
 @Injectable()
-export class ProductService {
+export class ProductService extends BaseService<Product> {
   constructor(
     @InjectRepository(Product)
-    private productRepository: Repository<Product>,
-  ) {}
-
-  create(user: CreateProductDto) {
-    return this.productRepository.save(user);
-  }
-
-  findOne(params: FindOneOptions<Product> = {}) {
-    return this.productRepository.findOne(params);
-  }
-
-  findAll(params: FindManyOptions<Product> = {}) {
-    return this.productRepository.find(params);
+    public repository: Repository<Product>,
+  ) {
+    super(repository);
   }
 }

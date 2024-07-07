@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NextPage } from 'next';
+import { redirect } from 'next/navigation';
 
 const Home: NextPage<{ message: string; query: string }> = (props) => {
   const { message, query } = props;

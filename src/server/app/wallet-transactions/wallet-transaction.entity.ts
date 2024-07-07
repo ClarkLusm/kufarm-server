@@ -26,8 +26,8 @@ export class WalletTransaction {
   @Column({ nullable: false })
   symbol: string;
 
-  @Column({ nullable: false })
-  amount: BigInt;
+  @Column({ type: 'bigint', nullable: false })
+  amount: number;
 
   @Column()
   status: number;

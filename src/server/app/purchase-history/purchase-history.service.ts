@@ -2,25 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 
-import { CreatePurchaseHistoryDto } from './dto/create-purchase-history.dto';
+import { BaseService } from 'src/server/common/base/base.service';
 import { PurchaseHistory } from './purchase-history.entity';
 
 @Injectable()
-export class PurchaseHistoryService {
+export class PurchaseHistoryService extends BaseService<PurchaseHistory> {
   constructor(
     @InjectRepository(PurchaseHistory)
-    private purchaseHistoryRepository: Repository<PurchaseHistory>,
-  ) {}
-
-  create(user: CreatePurchaseHistoryDto) {
-    return this.purchaseHistoryRepository.save(user);
-  }
-
-  findOne(params: FindOneOptions<PurchaseHistory> = {}) {
-    return this.purchaseHistoryRepository.findOne(params);
-  }
-
-  findAll(params: FindManyOptions<PurchaseHistory> = {}) {
-    return this.purchaseHistoryRepository.find(params);
+    public repository: Repository<PurchaseHistory>,
+  ) {
+    super(repository);
   }
 }

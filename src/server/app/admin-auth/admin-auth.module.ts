@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
+
+import { UserModule } from '../users/user.module';
 import { JwtAuthModule } from './jwt/jwt-auth.module';
-import { AuthController } from './auth.controller';
+import { AdminAuthController } from './admin-auth.controller';
 
 @Module({
-  controllers: [AuthController],
+  controllers: [AdminAuthController],
   imports: [
-    UsersModule,
+    UserModule,
     PassportModule,
     JwtAuthModule,
   ],

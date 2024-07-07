@@ -4,11 +4,11 @@ import { ConsoleModule } from 'nestjs-console';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { SeedService } from 'src/server/console/seed.service';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
+import { AuthModule } from './admin-auth/admin-auth.module';
+import { UserModule } from './users/user.module';
 import { UserProductModule } from './user-products/user-product.module';
+import { AdminRouteModule } from '../routes/admin-router.module';
+import { ClientRouteModule } from '../routes/client-router.module';
 
 @Module({
   imports: [
@@ -29,10 +29,11 @@ import { UserProductModule } from './user-products/user-product.module';
     }),
     ConsoleModule,
     AuthModule,
-    UsersModule,
+    UserModule,
     UserProductModule,
+    AdminRouteModule,
+    ClientRouteModule,
   ],
-  providers: [SeedService, AppService],
-  controllers: [AppController],
+  providers: [SeedService],
 })
 export class AppModule {}

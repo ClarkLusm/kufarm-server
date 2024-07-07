@@ -1,18 +1,7 @@
 import React, { useEffect } from 'react';
 import { NextPage } from 'next';
-import { Request } from 'express';
 
-export async function getServerSideProps({ req }) {
-  
-  return {
-    props: { user: (req as Request).user, orders: [] },
-  };
-}
-
-const Orders: NextPage = (props) => {
-  useEffect(() => {
-    window.gtag('event', 'ordersOpened');
-  }, []);
+const Users: NextPage = (props) => {
 
   return (
     <div>
@@ -21,4 +10,4 @@ const Orders: NextPage = (props) => {
   );
 };
 
-export default Orders;
+export default Users;

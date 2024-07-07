@@ -1,6 +1,6 @@
 import * as request from 'supertest';
 
-import { JwtAuthService } from 'src/server/app/auth/jwt/jwt-auth.service';
+import { JwtAuthService } from 'src/server/app/admin-auth/jwt/jwt-auth.service';
 import { User } from 'src/server/app/users/user.entity';
 import { SESSION_COOKIE_KEY } from 'src/server/config/constants';
 

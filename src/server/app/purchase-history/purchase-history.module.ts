@@ -8,4 +8,4 @@ import { PurchaseHistoryService } from './purchase-history.service';
   providers: [PurchaseHistoryService],
   exports: [PurchaseHistoryService],
 })
-export class UsersModule {}
+export class PurchaseHistoryModule {}

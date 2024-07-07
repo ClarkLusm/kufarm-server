@@ -1,6 +1,8 @@
 import React from 'react';
 import { AppProps } from 'next/app';
 import Script from 'next/script';
+// import 'tailwindcss/tailwind.css';
+import '../global.css';
 
 const App = ({ Component, pageProps }: AppProps) => {
   return (

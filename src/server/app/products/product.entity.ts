@@ -35,8 +35,8 @@ export class Product {
   @Column({ name: 'monthly_income', type: 'bigint', nullable: false })
   monthlyIncome: string;
 
-  @Column()
-  status: number;
+  @Column({ name: 'is_active' })
+  isActive: boolean;
 
   @Column()
   @CreateDateColumn()

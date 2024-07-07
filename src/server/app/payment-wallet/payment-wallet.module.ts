@@ -8,4 +8,4 @@ import { PaymentWalletService } from './payment-wallet.service';
   providers: [PaymentWalletService],
   exports: [PaymentWalletService],
 })
-export class UsersModule {}
+export class PaymentWalletModule {}

@@ -16,6 +16,7 @@ import { SearchProductDto } from './dto/search-product.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Product } from './product.entity';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductHelper } from './product.helper';
 
 @Controller()
 export class ProductController {
@@ -37,7 +38,7 @@ export class ProductController {
 
   @Post()
   async create(@Body() data: CreateProductDto): Promise<Product> {
-    return this.service.create(data);
+    return this.service.create(ProductHelper.dtoToEntity(data));
   }
 
   @Put(':id')

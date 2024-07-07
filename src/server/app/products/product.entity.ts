@@ -30,10 +30,10 @@ export class Product {
   hashPower: number;
 
   @Column({ name: 'daily_income', type: 'bigint', nullable: false })
-  dailyIncome: string;
+  dailyIncome: number;
 
   @Column({ name: 'monthly_income', type: 'bigint', nullable: false })
-  monthlyIncome: string;
+  monthlyIncome: number;
 
   @Column({ name: 'is_active' })
   isActive: boolean;

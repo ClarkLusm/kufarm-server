@@ -9,18 +9,20 @@ export class CreateUserProduct1719971671281 implements MigrationInterface {
         "id" UUID DEFAULT uuid_generate_v4(),
         "user_id" UUID,
         "product_id" UUID,
-        "duration" integer,
-        "hash_power" integer,
-        "daily_income" bigint,
-        "monthly_income" bigint,
+        "duration" INTEGER,
+        "hash_power" INTEGER,
+        "daily_income" BIGINT,
+        "monthly_income" BIGINT,
         "start_at" TIMESTAMP,
         "end_at" TIMESTAMP,
-        "status" smallint,
+        "status" SMALLINT,
         "sync_at" TIMESTAMP,
-        "income" bigint,
+        "income" BIGINT,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
-        CONSTRAINT "PK_1031171c13130102495201e3e25" PRIMARY KEY ("id")
+        CONSTRAINT "PK_1031171cf3130102495201e3e25" PRIMARY KEY ("id"),
+        CONSTRAINT "FK_1031171cf3130102495201e3e26" FOREIGN KEY (user_id) REFERENCES "user" (id),
+        CONSTRAINT "FK_1031171cf3130102495201e3e27" FOREIGN KEY (product_id) REFERENCES "product" (id)
       )`,
     );
   }

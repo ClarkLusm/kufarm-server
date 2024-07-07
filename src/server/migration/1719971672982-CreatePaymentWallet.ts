@@ -7,13 +7,13 @@ export class CreatePaymentWallet1719971672982 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE IF NOT EXISTS "payment_wallet" (
         "id" UUID DEFAULT uuid_generate_v4(),
-        "name" varchar NOT NULL,
-        "wallet_address" varchar NOT NULL,
-        "exchange_logo" varchar,
-        "status" smallint,
+        "name" VARCHAR NOT NULL,
+        "wallet_address" VARCHAR NOT NULL,
+        "exchange_logo" VARCHAR,
+        "status" SMALLINT,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
-        CONSTRAINT "PK_1031171c13130102495201e3e26" PRIMARY KEY ("id")
+        CONSTRAINT "PK_1032471c13130102495201e3e26" PRIMARY KEY ("id")
       )`,
     );
   }

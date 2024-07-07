@@ -9,15 +9,17 @@ export class CreatePurchaseHistory1719971652894 implements MigrationInterface {
         "id" UUID DEFAULT uuid_generate_v4(),
         "user_id" UUID NOT NULL,
         "product_id" UUID NOT NULL,
-        "hash_power" integer,
-        "duration" integer,
-        "daily_income" bigint,
-        "monthly_income" bigint,
-        "price" double(10,2),
-        "status" smallint,
+        "hash_power" INTEGER,
+        "duration" INTEGER,
+        "daily_income" BIGINT,
+        "monthly_income" BIGINT,
+        "price" NUMERIC(10,2),
+        "status" SMALLINT,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
-        CONSTRAINT "PK_1031171c13130102495201e3e21" PRIMARY KEY ("id")
+        CONSTRAINT "PK_1031171c13130102495201e3e30" PRIMARY KEY ("id"),
+        CONSTRAINT "FK_1031171c13130102495201e3e31" FOREIGN KEY (user_id) REFERENCES "user" (id),
+        CONSTRAINT "FK_1031171c13130102495201e3e32" FOREIGN KEY (product_id) REFERENCES "product" (id)
       )`,
     );
   }

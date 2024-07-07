@@ -7,18 +7,21 @@ export class CreateUsers1619278600863 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE IF NOT EXISTS "user" (
         "id" UUID DEFAULT uuid_generate_v4(),
-        "btc_address" varchar,
-        "username" varchar NOT NULL,
-        "password_hash" varchar NOT NULL,
-        "hash" varchar NOT NULL,
+        "username" VARCHAR NOT NULL,
+        "email" VARCHAR NOT NULL,
+        "btc_address" VARCHAR,
+        "password_hash" VARCHAR NOT NULL,
+        "salt" VARCHAR NOT NULL,
         "email_verified" BOOLEAN DEFAULT false,
         "balance" bigint,
         "referral_balance" bigint,
         "count_referral" integer DEFAULT 0,
         "referral_by" UUID,
+        "banned" BOOLEAN DEFAULT false,
+        "ban_reason" VARCHAR,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
-        CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id")
+        CONSTRAINT "PK_cace4a762ff9f2512dd42373760" PRIMARY KEY ("id")
       )`,
     );
   }

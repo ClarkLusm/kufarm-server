@@ -9,9 +9,12 @@ import {
 import { UserProduct } from '../user-products/user-product.entity';
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id: string;
+export class User {  
+  @PrimaryGeneratedColumn('increment')
+  id: number;
+
+  @Column({ type: 'uuid' })
+  uid: string;
 
   @Column({ nullable: false })
   username: string;
@@ -28,20 +31,26 @@ export class User {
   @Column({ name: 'salt', nullable: false })
   salt: string;
 
-  @Column({ type: 'bigint' })
-  balance: any;
-
-  @Column({ name: 'referral_balance', type: 'bigint' })
-  referralBalance: any;
-
-  @Column({ name: 'count_referral' })
-  countReferral?: number;
+  @Column({ type: 'bigint', comment: 'BTC balance' })
+  balance: number;
 
   @Column({ name: 'referral_by' })
-  referralBy?: string;
+  referralBy?: number;
+  
+  @Column({ name: 'referral_path' })
+  referralPath?: string;
+
+  @Column({ name: 'referral_balance', comment: 'USD unit' })
+  referralBalance: number;
+
+  @Column({ name: 'referral_income', comment: 'USD unit' })
+  referralIncome: number
 
   @Column({ name: 'email_verified' })
   emailVerified?: boolean;
+
+  @Column({ name: 'count_referral' })
+  countReferral?: number;
 
   @Column()
   banned?: boolean;

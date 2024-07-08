@@ -7,7 +7,7 @@ export class CreateUserProduct1719971671281 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE IF NOT EXISTS "user_product" (
         "id" UUID DEFAULT uuid_generate_v4(),
-        "user_id" UUID,
+        "user_id" INTEGER,
         "product_id" UUID,
         "duration" INTEGER,
         "hash_power" INTEGER,

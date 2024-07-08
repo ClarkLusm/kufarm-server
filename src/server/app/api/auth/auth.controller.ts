@@ -36,8 +36,9 @@ export class AuthController {
         !referralUser?.emailVerified ||
         referralUser?.banned
       ) {
-        throw new BadRequestException('Referral is not existed');
+        throw new BadRequestException('Referral user is not existed');
       }
+      data['referralPath'] = referralUser.referralPath;
     }
     const user = await this.userService.createNewUser(data);
     return user;

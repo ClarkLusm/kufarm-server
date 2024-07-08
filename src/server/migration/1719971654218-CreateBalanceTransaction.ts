@@ -9,7 +9,7 @@ export class CreateBalanceTransaction1719971654218
     await queryRunner.query(
       `CREATE TABLE IF NOT EXISTS "balance_transaciton" (
         "id" UUID DEFAULT uuid_generate_v4(),
-        "user_id" UUID NOT NULL,
+        "user_id" INTEGER NOT NULL,
         "type" INTEGER,
         "amount" BIGINT,
         "symbol" VARCHAR NOT NULL,

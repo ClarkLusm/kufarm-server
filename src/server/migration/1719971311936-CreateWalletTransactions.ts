@@ -9,7 +9,7 @@ export class CreateWalletTransactions1719971311936
     await queryRunner.query(
       `CREATE TABLE IF NOT EXISTS "wallet_transaction" (
         "id" UUID DEFAULT uuid_generate_v4(),
-        "user_id" UUID NOT NULL,
+        "user_id" INTEGER NOT NULL,
         "type" SMALLINT,
         "wallet_address" VARCHAR NOT NULL,
         "payment_address" VARCHAR NOT NULL,

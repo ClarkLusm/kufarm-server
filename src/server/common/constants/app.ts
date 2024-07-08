@@ -1,4 +1,4 @@
-export const PAGESIZE_DEFAULT = 10;
+export const PAGESIZE_DEFAULT = 20;
 export const PAGE_DEFAULT = 1;
 export const SORT_DEFAULT = 'updatedAt';
 export const ORDER_DEFAULT = 'DESC';

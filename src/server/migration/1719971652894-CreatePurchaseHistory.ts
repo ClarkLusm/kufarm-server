@@ -7,7 +7,7 @@ export class CreatePurchaseHistory1719971652894 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE IF NOT EXISTS "purchase_history" (
         "id" UUID DEFAULT uuid_generate_v4(),
-        "user_id" UUID NOT NULL,
+        "user_id" INTEGER NOT NULL,
         "product_id" UUID NOT NULL,
         "hash_power" INTEGER,
         "duration" INTEGER,

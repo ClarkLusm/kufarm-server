@@ -60,9 +60,9 @@ export class BaseService<T extends ObjectLiteral> {
   findOneBy = (query: FindOptionsWhere<T>): Promise<T> =>
     this.repository.findOneBy(query);
 
-  getById = (id: string|number): Promise<T> => this.repository.findOneBy({ id });
+  getById = (id: any): Promise<T> => this.repository.findOneByOrFail({ id });
 
-  updateById = (id: string|number, data: any): Promise<UpdateResult> =>
+  updateById = (id: any, data: any): Promise<UpdateResult> =>
     this.repository.update(id, data);
 
   update = (condition: any, data: any): Promise<UpdateResult> =>
@@ -70,7 +70,7 @@ export class BaseService<T extends ObjectLiteral> {
 
   create = (data: any): Promise<T> => this.repository.save(data);
 
-  deleteById = (id: string|number): Promise<DeleteResult> =>
+  deleteById = (id: any): Promise<DeleteResult> =>
     this.repository.softDelete(id);
 
   delete = (condition: any): Promise<DeleteResult> =>

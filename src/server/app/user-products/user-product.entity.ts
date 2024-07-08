@@ -28,10 +28,19 @@ export class UserProduct {
   hashPower: number;
 
   @Column({ name: 'daily_income', type: 'bigint', nullable: false })
-  dailyIncome: string;
+  dailyIncome: number;
 
   @Column({ name: 'monthly_income', type: 'bigint', nullable: false })
-  monthlyIncome: string;
+  monthlyIncome: number;
+
+  @Column({ name: 'start_at', type: 'timestamptz' })
+  startAt: Date;
+
+  @Column({ name: 'end_at', type: 'timestamptz' })
+  endAt: Date;
+
+  @Column()
+  status: number;
 
   @ManyToOne((_type) => User, (user) => user.userProducts)
   user: User;

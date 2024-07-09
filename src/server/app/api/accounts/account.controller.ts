@@ -1,12 +1,16 @@
 import { Controller, Get, Query, Req } from '@nestjs/common';
 
+import { TransactionEnum } from '../../../common/enums';
 import { UserService } from '../../users/user.service';
 import { ProductService } from '../../products/product.service';
 import { PaymentWalletService } from '../../payment-wallet/payment-wallet.service';
 import { UserProductService } from '../../user-products/user-product.service';
+import { PurchaseHistoryService } from '../../purchase-history/purchase-history.service';
+import { BalanceTransactionService } from '../../balance-transactions/balance-transaction.service';
 import { SearchReferralDto } from './dto/search-referral.dto';
 import { SearchProductDto } from './dto/search-product.dto';
-import { In } from 'typeorm';
+import { SearchOrderDto } from './dto/search-order.dto';
+import { SearchWithdrawHistoryDto } from './dto/search-transaction.dto';
 
 @Controller('account')
 export class AccountController {
@@ -15,6 +19,8 @@ export class AccountController {
     private readonly productService: ProductService,
     private readonly userProductService: UserProductService,
     private readonly paymentWalletService: PaymentWalletService,
+    private readonly purchaseHistoryService: PurchaseHistoryService,
+    private readonly balanceTransactionService: BalanceTransactionService,
   ) {}
 
   @Get('/referrals')
@@ -41,10 +47,10 @@ export class AccountController {
   }
 
   @Get('/my-products')
-  async getMyProducts(@Req() req, @Query() query: SearchReferralDto) {
+  async getMyProducts(@Req() req) {
     const { sub } = req.user;
     const user = await this.userService.getOne({ uid: sub }, { id: true });
-    const userProducts = await this.userProductService.countProductByUserId(user.id);
+    const userProducts = await this.userProductService.getProductByUserId(user.id);
     const [data, total] = await this.productService.getAll();
     return { data, total, userProducts };
   }
@@ -52,6 +58,42 @@ export class AccountController {
   @Get('/payments')
   async getPaymentWallets() {
     const [data, total] = await this.paymentWalletService.getAll();
+    return { data, total };
+  }
+
+  @Get('/mining')
+  async getMyMining(@Req() req) {
+    const { sub } = req.user;
+    const user = await this.userService.getOne({ uid: sub });
+    const userProducts = await this.userProductService.getProductByUserId(user.id);
+    return {
+      pool: 'stratum+tcp://sha256d.kupool.com:443',
+      balance: user.balance,
+      username: user.username,
+      wallet: user.btcAddress,
+      referralBalance: user.referralBalance,
+      dailyIncome: userProducts.reduce((a, b) => a + b.dailyIncome, 0),
+      monthlyIncome: userProducts.reduce((a, b) => a + b.monthlyIncome, 0),
+    }
+  }
+
+  @Get('/orders')
+  async getOrderHistory(@Req() req, @Query() query: SearchOrderDto) {
+    const { sub } = req.user;
+    const user = await this.userService.getOne({ uid: sub }, { id: true });
+    const [data, total] = await this.purchaseHistoryService.getAll({...query, userId: user.id });
+    return { data, total };
+  }
+
+  @Get('/withdraws')
+  async getWithdrawHistory(@Req() req, @Query() query: SearchWithdrawHistoryDto) {
+    const { sub } = req.user;
+    const user = await this.userService.getOne({ uid: sub }, { id: true });
+    const [data, total] = await this.balanceTransactionService.getAll({
+      ...query,
+      userId: user.id,
+      type: TransactionEnum.withdraw
+    })
     return { data, total };
   }
 }

@@ -17,7 +17,7 @@ export class UserProductService extends BaseService<UserProduct> {
     super(repository);
   }
 
-  async countProductByUserId(userId: number) {
+  async getProductByUserId(userId: number) {
     const result = await this.repository
       .createQueryBuilder('user_product')
       .select('user_product.product_id, COUNT(user_product.id) AS count')

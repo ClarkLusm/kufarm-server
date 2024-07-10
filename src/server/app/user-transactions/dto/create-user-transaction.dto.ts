@@ -1,4 +1,4 @@
-export class CreateWalletTransactionDto {
+export class CreateUserTransactionDto {
   userId: string;
   type: number;
   symbol: string;

@@ -1,13 +1,13 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateWalletTransactions1719971311936
+export class CreateUserTransactions1719971311936
   implements MigrationInterface
 {
-  name = 'CreateWalletTransactions1719971311936';
+  name = 'CreateUserTransactions1719971311936';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE IF NOT EXISTS "wallet_transaction" (
+      `CREATE TABLE IF NOT EXISTS "user_transaction" (
         "id" UUID DEFAULT uuid_generate_v4(),
         "user_id" INTEGER NOT NULL,
         "type" SMALLINT,
@@ -22,10 +22,10 @@ export class CreateWalletTransactions1719971311936
         CONSTRAINT "FK_1031171c13130102495201e3f21" FOREIGN KEY (user_id) REFERENCES "user" (id)
       )`,
     );
-    await queryRunner.query('CREATE INDEX idx_user ON "wallet_transaction" (user_id)');
+    await queryRunner.query('CREATE INDEX idx_user ON "user_transaction" (user_id)');
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE "wallet_transaction"`);
+    await queryRunner.query(`DROP TABLE "user_transaction"`);
   }
 }

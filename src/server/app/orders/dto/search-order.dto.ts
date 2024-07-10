@@ -1,4 +1,4 @@
-export class SearchPurchaseHistoryDto {
+export class SearchOrderDto {
   userId?: string;
   productId?: string;
   price?: number;

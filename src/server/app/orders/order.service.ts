@@ -3,13 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 
 import { BaseService } from 'src/server/common/base/base.service';
-import { PurchaseHistory } from './purchase-history.entity';
+import { Order } from './order.entity';
 
 @Injectable()
-export class PurchaseHistoryService extends BaseService<PurchaseHistory> {
+export class OrderService extends BaseService<Order> {
   constructor(
-    @InjectRepository(PurchaseHistory)
-    public repository: Repository<PurchaseHistory>,
+    @InjectRepository(Order)
+    public repository: Repository<Order>,
   ) {
     super(repository);
   }

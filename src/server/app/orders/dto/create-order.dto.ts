@@ -1,4 +1,4 @@
-export class CreatePurchaseHistoryDto {
+export class CreateOrderDto {
   userId: string;
   productId: string;
   price: number;

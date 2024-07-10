@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class PurchaseHistory {
+export class Order {
   @PrimaryGeneratedColumn()
   id: string;
 

@@ -21,7 +21,7 @@ export class BalanceTransaction {
   amount: string;
 
   @Column({ nullable: false })
-  symbol: string;
+  coin: string;
 
   @Column()
   @CreateDateColumn()

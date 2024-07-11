@@ -11,14 +11,11 @@ export class PaymentWallet {
   @PrimaryGeneratedColumn()
   id: string;
 
-  @Column({ nullable: false })
-  name: string;
-
   @Column({ name: 'wallet_address', nullable: false })
   walletAddress: string;
 
-  @Column({ name: 'exchange_logo', nullable: false })
-  exchangeLogo?: number;
+  @Column({ name: 'chain_id', nullable: false })
+  chainId: number;
 
   @Column()
   status: number;

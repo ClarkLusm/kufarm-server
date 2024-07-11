@@ -14,17 +14,20 @@ export class UserTransaction {
   @Column({ type: 'uuid', name: 'user_id', nullable: false })
   userId: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, comment: '1-withdraw 2-deposit' })
   type: number;
 
-  @Column({ name: 'wallet_address', nullable: false })
-  walletAddress: string;
-
-  @Column({ name: 'payment_address', nullable: false })
-  paymentAddress: string;
+  @Column({ nullable: false })
+  sender: string;
 
   @Column({ nullable: false })
-  symbol: string;
+  receiver: string;
+
+  @Column({ nullable: false })
+  coin: string;
+
+  @Column({ name: 'tx_hash', nullable: false })
+  txHash: string;
 
   @Column({ type: 'bigint', nullable: false })
   amount: number;

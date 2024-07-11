@@ -12,7 +12,7 @@ export class CreateBalanceTransaction1719971654218
         "user_id" INTEGER NOT NULL,
         "type" INTEGER,
         "amount" BIGINT,
-        "symbol" VARCHAR NOT NULL,
+        "coin" VARCHAR NOT NULL,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_1031171c13130102495201e3e42" PRIMARY KEY ("id"),

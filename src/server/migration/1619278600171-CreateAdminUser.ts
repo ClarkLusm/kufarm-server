@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateAdminUsers1619278600171 implements MigrationInterface {
-  name = 'CreateAdminUsers1619278600171';
+export class CreateAdminUser1619278600171 implements MigrationInterface {
+  name = 'CreateAdminUser1619278600171';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');

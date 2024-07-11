@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
-import { CreateUserTransactionDto } from './dto/create-user-transaction.dto';
-import { UserTransaction } from './user-transaction.entity';
 import { BaseService } from 'src/server/common/base/base.service';
+import { buildQueryFilter } from 'src/server/common/helpers/query-builder';
+import { UserTransaction } from './user-transaction.entity';
 
 @Injectable()
 export class UserTransactionService extends BaseService<UserTransaction> {
@@ -13,5 +13,28 @@ export class UserTransactionService extends BaseService<UserTransaction> {
     public repository: Repository<UserTransaction>,
   ) {
     super(repository);
+  }
+
+  getAll(query?: any): Promise<[UserTransaction[], number]> {
+    const qr = buildQueryFilter(query);
+    qr.select = {
+      id: true,
+      type: true,
+      sender: true,
+      receiver: true,
+      coin: true,
+      amount: true,
+      txHash: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      user: {
+        username: true,
+      },
+    };
+    qr.relations = {
+      user: true,
+    };
+    return this.repository.findAndCount(qr);
   }
 }

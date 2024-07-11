@@ -3,13 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { BaseService } from 'src/server/common/base/base.service';
-import { Config } from './config.entity';
+import { Setting } from './setting.entity';
 
 @Injectable()
-export class ConfigService extends BaseService<Config> {
+export class SettingService extends BaseService<Setting> {
   constructor(
-    @InjectRepository(Config)
-    public repository: Repository<Config>,
+    @InjectRepository(Setting)
+    public repository: Repository<Setting>,
   ) {
     super(repository);
   }

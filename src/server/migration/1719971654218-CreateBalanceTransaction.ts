@@ -7,7 +7,7 @@ export class CreateBalanceTransaction1719971654218
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE IF NOT EXISTS "balance_transaciton" (
+      `CREATE TABLE IF NOT EXISTS "balance_transaction" (
         "id" UUID DEFAULT uuid_generate_v4(),
         "user_id" INTEGER NOT NULL,
         "type" INTEGER,
@@ -22,6 +22,6 @@ export class CreateBalanceTransaction1719971654218
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE "balance_transaciton"`);
+    await queryRunner.query(`DROP TABLE "balance_transaction"`);
   }
 }

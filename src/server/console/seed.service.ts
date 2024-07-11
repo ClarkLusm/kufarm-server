@@ -1,14 +1,11 @@
 import { Inject } from '@nestjs/common';
 import { Console, Command, createSpinner } from 'nestjs-console';
 
-import {ConfigService} from '../app/configs/config.service';
+import { SettingService } from '../app/settings/setting.service';
 
 @Console()
 export class SeedService {
-
-  constructor(
-    @Inject(ConfigService) private configService: ConfigService,
-  ){}
+  constructor(@Inject(SettingService) private settingService: SettingService) {}
   @Command({
     command: 'seed',
     description: 'Seed DB',
@@ -24,12 +21,12 @@ export class SeedService {
   }
 
   async initialConfiguration() {
-    return await this.configService.create({
+    return await this.settingService.create({
       key: 'income_share',
       value: {
         usd: 50,
         bit: 50,
-      }
-    })
+      },
+    });
   }
 }

@@ -4,15 +4,19 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
-@Entity()
+import { User } from '../users/user.entity';
+
+@Entity({ name: 'balance_transaction' })
 export class BalanceTransaction {
   @PrimaryGeneratedColumn()
   id: string;
 
   @Column({ name: 'user_id', nullable: false })
-  userId: string;
+  userId: number;
 
   @Column({ nullable: false })
   type: number;
@@ -23,11 +27,15 @@ export class BalanceTransaction {
   @Column({ nullable: false })
   coin: string;
 
-  @Column()
+  @Column({ name: 'created_at' })
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
-  @Column()
+  @Column({ name: 'updated_at' })
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
+
+  // @ManyToOne(() => User, (user) => user.balanceTransactions)
+  // @JoinColumn({ name: 'user_id' })
+  // user: User;
 }

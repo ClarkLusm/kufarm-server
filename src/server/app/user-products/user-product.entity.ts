@@ -48,11 +48,11 @@ export class UserProduct {
   @OneToOne((_type) => Product)
   product: Product;
 
-  @Column()
+  @Column({ name: 'created_at' })
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
-  @Column()
+  @Column({ name: 'updated_at' })
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 }

@@ -4,11 +4,10 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
 } from 'typeorm';
 
 @Entity()
-export class User {
+export class AdminUser {
   @PrimaryGeneratedColumn()
   id: string;
 

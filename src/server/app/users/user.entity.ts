@@ -6,7 +6,11 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
+
+import { Order } from '../orders/order.entity';
 import { UserProduct } from '../user-products/user-product.entity';
+import { UserTransaction } from '../user-transactions/user-transaction.entity';
+import { BalanceTransaction } from '../balance-transactions/balance-transaction.entity';
 
 @Entity()
 export class User {  
@@ -68,4 +72,13 @@ export class User {
 
   @OneToMany((_type) => UserProduct, (userProduct) => userProduct.user)
   userProducts?: UserProduct[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
+  
+  @OneToMany(() => UserTransaction, (transaction) => transaction.user)
+  transactions: UserTransaction[];
+  
+  // @OneToMany(() => BalanceTransaction, (b) => b.user)
+  // balanceTransactions: BalanceTransaction[];
 }

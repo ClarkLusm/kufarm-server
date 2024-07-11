@@ -4,7 +4,13 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
+
+import { User } from '../users/user.entity';
+import { Product } from '../products/product.entity';
 
 @Entity()
 export class Order {
@@ -35,11 +41,19 @@ export class Order {
   @Column()
   status: number;
 
-  @Column()
+  @Column({ name: 'created_at' })
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
-  @Column()
+  @Column({ name: 'updated_at' })
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
+
+  @ManyToOne(() => User, (user) => user.orders)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @OneToOne(() => Product)
+  @JoinColumn({ name: 'product_id', referencedColumnName: 'id' })
+  product: Product;
 }

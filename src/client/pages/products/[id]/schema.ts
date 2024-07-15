@@ -6,5 +6,5 @@ export const productSchema = Yup.object().shape({
   hashPower: Yup.string().required('Không được bỏ trống'),
   dailyIncome: Yup.string().required('Không được bỏ trống'),
   monthlyIncome: Yup.string().required('Không được bỏ trống'),
-  duration: Yup.string().required('Không được bỏ trống'),
+  maxOut: Yup.string().required('Không được bỏ trống'),
 })

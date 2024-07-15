@@ -17,14 +17,30 @@ export class UserProductService extends BaseService<UserProduct> {
     super(repository);
   }
 
-  async getProductByUserId(userId: number) {
+  async countProductByUserId(userId: number) {
     const result = await this.repository
       .createQueryBuilder('user_product')
       .select('user_product.product_id, COUNT(user_product.id) AS count')
       .where('user_product.user_id = :userId', { userId })
       .andWhere('user_product.end_at > :now', { now: new Date().toISOString() })
-      .andWhere('user_product.status != :expired', { stop: USERPRODUCT_EXPIRED })
+      .andWhere('user_product.status != :expired', {
+        stop: USERPRODUCT_EXPIRED,
+      })
       .groupBy('user_product.product_id')
+      .getRawMany();
+    return result;
+  }
+
+  async getRunningProductsByUserId(userId: string) {
+    const result = await this.repository
+      .createQueryBuilder('user_product')
+      .select('user_product.*')
+      .where('user_product.user_id = :userId', { userId })
+      .andWhere('user_product.income < user_product.max_out')
+      .andWhere('user_product.status != :expired', {
+        stop: USERPRODUCT_EXPIRED,
+      })
+      .orderBy('created_at', 'ASC')
       .getRawMany();
     return result;
   }

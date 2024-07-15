@@ -73,8 +73,8 @@ const Page = () => {
               />
               <FastField
                 required
-                {...getFieldProps('duration')}
-                label="Thời gian sử dụng"
+                {...getFieldProps('maxOut')}
+                label="Lợi nhuận tối đa"
                 component={InputField}
                 disabled={isSubmitting}
               />

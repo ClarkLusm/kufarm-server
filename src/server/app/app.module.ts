@@ -10,6 +10,7 @@ import { AuthModule } from './admin-auth/admin-auth.module';
 import { UserModule } from './users/user.module';
 import { UserProductModule } from './user-products/user-product.module';
 import { SettingModule } from './settings/setting.module';
+import { AdminUserModule } from './admin-users/admin-user.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { SettingModule } from './settings/setting.module';
     UserModule,
     UserProductModule,
     SettingModule,
+    AdminUserModule,
     AdminRouteModule,
     ClientRouteModule,
   ],

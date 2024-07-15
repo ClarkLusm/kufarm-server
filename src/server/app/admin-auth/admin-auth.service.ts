@@ -80,7 +80,7 @@ export class AdminAuthService {
       });
     }
     const user = await this.userModel.findOne(userData.id);
-    if (user.banned)
+    if (user.bannedAt)
       throw new UnauthorizedException({
         message: `Вы забанены ${user.banReason}`,
       });

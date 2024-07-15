@@ -4,6 +4,6 @@ export interface IProduct {
   hashPower?: number;
   dailyIncome?: number;
   monthlyIncome?: number;
-  duration?: number;
-  isActive?: boolean;
+  maxOut?: number;
+  published?: boolean;
 }

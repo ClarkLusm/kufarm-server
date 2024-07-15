@@ -1,5 +1,6 @@
 import { BadRequestException, Body, Post } from '@nestjs/common';
 import { Controller } from '@nestjs/common';
+
 import { UserService } from '../../users/user.service';
 import { CreateUserDto } from '../../users/dto/create-user.dto';
 import { SigninDto } from './dto/signin.dto';
@@ -28,17 +29,6 @@ export class AuthController {
     const existedEmail = await this.userService.getOne({ email: data.email });
     if (existedEmail) {
       throw new BadRequestException('Email has been used already');
-    }
-    if (data.referralId) {
-      const referralUser = await this.userService.getById(data.referralId);
-      if (
-        !referralUser ||
-        !referralUser?.emailVerified ||
-        referralUser?.banned
-      ) {
-        throw new BadRequestException('Referral user is not existed');
-      }
-      data['referralPath'] = referralUser.referralPath;
     }
     const user = await this.userService.createNewUser(data);
     return user;

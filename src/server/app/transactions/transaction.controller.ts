@@ -2,16 +2,16 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import * as moment from 'moment';
 
-import { BalanceTransactionService } from './balance-transaction.service';
-import { SearchBalanceTransactionDto } from './dto/search-balance-transaction.dto';
+import { TransactionService } from './transaction.service';
+import { SearchTransactionDto } from './dto/search-transaction.dto';
 import { SEARCH_DATE_FORMAT } from 'src/server/common/constants';
 
 @Controller()
-export class BalanceTransactionController {
-  constructor(private readonly service: BalanceTransactionService) {}
+export class TransactionController {
+  constructor(private readonly service: TransactionService) {}
 
   @Get('/')
-  async getList(@Query() query: SearchBalanceTransactionDto) {
+  async getList(@Query() query: SearchTransactionDto) {
     if (query.fromDate) {
       query['created_at'] = MoreThanOrEqual(
         moment(query.fromDate, SEARCH_DATE_FORMAT, true)

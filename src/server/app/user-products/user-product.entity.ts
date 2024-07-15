@@ -15,29 +15,26 @@ export class UserProduct {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false })
-  userId: string;
+  @Column({ name: 'user_id', nullable: false })
+  userId: number;
 
-  @Column({ nullable: false })
+  @Column({ name: 'product_id', nullable: false })
   productId: string;
 
+  @Column({ name: 'max_out', nullable: false })
+  maxOut: number;
+
   @Column({ nullable: false })
-  duration: number;
+  income: number;
 
   @Column({ name: 'hash_power' })
   hashPower: number;
 
-  @Column({ name: 'daily_income', type: 'bigint', nullable: false })
+  @Column({ name: 'daily_income', nullable: false })
   dailyIncome: number;
 
-  @Column({ name: 'monthly_income', type: 'bigint', nullable: false })
+  @Column({ name: 'monthly_income', nullable: false })
   monthlyIncome: number;
-
-  @Column({ name: 'start_at', type: 'timestamptz' })
-  startAt: Date;
-
-  @Column({ name: 'end_at', type: 'timestamptz' })
-  endAt: Date;
 
   @Column()
   status: number;

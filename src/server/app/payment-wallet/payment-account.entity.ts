@@ -7,18 +7,18 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Setting {
+export class PaymentAccount {
   @PrimaryGeneratedColumn()
   id: string;
 
-  @Column()
-  name: string;
+  @Column({ name: 'account_address', nullable: false })
+  accountAddress: string;
 
-  @Column()
-  key: string;
+  @Column({ name: 'payment_wallet_id', type: 'uuid', nullable: false })
+  paymentWalletId: string;
 
-  @Column({ type: 'jsonb' })
-  value: any;
+  @Column({ type: 'bigint' })
+  balance?: number;
 
   @Column({ name: 'created_at' })
   @CreateDateColumn()

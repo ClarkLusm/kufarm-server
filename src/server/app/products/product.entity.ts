@@ -4,12 +4,17 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  PrimaryColumn,
 } from 'typeorm';
 
 @Entity()
 export class Product {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   id: string;
+
+  @Column()
+  sid: number;
 
   @Column({ nullable: false })
   name: string;
@@ -23,26 +28,26 @@ export class Product {
   @Column({ name: 'sale_price' })
   salePrice: number;
 
-  @Column({ nullable: false })
-  duration: number;
+  @Column({ name: 'max_out', nullable: false })
+  maxOut: number;
 
   @Column({ name: 'hash_power' })
   hashPower: number;
 
-  @Column({ name: 'daily_income', type: 'bigint', nullable: false })
+  @Column({ name: 'daily_income', nullable: false })
   dailyIncome: number;
 
-  @Column({ name: 'monthly_income', type: 'bigint', nullable: false })
+  @Column({ name: 'monthly_income', nullable: false })
   monthlyIncome: number;
 
-  @Column({ name: 'is_active' })
-  isActive: boolean;
-
   @Column()
+  published: boolean;
+
+  @Column({ name: 'created_at' })
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
-  @Column()
+  @Column({ name: 'updated_at' })
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 }

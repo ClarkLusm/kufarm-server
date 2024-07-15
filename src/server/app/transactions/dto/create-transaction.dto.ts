@@ -1,4 +1,4 @@
-export class CreateBalanceTransactionDto {
+export class CreateTransactionDto {
   userId: string;
   type: number;
   symbol: string;

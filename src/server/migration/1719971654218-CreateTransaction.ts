@@ -1,18 +1,22 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateBalanceTransaction1719971654218
+export class CreateTransaction1719971654218
   implements MigrationInterface
 {
-  name = 'CreateBalanceTransaction1719971654218';
+  name = 'CreateTransaction1719971654218';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE IF NOT EXISTS "balance_transaction" (
+      `CREATE TABLE IF NOT EXISTS "transaction" (
         "id" UUID DEFAULT uuid_generate_v4(),
-        "user_id" INTEGER NOT NULL,
+        "user_id" UUID,
         "type" INTEGER,
+        "tx_hash" VARCHAR,
+        "sender" VARCHAR,
+        "receiver" VARCHAR,
         "amount" BIGINT,
         "coin" VARCHAR NOT NULL,
+        "status" SMALLINT,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_1031171c13130102495201e3e42" PRIMARY KEY ("id"),
@@ -22,6 +26,6 @@ export class CreateBalanceTransaction1719971654218
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE "balance_transaction"`);
+    await queryRunner.query(`DROP TABLE "transaction"`);
   }
 }

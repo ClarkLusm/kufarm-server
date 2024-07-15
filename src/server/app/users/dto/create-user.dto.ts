@@ -14,5 +14,5 @@ export class CreateUserDto {
   referralId?: string;
 
   @IsNotEmpty()
-  btcAddress: string;
+  walletAddress: string;
 }

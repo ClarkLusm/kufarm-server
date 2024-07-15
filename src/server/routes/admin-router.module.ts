@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@nestjs/core';
 
 import { UserModule } from '../app/users/user.module';
 import { ProductModule } from '../app/products/product.module';
-import { UserTransactionModule } from '../app/user-transactions/user-transaction.module';
+import { TransactionModule } from '../app/transactions/transaction.module';
 import { PaymentWalletModule } from '../app/payment-wallet/payment-wallet.module';
 import { SettingModule } from '../app/settings/setting.module';
 import { OrderModule } from '../app/orders/order.module';
@@ -14,7 +14,7 @@ const routes: Routes = [
     children: [
       { path: '/users', module: UserModule },
       { path: '/products', module: ProductModule },
-      { path: '/transactions', module: UserTransactionModule },
+      { path: '/transactions', module: TransactionModule },
       { path: '/wallets', module: PaymentWalletModule },
       { path: '/orders', module: OrderModule },
       { path: '/settings', module: SettingModule },
@@ -27,7 +27,7 @@ const routes: Routes = [
     RouterModule.register(routes),
     UserModule,
     ProductModule,
-    UserTransactionModule,
+    TransactionModule,
     PaymentWalletModule,
     OrderModule,
     SettingModule,

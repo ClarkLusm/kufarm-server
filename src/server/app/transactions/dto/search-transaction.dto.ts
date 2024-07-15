@@ -1,4 +1,4 @@
-export class SearchBalanceTransactionDto {
+export class SearchTransactionDto {
   userId?: string;
   type?: string;
   status?: number;

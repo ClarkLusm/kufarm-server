@@ -40,7 +40,7 @@ export class UserController {
     if (!user) {
       throw new NotFoundException('Not found user');
     }
-    user.banned = data.banned;
+    user.bannedAt = new Date();
     user.banReason = data.banReason;
     await this.service.updateById(id, data);
     return user;

@@ -3,13 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { BaseService } from 'src/server/common/base/base.service';
-import { BalanceTransaction } from './balance-transaction.entity';
+import { AdminUser } from './admin-user.entity';
 
 @Injectable()
-export class BalanceTransactionService extends BaseService<BalanceTransaction> {
+export class AdminUserService extends BaseService<AdminUser> {
   constructor(
-    @InjectRepository(BalanceTransaction)
-    public repository: Repository<BalanceTransaction>,
+    @InjectRepository(AdminUser)
+    public repository: Repository<AdminUser>,
   ) {
     super(repository);
   }

@@ -7,6 +7,7 @@ import {
   OneToOne,
   JoinColumn,
   ManyToOne,
+  PrimaryColumn,
 } from 'typeorm';
 
 import { User } from '../users/user.entity';
@@ -14,32 +15,36 @@ import { Product } from '../products/product.entity';
 
 @Entity()
 export class Order {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   id: string;
 
-  @Column({ type: 'uuid', name: 'user_id', nullable: false })
+  @Column()
+  code: string;
+
+  @Column({ name: 'wallet_address' })
+  walletAddress: string;
+
+  @Column({ name: 'user_id', type: 'uuid', nullable: false })
   userId: string;
 
-  @Column({ type: 'uuid', name: 'product_id', nullable: false })
+  @Column({ name: 'product_id', type: 'uuid', nullable: false })
   productId: string;
 
   @Column({ nullable: false })
-  price: number;
+  quantity: number;
+
+  @Column({ type: 'bigint', nullable: false })
+  amount: number;
 
   @Column({ nullable: false })
-  duration: number;
-
-  @Column({ name: 'hash_power' })
-  hashPower: number;
-
-  @Column({ name: 'daily_income', type: 'bigint', nullable: false })
-  dailyIncome: number;
-
-  @Column({ name: 'monthly_income', type: 'bigint', nullable: false })
-  monthlyIncome: number;
+  coin: string;
 
   @Column()
   status: number;
+
+  @Column({ name: 'expired_at' })
+  expiredAt: Date;
 
   @Column({ name: 'created_at' })
   @CreateDateColumn()

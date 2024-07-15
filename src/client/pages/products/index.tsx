@@ -9,20 +9,20 @@ const Products: NextPage = (props) => {
       name: 'Mike',
       price: 32,
       power: '10TH/S',
-      duration: 360,
+      maxOut: 300,
       dailyIncome: '10$',
       monthlyIncome: '100$',
-      isActive: false
+      published: false
     },
     {
       key: '1',
       name: 'Mike',
       price: 32,
       power: '10TH/S',
-      duration: 360,
+      maxOut: 300,
       dailyIncome: '10$',
       monthlyIncome: '100$',
-      isActive: true
+      published: true
     },
   ];
 
@@ -53,14 +53,14 @@ const Products: NextPage = (props) => {
       key: 'monthlyIncome',
     },
     {
-      title: 'Thời gian',
-      dataIndex: 'duration',
-      key: 'duration',
+      title: 'Tối đa',
+      dataIndex: 'maxOut',
+      key: 'maxOut',
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'isActive',
-      key: 'isActive',
+      dataIndex: 'published',
+      key: 'published',
     },
   ];
 

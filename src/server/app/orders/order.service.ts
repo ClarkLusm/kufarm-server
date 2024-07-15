@@ -20,10 +20,6 @@ export class OrderService extends BaseService<Order> {
     qr.select = {
       id: true,
       price: true,
-      duration: true,
-      hashPower: true,
-      dailyIncome: true,
-      monthlyIncome: true,
       status: true,
       createdAt: true,
       updatedAt: true,

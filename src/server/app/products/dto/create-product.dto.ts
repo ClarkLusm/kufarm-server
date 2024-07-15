@@ -22,7 +22,7 @@ export class CreateProductDto {
 
   @IsNotEmpty()
   @IsInt()
-  duration: number;
+  maxOut: number;
 
   @IsOptional()
   image?: string;

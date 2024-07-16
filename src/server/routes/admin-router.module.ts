@@ -7,6 +7,7 @@ import { TransactionModule } from '../app/transactions/transaction.module';
 import { PaymentWalletModule } from '../app/payment-wallet/payment-wallet.module';
 import { SettingModule } from '../app/settings/setting.module';
 import { OrderModule } from '../app/orders/order.module';
+import { AdminAuthModule } from '../app/admin-auth/admin-auth.module';
 
 const routes: Routes = [
   {
@@ -18,6 +19,7 @@ const routes: Routes = [
       { path: '/wallets', module: PaymentWalletModule },
       { path: '/orders', module: OrderModule },
       { path: '/settings', module: SettingModule },
+      { path: '/', module: AdminAuthModule },
     ],
   },
 ];
@@ -31,6 +33,7 @@ const routes: Routes = [
     PaymentWalletModule,
     OrderModule,
     SettingModule,
+    AdminAuthModule,
   ],
 })
 export class AdminRouteModule {}

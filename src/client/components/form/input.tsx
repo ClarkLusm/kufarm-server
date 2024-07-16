@@ -14,12 +14,21 @@ export const InputField = (props) => {
       validateStatus={touched[name] && errors[name] ? 'error' : 'success'}
       help={touched[name] && errors[name] ? errors[name] : ''}
     >
-      <Input
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        placeholder={placeholder}
-      />
+      {props.type === 'password' ?
+        <Input.Password
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          placeholder={placeholder}
+        />
+        :
+        <Input
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          placeholder={placeholder}
+        />
+      }
     </Form.Item>
   );
 };

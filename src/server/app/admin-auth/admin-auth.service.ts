@@ -1,38 +1,25 @@
 import {
-  BadRequestException,
   HttpException,
   HttpStatus,
   Inject,
   Injectable,
-  MethodNotAllowedException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../users/user.entity';
-import { UserService } from '../users/user.service';
+import { AdminUserService } from '../admin-users/admin-user.service';
 
 @Injectable()
 export class AdminAuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userModel: Repository<User>,
-    private jwtService: JwtService,
-    @Inject(UserService) private userService: UserService,
-  ) {}
+    @Inject(AdminUserService) private adminUserService: AdminUserService,
+    private readonly jwtService: JwtService,
+  ) { }
 
-  async login(userData: any, ip: string, ua: any, fingerprint, os: any) {
+  async login(userData: any) {
     try {
       const user = await this.validateUser(userData);
-      if (user.banned)
-        throw new UnauthorizedException({
-          message: `Вы забанены ${user.banReason}`,
-        });
-      // console.log({ fingerprint: userData.fingerprint });
       const userDataAndTokens = await this.tokenSession(user);
       return userDataAndTokens;
     } catch (error) {
@@ -40,30 +27,11 @@ export class AdminAuthService {
     }
   }
 
-  async logout(refreshToken: string) {}
-
-  async activateAccount(activationLink: string): Promise<any> {
-    const user = await this.userService.findOne({});
-    if (!user) {
-      throw new HttpException(
-        `Некорректная ссылка активации`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    user.emailVerified = true;
-    await this.userService.updateById(user.id, { emailVerified: true });
-    return user;
-  }
-
-  
+  async logout(refreshToken: string) { }
 
   async refreshToken(
     refreshtoken: string,
-    ip: string,
-    ua: any,
-    os: any,
     res: any,
-    fingerprint: any,
   ) {
     if (!refreshtoken)
       throw new UnauthorizedException({
@@ -79,11 +47,7 @@ export class AdminAuthService {
           'refreshToken service: рефреш токен отсутствует в базе и пользователь не авторизован',
       });
     }
-    const user = await this.userModel.findOne(userData.id);
-    if (user.bannedAt)
-      throw new UnauthorizedException({
-        message: `Вы забанены ${user.banReason}`,
-      });
+    const user = await this.adminUserService.findOne(userData.id);
     const userDataAndTokens = await this.tokenSession(user);
     return userDataAndTokens;
   }
@@ -126,12 +90,12 @@ export class AdminAuthService {
 
   async validateUser(userData: any): Promise<any> {
     try {
-      const user = await this.userService.findOneBy({
-        email: userData.email,
+      const user = await this.adminUserService.findOneBy({
+        username: userData.username,
       });
       if (!user)
         throw new UnauthorizedException({
-          message: `User with email ${userData.email} not found`,
+          message: `User ${userData.username} not found`,
         });
       const isPasswordEquals = await bcrypt.compare(
         userData.password,
@@ -139,7 +103,7 @@ export class AdminAuthService {
       );
       if (!isPasswordEquals)
         throw new UnauthorizedException({ message: `Incorrect password` });
-      const { passwordHash, salt, ...result } = user;
+      const { passwordHash, hash, ...result } = user;
       return result;
     } catch (error) {
       throw console.log(error);

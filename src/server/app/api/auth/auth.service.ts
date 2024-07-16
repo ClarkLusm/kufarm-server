@@ -19,7 +19,7 @@ export class AuthService {
 
   async login(userData: any) {
     const user = await this.validateUser(userData);
-    if (user.banned)
+    if (user.bannedAt)
       throw new UnauthorizedException({
         message: `Your account has been banned ${user.banReason}`,
       });

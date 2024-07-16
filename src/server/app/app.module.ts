@@ -6,9 +6,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SeedService } from 'src/server/console/seed.service';
 import { AdminRouteModule } from '../routes/admin-router.module';
 import { ClientRouteModule } from '../routes/client-router.module';
-import { AuthModule } from './admin-auth/admin-auth.module';
-import { UserModule } from './users/user.module';
-import { UserProductModule } from './user-products/user-product.module';
 import { SettingModule } from './settings/setting.module';
 import { AdminUserModule } from './admin-users/admin-user.module';
 
@@ -30,9 +27,6 @@ import { AdminUserModule } from './admin-users/admin-user.module';
       inject: [ConfigService],
     }),
     ConsoleModule,
-    AuthModule,
-    UserModule,
-    UserProductModule,
     SettingModule,
     AdminUserModule,
     AdminRouteModule,
@@ -40,4 +34,4 @@ import { AdminUserModule } from './admin-users/admin-user.module';
   ],
   providers: [SeedService],
 })
-export class AppModule {}
+export class AppModule { }

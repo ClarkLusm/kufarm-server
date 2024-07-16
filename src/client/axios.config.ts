@@ -17,7 +17,7 @@ export function setupAxios() {
         config.headers.Authorization = `Bearer ${auth.token}`;
       }
       if (config.url && config.url.indexOf('http') < 0) {
-        config.url = `${process.env.API_URL}/${config.url}`;
+        config.url = `${process.env.NEXT_PUBLIC_API_URL}/api/admin/${config.url}`;
       }
       return config;
     },

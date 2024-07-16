@@ -73,12 +73,10 @@ export class User {
   @Column({ name: 'sync_at' })
   syncAt: Date;
 
-  @Column({ name: 'created_at' })
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @Column({ name: 'updated_at' })
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   @OneToMany((_type) => UserProduct, (userProduct) => userProduct.user)

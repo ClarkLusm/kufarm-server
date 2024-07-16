@@ -20,11 +20,9 @@ export class AdminUser {
   @Column({ name: 'hash', nullable: false })
   hash: string;
 
-  @Column()
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @Column()
-  @UpdateDateColumn()
-  updated_at: Date;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

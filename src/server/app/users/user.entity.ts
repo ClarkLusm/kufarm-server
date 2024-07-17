@@ -11,6 +11,7 @@ import {
 import { Order } from '../orders/order.entity';
 import { UserProduct } from '../user-products/user-product.entity';
 import { Transaction } from '../transactions/transaction.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -18,7 +19,7 @@ export class User {
   @PrimaryColumn()
   id: string;
 
-  @Column()
+  @Column({ nullable: false })
   sid: number;
 
   @Column({ nullable: false })
@@ -33,7 +34,7 @@ export class User {
   @Column({ name: 'password_hash', nullable: false })
   passwordHash: string;
 
-  @Column({ name: 'salt', nullable: false })
+  @Column({ name: 'salt', nullable: false, select: false })
   salt: string;
 
   @Column({

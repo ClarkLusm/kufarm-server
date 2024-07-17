@@ -17,7 +17,7 @@ export class AdminUser {
   @Column({ name: 'password_hash', nullable: false })
   passwordHash: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, select: false })
   salt: string;
 
   @CreateDateColumn({ name: 'created_at' })

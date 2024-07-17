@@ -54,12 +54,13 @@ export class UserService extends BaseService<User> {
       userData['maxOut'] = promotion?.maxOut;
     }
     const user = await this.create(userData);
+    const createdUser = await this.getById(user.id);
 
+    let referralPath = `${createdUser.sid}/`;
     if (userData.referralPath) {
-      const referralPath = `${userData.referralPath}${user.sid}/`;
-      this.updateById(user.id, { referralPath });
+      referralPath = `${userData.referralPath}${createdUser.sid}/`;
     }
-    return user.id;
+    await this.updateById(createdUser.id, { referralPath });
   }
 
   async getReferralsByPath(

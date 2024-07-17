@@ -46,11 +46,8 @@ export class User {
   @Column({ type: 'bigint', comment: 'Số tiền đã nhận' })
   income: number;
 
-  @Column({ name: 'balance_usd', type: 'bigint' })
-  balanceUsd: number;
-
-  @Column({ name: 'balance_token', type: 'bigint' })
-  balanceToken: number;
+  @Column({ type: 'bigint' })
+  balance: number;
 
   @Column({ name: 'referral_by', type: 'uuid' })
   referralBy?: string;

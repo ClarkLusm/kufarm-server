@@ -49,14 +49,11 @@ export class TransactionService extends BaseService<Transaction> {
       .getRepository(User)
       .findOneBy({ id: userId });
 
-    if (coin === TransactionCoinEnum.Usd && user.balanceUsd < amount) {
+    if (coin === TransactionCoinEnum.Usd && user.balance < amount) {
       throw new Error('Usd balance is not enough');
     }
-    if (coin === TransactionCoinEnum.BitcoinCo2 && user.balanceToken < amount) {
-      throw new Error('Token balance is not enough');
-    }
+    
     //TODO: log transaction & decrease user balance
-
     await this.dataSource.transaction(async (tx) => {
       await tx.getRepository(Transaction).create({
         userId,

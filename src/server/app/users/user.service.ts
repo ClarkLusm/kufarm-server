@@ -125,17 +125,7 @@ export class UserService extends BaseService<User> {
         const userData = { syncAt: new Date() };
         if (totalIncome) {
           userData['income'] = user.income + totalIncome;
-
-          const { usd: usdPercent, token: tokenPercent } =
-            await this.settingService.getIncomeShare();
-          const { usd: usdRate, token: tokenRate } =
-            await this.settingService.getExchangeRate();
-
-          userData['balanceUsd'] =
-            user.balanceUsd + (totalIncome * usdPercent) / 100;
-          userData['balanceToken'] =
-            user.balanceToken +
-            ((totalIncome * tokenPercent) / 100) * (tokenRate / usdRate);
+          userData['balance'] = user.balance + totalIncome;
         }
 
         await tx.getRepository(User).update(userId, userData);

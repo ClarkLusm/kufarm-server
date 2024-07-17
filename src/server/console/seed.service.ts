@@ -27,22 +27,13 @@ export class SeedService {
   }
 
   async createAdminUser() {
-    return await this.adminUserService.create({
-      username: 'admin',
-      password: 'admin',
-    });
+    return this.adminUserService.createAdminUser();
   }
 
   async initialConfiguration() {
     return await this.settingService.create([
       {
-        key: Constants.SETTING_INCOME_SHARE,
-        value: {
-          usd: 50,
-          token: 50,
-        },
-      },
-      {
+        name: 'Tỉ giá',
         key: Constants.SETTING_EXCHANGE_RATE,
         value: {
           usd: 1,
@@ -50,6 +41,7 @@ export class SeedService {
         },
       },
       {
+        name: 'Đăng ký thành viên',
         key: Constants.SETTING_NEW_USER_PROMOTION,
         value: {
           hashPower: 1,
@@ -57,10 +49,12 @@ export class SeedService {
         },
       },
       {
+        name: 'Tỉ lệ lợi nhuận',
         key: Constants.SETTING_ICOME_RATE,
         value: 300,
       },
       {
+        name: 'Tỉ lệ hoa hồng',
         key: Constants.SETTING_REFERRAL_INCOME,
         value: {
           f1: 10,
@@ -78,6 +72,27 @@ export class SeedService {
           f13: 1,
           f14: 1,
           f15: 1,
+        },
+      },
+      {
+        name: 'Điều kiện nhận hoa hồng',
+        key: Constants.SETTING_REFERRAL_INCOME_CONDITION,
+        value: {
+          f1: 1,
+          f2: 2,
+          f3: 3,
+          f4: 4,
+          f5: 5,
+          f6: 6,
+          f7: 7,
+          f8: 8,
+          f9: 9,
+          f10: 10,
+          f11: 10,
+          f12: 10,
+          f13: 10,
+          f14: 10,
+          f15: 10,
         },
       },
     ]);

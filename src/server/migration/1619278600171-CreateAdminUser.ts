@@ -10,7 +10,7 @@ export class CreateAdminUser1619278600171 implements MigrationInterface {
         "id" UUID DEFAULT uuid_generate_v4(),
         "username" varchar NOT NULL,
         "password_hash" varchar NOT NULL,
-        "hash" varchar NOT NULL,
+        "salt" varchar NOT NULL,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id")

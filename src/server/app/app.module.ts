@@ -34,4 +34,4 @@ import { AdminUserModule } from './admin-users/admin-user.module';
   ],
   providers: [SeedService],
 })
-export class AppModule { }
+export class AppModule {}

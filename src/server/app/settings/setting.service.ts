@@ -22,13 +22,6 @@ export class SettingService extends BaseService<Setting> {
     return setting?.value;
   }
 
-  async getIncomeShare() {
-    const setting = await this.repository.findOneBy({
-      key: Constants.SETTING_INCOME_SHARE,
-    });
-    return setting?.value;
-  }
-
   async getExchangeRate() {
     // Check the rate config whether is fixed or not
     const setting = await this.repository.findOneBy({

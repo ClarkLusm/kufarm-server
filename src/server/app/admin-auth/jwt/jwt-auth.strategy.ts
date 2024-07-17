@@ -2,7 +2,6 @@ import { Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { SESSION_COOKIE_KEY } from 'src/server/config/constants';
 
 export type JwtPayload = { sub: string; username: string };
 
@@ -13,7 +12,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
       let token = null;
 
       if (req && req.cookies) {
-        token = req.cookies[SESSION_COOKIE_KEY];
+        token = req.cookies['SESSION_COOKIE_KEY'];
       }
       return token;
     };

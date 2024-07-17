@@ -1,7 +1,7 @@
 import { Post } from '@nestjs/common';
 import { Controller, Body } from '@nestjs/common';
 import { AdminAuthService } from './admin-auth.service';
-import { AdminSigninDto } from './dto/signin.dto';
+import { AdminLoginDto } from './dto/login.dto';
 
 @Controller()
 export class AdminAuthController {
@@ -10,7 +10,7 @@ export class AdminAuthController {
   ) { }
 
   @Post('/login')
-  async login(@Body() data: AdminSigninDto) {
+  async login(@Body() data: AdminLoginDto) {
     return this.adminAuthService.login(data);
   }
 }

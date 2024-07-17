@@ -15,24 +15,17 @@ export class AdminAuthService {
   constructor(
     @Inject(AdminUserService) private adminUserService: AdminUserService,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
   async login(userData: any) {
-    try {
-      const user = await this.validateUser(userData);
-      const userDataAndTokens = await this.tokenSession(user);
-      return userDataAndTokens;
-    } catch (error) {
-      throw console.log(error);
-    }
+    const user = await this.validateUser(userData);
+    const userDataAndTokens = await this.tokenSession(user);
+    return userDataAndTokens;
   }
 
-  async logout(refreshToken: string) { }
+  async logout(refreshToken: string) {}
 
-  async refreshToken(
-    refreshtoken: string,
-    res: any,
-  ) {
+  async refreshToken(refreshtoken: string, res: any) {
     if (!refreshtoken)
       throw new UnauthorizedException({
         message: 'Пользователь не авторизован',
@@ -89,25 +82,21 @@ export class AdminAuthService {
   }
 
   async validateUser(userData: any): Promise<any> {
-    try {
-      const user = await this.adminUserService.findOneBy({
-        username: userData.username,
+    const user = await this.adminUserService.findOneBy({
+      username: userData.username,
+    });
+    if (!user)
+      throw new UnauthorizedException({
+        message: `User ${userData.username} not found`,
       });
-      if (!user)
-        throw new UnauthorizedException({
-          message: `User ${userData.username} not found`,
-        });
-      const isPasswordEquals = await bcrypt.compare(
-        userData.password,
-        user.passwordHash,
-      );
-      if (!isPasswordEquals)
-        throw new UnauthorizedException({ message: `Incorrect password` });
-      const { passwordHash, hash, ...result } = user;
-      return result;
-    } catch (error) {
-      throw console.log(error);
-    }
+    const isPasswordEquals = await bcrypt.compare(
+      userData.password,
+      user.passwordHash,
+    );
+    if (!isPasswordEquals)
+      throw new UnauthorizedException({ message: `Incorrect password` });
+    const { passwordHash, salt, ...result } = user;
+    return result;
   }
 
   private validateRefreshToken(token: string) {

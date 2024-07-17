@@ -89,8 +89,7 @@ export class AccountController {
     const user = await this.userService.getOne({ uid: sub });
     return {
       pool: 'stratum+tcp://sha256d.kupool.com:443',
-      balanceUsd: user.balanceUsd,
-      balanceToken: user.balanceToken,
+      balance: user.balance,
       username: user.username,
       wallet: user.walletAddress,
       referralCommission: user.referralCommission,

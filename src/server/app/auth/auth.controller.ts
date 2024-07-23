@@ -1,8 +1,8 @@
 import { BadRequestException, Body, Post } from '@nestjs/common';
 import { Controller } from '@nestjs/common';
 
-import { UserService } from '../../users/user.service';
-import { CreateUserDto } from '../../users/dto/create-user.dto';
+import { UserService } from '../users/user.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 import { SigninDto } from './dto/signin.dto';
 import { AuthService } from './auth.service';
 

@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, LessThan, Not, Repository } from 'typeorm';
-import ethers from 'ethers';
+import { ethers } from 'ethers';
 
-import { PaymentWallet } from './payment-wallet.entity';
-import { BaseService } from 'src/server/common/base/base.service';
-import { PaymentAccount } from './payment-account.entity';
+import { BaseService } from '../../common/base/base.service';
+import { OrderStatusEnum } from '../../common/enums';
 import { Order } from '../orders/order.entity';
-import { OrderStatusEnum } from 'src/server/common/enums';
+import { PaymentAccount } from './payment-account.entity';
+import { PaymentWallet } from './payment-wallet.entity';
 
 @Injectable()
 export class PaymentWalletService extends BaseService<PaymentWallet> {
@@ -30,38 +30,80 @@ export class PaymentWalletService extends BaseService<PaymentWallet> {
       },
     });
 
+    if (!busyAccounts.length) return wallet.walletAddress;
+
     const busyAddresses = busyAccounts.map((a) => a.walletAddress);
     const account = await this.dataSource
       .getRepository(PaymentAccount)
-      .findOneBy({
-        paymentWalletId: wallet.id,
-        accountAddress: Not(In(busyAddresses)),
+      .findOne({
+        where: {
+          paymentWalletId: wallet.id,
+          accountAddress: Not(In(busyAddresses)),
+        },
+        order: {
+          path: 'DESC',
+        },
       });
 
     if (account) return account.accountAddress;
 
-    const accountAddress = await this.genWalletAccount();
+    const lastAccount = await this.dataSource
+      .getRepository(PaymentAccount)
+      .findOne({
+        select: {
+          path: true,
+        },
+        where: {
+          paymentWalletId: wallet.id,
+        },
+        order: {
+          path: 'DESC',
+        },
+      });
+
+    const nextPath = lastAccount ? Number(lastAccount.path) + 1 : 1;
+    const accountAddress = await this.genWalletAccount(wallet, nextPath);
     // Save new account
     if (accountAddress) {
       const newAccount = new PaymentAccount();
       newAccount.paymentWalletId = wallet.id;
       newAccount.accountAddress = accountAddress;
+      newAccount.path = nextPath.toString();
       await this.dataSource.getRepository(PaymentAccount).save(newAccount);
     }
     return accountAddress;
   }
 
-  async genWalletAccount() {
-    let privateKey =
-      '0x0123456789012345678901234567890123456789012345678901234567890123';
-    let wallet = new ethers.Wallet(privateKey);
-
-    // Connect a wallet to mainnet
-    let provider = ethers.getDefaultProvider();
-    let walletWithProvider = new ethers.Wallet(privateKey, provider);
-    let randomWallet = ethers.Wallet.createRandom();
-    console.log(randomWallet);
-    return randomWallet.address;
+  async genWalletAccount(wallet: PaymentWallet, index: number) {
+    const HDWallet = ethers.HDNodeWallet.fromPhrase(
+      wallet.secret,
+      null,
+      wallet.path,
+    );
+    const childAccount = HDWallet.derivePath(`${index}`);
+    return childAccount.address;
   }
 
+  async getAccountPayout(minBalance: number) {
+    return this.dataSource
+      .getRepository(PaymentAccount)
+      .createQueryBuilder('payment_account')
+      .leftJoinAndSelect('payment_account.paymentWallet', 'paymentWallet')
+      .where('paymentWallet.is_out = true')
+      .andWhere('paymentWallet.published = true')
+      .andWhere('payment_account.balance >= :balance', {
+        balance: minBalance,
+      })
+      .getOne();
+  }
+
+  async createAccount(data) {
+    return this.dataSource.getRepository(PaymentAccount).save(data);
+  }
+
+  async updateAccountById(accountId: string, data) {
+    return this.dataSource
+      .getRepository(PaymentAccount)
+      .update(accountId, data);
+  }
 }

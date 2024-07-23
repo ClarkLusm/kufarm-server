@@ -3,6 +3,7 @@ import { Console, Command, createSpinner } from 'nestjs-console';
 
 import { SettingService } from '../app/settings/setting.service';
 import { AdminUserService } from '../app/admin-users/admin-user.service';
+import { ProductService } from '../app/products/product.service';
 import * as Constants from '../common/constants';
 
 @Console()
@@ -10,6 +11,7 @@ export class SeedService {
   constructor(
     @Inject(SettingService) private settingService: SettingService,
     @Inject(AdminUserService) private adminUserService: AdminUserService,
+    @Inject(ProductService) private productService: ProductService,
   ) {}
   @Command({
     command: 'seed',
@@ -22,12 +24,83 @@ export class SeedService {
 
     await this.createAdminUser();
     await this.initialConfiguration();
+    await this.createProducts();
 
     spin.succeed('Seeding done');
   }
 
   async createAdminUser() {
     return this.adminUserService.createAdminUser();
+  }
+
+  async createProducts() {
+    const products = [
+      {
+        name: 'Antminer Z9 MINI',
+        alias: 'z9mini',
+        hashPower: 1000,
+        maxOut: 300,
+        dailyIncome: 0.2,
+        monthlyIncome: 6,
+        price: 100,
+        published: true,
+      },
+      {
+        name: 'Antminer S9K',
+        alias: 's9k',
+        hashPower: 6250,
+        maxOut: 1500,
+        dailyIncome: 1.25,
+        monthlyIncome: 37.5,
+        price: 500,
+        published: true,
+      },
+      {
+        name: 'Antminer T17',
+        alias: 't17',
+        hashPower: 15000,
+        maxOut: 3000,
+        dailyIncome: 3,
+        monthlyIncome: 90,
+        price: 1000,
+        published: true,
+      },
+      {
+        name: 'Antminer S17 PRO',
+        alias: 's17pro',
+        hashPower: 87500,
+        maxOut: 15000,
+        dailyIncome: 17.5,
+        monthlyIncome: 525,
+        price: 5000,
+        published: true,
+      },
+      {
+        name: 'Antminer S19 XP',
+        alias: 's19xp',
+        hashPower: 200000,
+        maxOut: 30000,
+        dailyIncome: 40,
+        monthlyIncome: 1200,
+        price: 10000,
+        published: true,
+      },
+      {
+        name: 'Antminer S19 PRO',
+        alias: 's19pro',
+        hashPower: 675000,
+        maxOut: 90000,
+        dailyIncome: 135,
+        monthlyIncome: 4050,
+        price: 30000,
+        published: true,
+      },
+    ];
+    return Promise.all(
+      products.map(async (p) => {
+        await this.productService.create(p);
+      }),
+    );
   }
 
   async initialConfiguration() {

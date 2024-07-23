@@ -8,8 +8,10 @@ export class CreatePaymentAccount1719971674211 implements MigrationInterface {
       `CREATE TABLE IF NOT EXISTS "payment_account" (
         "id" UUID DEFAULT uuid_generate_v4(),
         "payment_wallet_id" UUID,
-        "account_address" VARCHAR NOT NULL,
-        "balance" BIGINT,
+        "account_address" VARCHAR(42) NOT NULL,
+        "balance" NUMERIC(38),
+        "coin" VARCHAR(10),
+        "path" VARCHAR,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_1032471c13130102494211e3e26" PRIMARY KEY ("id"),

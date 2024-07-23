@@ -4,7 +4,10 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { PaymentWallet } from './payment-wallet.entity';
 
 @Entity()
 export class PaymentAccount {
@@ -17,14 +20,19 @@ export class PaymentAccount {
   @Column({ name: 'payment_wallet_id', type: 'uuid', nullable: false })
   paymentWalletId: string;
 
-  @Column({ type: 'bigint' })
+  @Column()
   balance?: number;
 
-  @Column({ name: 'created_at' })
-  @CreateDateColumn()
+  @Column()
+  path: string;
+
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @Column({ name: 'updated_at' })
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @ManyToOne(() => PaymentWallet, (wallet) => wallet.paymentAccounts)
+  @JoinColumn({ name: 'payment_wallet_id' })
+  paymentWallet: PaymentWallet;
 }

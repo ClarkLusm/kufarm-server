@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Product } from '../products/product.entity';
@@ -30,19 +31,32 @@ export class UserProduct {
   @Column({ name: 'hash_power' })
   hashPower: number;
 
-  @Column({ name: 'daily_income', nullable: false })
+  @Column({
+    name: 'daily_income',
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    nullable: false,
+  })
   dailyIncome: number;
 
-  @Column({ name: 'monthly_income', nullable: false })
+  @Column({
+    name: 'monthly_income',
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    nullable: false,
+  })
   monthlyIncome: number;
 
   @Column()
   status: number;
 
-  @ManyToOne((_type) => User, (user) => user.userProducts)
+  @ManyToOne(() => User, (user) => user.userProducts)
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @OneToOne((_type) => Product)
+  @OneToOne(() => Product)
   product: Product;
 
   @CreateDateColumn({ name: 'created_at' })

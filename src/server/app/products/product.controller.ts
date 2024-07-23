@@ -38,7 +38,7 @@ export class ProductController {
 
   @Post()
   async create(@Body() data: CreateProductDto): Promise<Product> {
-    return this.service.create(ProductHelper.dtoToEntity(data));
+    return this.service.create(data);
   }
 
   @Put(':id')

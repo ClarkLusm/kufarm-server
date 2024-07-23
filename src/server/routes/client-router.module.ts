@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { RouterModule, Routes } from '@nestjs/core';
 
-import { AuthModule } from '../app/api/auth/auth.module';
+import { AuthModule } from '../app/auth/auth.module';
+import { AccountModule } from '../app/accounts/account.module';
 
 const routes: Routes = [
   {
@@ -11,11 +12,15 @@ const routes: Routes = [
         path: '/auth',
         module: AuthModule,
       },
+      {
+        path: '/account',
+        module: AccountModule,
+      },
     ],
   },
 ];
 
 @Module({
-  imports: [RouterModule.register(routes), AuthModule],
+  imports: [RouterModule.register(routes), AuthModule, AccountModule],
 })
 export class ClientRouteModule {}

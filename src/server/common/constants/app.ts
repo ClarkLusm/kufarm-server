@@ -12,3 +12,26 @@ export const SETTING_REFERRAL_INCOME = 'referral_income';
 export const SETTING_REFERRAL_INCOME_CONDITION = 'referral_income_condition';
 export const SETTING_EXCHANGE_RATE = 'exchange_rate';
 export const SETTING_ICOME_RATE = 300;
+
+// export const TOKEN_BTCO2 = {
+//   chainId: 1,
+//   decimal: 18,
+//   symbol: 'BTCO2',
+// };
+
+export const TOKENS = {
+  BTCO2: {
+    decimal: 18,
+    symbol: 'BTCO2',
+  },
+  USDT: {
+    decimal: 6,
+    symbol: 'USDT'
+  }
+}
+
+export const DERIVATION_PATH = {
+  1: "m/44'/60'/0'/0",
+  56: "m/44'/714'/0'/0",
+  97: "m/44'/1656'/0'/0",
+};

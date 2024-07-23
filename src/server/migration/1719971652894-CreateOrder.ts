@@ -8,11 +8,11 @@ export class CreateOrder1719971652894 implements MigrationInterface {
       `CREATE TABLE IF NOT EXISTS "order" (
         "id" UUID DEFAULT uuid_generate_v4(),
         "code" VARCHAR NOT NULL,
-        "wallet_address" VARCHAR NOT NULL,
+        "wallet_address" VARCHAR(42) NOT NULL,
         "user_id" UUID,
         "product_id" UUID,
         "quantity" SMALLINT,
-        "amount" BIGINT,
+        "amount" NUMERIC(38),
         "coin" VARCHAR NOT NULL,
         "status" SMALLINT DEFAULT 0,
         "expired_at" TIMESTAMP,

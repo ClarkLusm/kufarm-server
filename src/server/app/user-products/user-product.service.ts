@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThan, Not, Repository } from 'typeorm';
 
 import { BaseService } from 'src/server/common/base/base.service';
 import { UserProduct } from './user-product.entity';
@@ -22,8 +22,7 @@ export class UserProductService extends BaseService<UserProduct> {
       .createQueryBuilder('user_product')
       .select('user_product.product_id, COUNT(user_product.id) AS count')
       .where('user_product.user_id = :userId', { userId })
-      .andWhere('user_product.end_at > :now', { now: new Date().toISOString() })
-      .andWhere('user_product.status != :expired', {
+      .andWhere('user_product.status != :stop', {
         stop: USERPRODUCT_EXPIRED,
       })
       .groupBy('user_product.product_id')
@@ -32,16 +31,14 @@ export class UserProductService extends BaseService<UserProduct> {
   }
 
   async getRunningProductsByUserId(userId: string) {
-    const result = await this.repository
+    return this.repository
       .createQueryBuilder('user_product')
-      .select('user_product.*')
       .where('user_product.user_id = :userId', { userId })
       .andWhere('user_product.income < user_product.max_out')
-      .andWhere('user_product.status != :expired', {
+      .andWhere('user_product.status != :stop', {
         stop: USERPRODUCT_EXPIRED,
       })
-      .orderBy('created_at', 'ASC')
-      .getRawMany();
-    return result;
+      .orderBy('user_product.created_at', 'ASC')
+      .getMany();
   }
 }

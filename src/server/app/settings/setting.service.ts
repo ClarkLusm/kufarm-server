@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { BaseService } from 'src/server/common/base/base.service';
-import * as Constants from 'src/server/common/constants';
+import { BaseService } from '../../common/base/base.service';
+import * as Constants from '../../common/constants';
+import { numberToBigInt } from '../../common/helpers/number.utils';
 import { Setting } from './setting.entity';
 
 @Injectable()
@@ -28,5 +29,19 @@ export class SettingService extends BaseService<Setting> {
       key: Constants.SETTING_EXCHANGE_RATE,
     });
     return setting?.value;
+  }
+
+  async convertUsdToBitCo2(usdAmount: number) {
+    const exchangeRate = await this.getExchangeRate();
+    if (!exchangeRate) {
+      throw new Error('Cannot fetch exchange rate');
+    }
+    const { usd: usdRate, token: tokenRate } = exchangeRate;
+    const rate = usdRate / tokenRate; // token to usd
+    const tokenBalance = numberToBigInt(
+      usdAmount / rate,
+      Constants.TOKENS.BTCO2.decimal,
+    );
+    return [tokenBalance, rate];
   }
 }

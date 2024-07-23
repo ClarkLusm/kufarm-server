@@ -7,9 +7,12 @@ export class CreatePaymentWallet1719971672982 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE IF NOT EXISTS "payment_wallet" (
         "id" UUID DEFAULT uuid_generate_v4(),
+        "is_out" BOOLEAN DEFAULT false,
         "name" VARCHAR NOT NULL,
         "chain_id" INTEGER,
-        "wallet_address" VARCHAR NOT NULL,
+        "wallet_address" VARCHAR(42) NOT NULL,
+        "secret" VARCHAR,
+        "path" VARCHAR(30),
         "coin" VARCHAR,
         "image" VARCHAR,
         "published" BOOLEAN DEFAULT false,

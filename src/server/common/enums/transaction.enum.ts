@@ -6,4 +6,5 @@ export enum TransactionCoinEnum {
 export enum TransactStatusEnum {
     Pending = 1,
     Success = 2,
+    Error = 3,
 }

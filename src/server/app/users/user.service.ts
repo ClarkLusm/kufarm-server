@@ -2,15 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as moment from 'moment';
 
-import { BaseService } from 'src/server/common/base/base.service';
+import { BaseService } from '../..//common/base/base.service';
+import { UserProductStatusEnum } from '../../common/enums/user-product.enum';
 import { SettingService } from '../settings/setting.service';
 import { UserProductService } from '../user-products/user-product.service';
+import { UserProduct } from '../user-products/user-product.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.entity';
-import moment from 'moment';
-import { UserProduct } from '../user-products/user-product.entity';
-import { UserProductStatusEnum } from 'src/server/common/enums/user-product.enum';
 
 @Injectable()
 export class UserService extends BaseService<User> {
@@ -38,6 +38,7 @@ export class UserService extends BaseService<User> {
       balanceToken: BigInt(0),
       referralBy: null,
       referralPath: null,
+      syncAt: new Date(),
     };
 
     if (data.referralId) {
@@ -83,16 +84,23 @@ export class UserService extends BaseService<User> {
   }
 
   async syncBalance(userId: string) {
-    const user = await this.getById(userId);
-    const userProducts =
-      await this.userProductService.getRunningProductsByUserId(userId);
+    const user = await this.getById(userId),
+      userData = {
+        income: Number(user.income),
+        balance: Number(user.balance),
+        syncAt: new Date(),
+      },
+      userProducts = await this.userProductService.getRunningProductsByUserId(
+        userId,
+      );
+
     if (userProducts.length && user.income < user.maxOut) {
       const daysDuration = moment().diff(user.syncAt, 'day', true);
       let totalIncome = 0,
         [dailyIncome, monthlyIncome, hashPower] = userProducts.reduce(
           (a, b) => [
-            a[0] + b.dailyIncome,
-            a[1] + b.monthlyIncome,
+            a[0] + Number(b.dailyIncome),
+            a[1] + Number(b.monthlyIncome),
             a[2] + b.hashPower,
           ],
           [0, 0, 0],
@@ -100,9 +108,13 @@ export class UserService extends BaseService<User> {
 
       await this.dataSource.transaction(async (tx) => {
         for (let i = 0; i < userProducts.length; i++) {
-          const up: UserProduct = userProducts[0];
-          const income = daysDuration * up.dailyIncome;
-          const incomeNeedToMax = up.maxOut - up.income;
+          const up: UserProduct = userProducts[0],
+            upIncome = Number(up.income),
+            upMonthlyIncome = Number(up.monthlyIncome),
+            upDailyIncome = Number(up.dailyIncome);
+
+          const income = daysDuration * upDailyIncome;
+          const incomeNeedToMax = up.maxOut - upIncome;
           const reachMax = income > incomeNeedToMax; // true: the machine is fully
 
           await tx.getRepository(UserProduct).update(up.id, {
@@ -113,8 +125,8 @@ export class UserService extends BaseService<User> {
           });
 
           if (reachMax) {
-            dailyIncome -= up.dailyIncome;
-            monthlyIncome -= up.monthlyIncome;
+            dailyIncome -= upDailyIncome;
+            monthlyIncome -= upMonthlyIncome;
             hashPower -= up.hashPower;
             totalIncome += incomeNeedToMax;
           } else {
@@ -123,12 +135,11 @@ export class UserService extends BaseService<User> {
           }
         }
 
-        const userData = { syncAt: new Date() };
+        // Update user data
         if (totalIncome) {
-          userData['income'] = user.income + totalIncome;
-          userData['balance'] = user.balance + totalIncome;
+          userData.income += totalIncome;
+          userData.balance += totalIncome;
         }
-
         await tx.getRepository(User).update(userId, userData);
       });
 
@@ -136,6 +147,9 @@ export class UserService extends BaseService<User> {
         dailyIncome,
         monthlyIncome,
         hashPower,
+        maxOut: user.maxOut,
+        income: userData.income,
+        balance: userData.balance,
       };
     }
   }

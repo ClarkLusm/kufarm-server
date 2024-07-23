@@ -18,23 +18,35 @@ export class Transaction {
   @Column({ name: 'user_id', type: 'uuid', nullable: false })
   userId: string;
 
+  @Column({ name: 'payment_wallet_id', type: 'uuid', nullable: false })
+  paymentWalletId: string;
+
+  @Column({ name: 'payment_account_id', type: 'uuid', nullable: false })
+  paymentAccountId: string;
+
   @Column({ nullable: false })
   type: number;
 
-  @Column()
-  sender?: string;
+  @Column({ name: 'user_address', nullable: false })
+  userAddress?: string;
 
-  @Column()
-  receiver?: string;
-
-  @Column()
+  @Column({ name: 'tx_hash' })
   txHash?: string;
 
   @Column({ nullable: false })
   amount: number;
 
+  @Column({ name: 'amount_usd' })
+  amountUsd: number;
+
+  @Column({ name: 'exchange_rate', nullable: false })
+  exchangeRate: number;
+
   @Column({ nullable: false })
   coin: string;
+
+  @Column({ name: 'wallet_balance', nullable: false })
+  walletBalance: number;
 
   @Column()
   status: number;

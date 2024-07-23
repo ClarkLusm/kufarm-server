@@ -13,14 +13,14 @@ export class Product {
   @PrimaryColumn()
   id: string;
 
-  @Column()
-  sid: number;
-
   @Column({ nullable: false })
   name: string;
 
   @Column({ nullable: false })
   alias: string;
+
+  @Column()
+  image: string;
 
   @Column({ nullable: false })
   price: number;
@@ -34,10 +34,22 @@ export class Product {
   @Column({ name: 'hash_power' })
   hashPower: number;
 
-  @Column({ name: 'daily_income', nullable: false })
+  @Column({
+    name: 'daily_income',
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    nullable: false,
+  })
   dailyIncome: number;
 
-  @Column({ name: 'monthly_income', nullable: false })
+  @Column({
+    name: 'monthly_income',
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    nullable: false,
+  })
   monthlyIncome: number;
 
   @Column()

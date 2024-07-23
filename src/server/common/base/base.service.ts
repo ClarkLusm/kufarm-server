@@ -22,22 +22,24 @@ export class BaseService<T extends ObjectLiteral> {
     select?: FindOptionsSelect<T>,
   ): Promise<[T[], number]> {
     const qr: FindManyOptions = {};
-    qr.take = query.hasOwnProperty('pageSize')
+    qr.take = query?.hasOwnProperty('pageSize')
       ? query.pageSize
       : PAGESIZE_DEFAULT;
-    const page = query.hasOwnProperty('page') ? query.page : PAGE_DEFAULT;
+    const page = query?.hasOwnProperty('page') ? query.page : PAGE_DEFAULT;
     qr.skip = (page - 1) * qr.take;
-    delete query.pageSize;
-    delete query.page;
+    delete query?.pageSize;
+    delete query?.page;
     qr.where = query;
     if (select) {
       qr.select = select;
     }
-    if (query.sort) {
+    if (query?.sort) {
       qr.order = {
         [query.sort]: query.order ?? 'ASC',
         updatedAt: 'DESC',
       };
+      delete query.sort;
+      delete query.order;
     }
     return this.repository.findAndCount(qr);
   }
@@ -60,7 +62,7 @@ export class BaseService<T extends ObjectLiteral> {
   findOneBy = (query: FindOptionsWhere<T>): Promise<T> =>
     this.repository.findOneBy(query);
 
-  getById = (id: any): Promise<T> => this.repository.findOneByOrFail({ id });
+  getById = (id: any): Promise<T> => this.repository.findOneBy({ id });
 
   updateById = (id: any, data: any): Promise<UpdateResult> =>
     this.repository.update(id, data);

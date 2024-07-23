@@ -34,7 +34,7 @@ export class Order {
   @Column({ nullable: false })
   quantity: number;
 
-  @Column({ type: 'bigint', nullable: false })
+  @Column({ nullable: false })
   amount: number;
 
   @Column({ nullable: false })

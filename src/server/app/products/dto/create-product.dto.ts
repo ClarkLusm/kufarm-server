@@ -20,7 +20,6 @@ export class CreateProductDto {
   @IsNumber()
   salePrice?: number;
 
-  @IsNotEmpty()
   @IsInt()
   maxOut: number;
 

@@ -3,11 +3,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConsoleModule } from 'nestjs-console';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { SeedService } from 'src/server/console/seed.service';
-import { AdminRouteModule } from '../routes/admin-router.module';
-import { ClientRouteModule } from '../routes/client-router.module';
+import {
+  AdminRouteModule,
+  ClientRouteModule,
+  PublicRouteModule,
+} from '../routes';
+import { SeedService } from '../console/seed.service';
 import { SettingModule } from './settings/setting.module';
 import { AdminUserModule } from './admin-users/admin-user.module';
+import { ProductModule } from './products/product.module';
 
 @Module({
   imports: [
@@ -28,9 +32,12 @@ import { AdminUserModule } from './admin-users/admin-user.module';
     }),
     ConsoleModule,
     SettingModule,
+    ProductModule,
     AdminUserModule,
+
     AdminRouteModule,
     ClientRouteModule,
+    PublicRouteModule,
   ],
   providers: [SeedService],
 })

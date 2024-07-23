@@ -11,7 +11,6 @@ import {
 import { Order } from '../orders/order.entity';
 import { UserProduct } from '../user-products/user-product.entity';
 import { Transaction } from '../transactions/transaction.entity';
-import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -39,15 +38,14 @@ export class User {
 
   @Column({
     name: 'max_out',
-    type: 'bigint',
     comment: 'Số tiền tối đa được nhận',
   })
   maxOut: number;
 
-  @Column({ type: 'bigint', comment: 'Số tiền đã nhận' })
+  @Column({ type: 'numeric', comment: 'Số tiền đã nhận' })
   income: number;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'numeric' })
   balance: number;
 
   @Column({ name: 'referral_by', type: 'uuid' })
@@ -56,7 +54,7 @@ export class User {
   @Column({ name: 'referral_path' })
   referralPath?: string;
 
-  @Column({ name: 'referral_commission', type: 'bigint', comment: 'USD' })
+  @Column({ name: 'referral_commission', type: 'numeric', comment: 'USD' })
   referralCommission: number;
 
   @Column({ name: 'email_verified' })
@@ -77,7 +75,7 @@ export class User {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany((_type) => UserProduct, (userProduct) => userProduct.user)
+  @OneToMany(() => UserProduct, (userProduct) => userProduct.user)
   userProducts?: UserProduct[];
 
   @OneToMany(() => Order, (order) => order.user)

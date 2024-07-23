@@ -10,7 +10,7 @@ export class CreateUserProduct1719971671281 implements MigrationInterface {
         "user_id" UUID,
         "product_id" UUID,
         "max_out" INTEGER DEFAULT 0,
-        "income" INTEGER DEFAULT 0,
+        "income" NUMERIC(19,10) DEFAULT 0,
         "hash_power" INTEGER DEFAULT 0,
         "daily_income" NUMERIC(10,2),
         "monthly_income" NUMERIC(10,2),

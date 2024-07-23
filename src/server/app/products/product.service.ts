@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
-import { CreateProductDto } from './dto/create-product.dto';
+import { BaseService } from '../../common/base/base.service';
 import { Product } from './product.entity';
-import { ProductHelper } from './product.helper';
-import { BaseService } from 'src/server/common/base/base.service';
 
 @Injectable()
 export class ProductService extends BaseService<Product> {

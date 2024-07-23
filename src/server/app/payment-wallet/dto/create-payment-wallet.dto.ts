@@ -2,6 +2,9 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CreatePaymentWalletDto {
   @IsNotEmpty()
+  isOut: boolean;
+
+  @IsNotEmpty()
   name: string;
 
   @IsNotEmpty()
@@ -9,6 +12,12 @@ export class CreatePaymentWalletDto {
 
   @IsNotEmpty()
   walletAddress: string;
+
+  @IsNotEmpty()
+  secret: string;
+
+  @IsNotEmpty()
+  path: string;
 
   @IsNotEmpty()
   coin: string;

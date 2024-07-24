@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, LessThan, Not, Repository } from 'typeorm';
+import {
+  DataSource,
+  FindManyOptions,
+  In,
+  LessThan,
+  Not,
+  Repository,
+} from 'typeorm';
 import { ethers } from 'ethers';
 
 import { BaseService } from '../../common/base/base.service';
@@ -105,5 +112,9 @@ export class PaymentWalletService extends BaseService<PaymentWallet> {
     return this.dataSource
       .getRepository(PaymentAccount)
       .update(accountId, data);
+  }
+
+  async getAndCountAccounts(query: FindManyOptions) {
+    return this.dataSource.getRepository(PaymentAccount).findAndCount(query);
   }
 }

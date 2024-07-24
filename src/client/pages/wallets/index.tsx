@@ -10,14 +10,16 @@ import { shortAddress } from '../../common/helpers';
 
 const Wallets: NextPage = (props) => {
   const [wallets, setWallets] = useState([]);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     fetchData();
   }, []);
 
   async function fetchData() {
-    const data = await listPaymentWallet();
+    const { data, total } = await listPaymentWallet();
     setWallets(data);
+    setTotal(total);
   }
 
   const columns = [

@@ -64,12 +64,10 @@ const AuthInitBase: FC<WithChildren> = ({ children }) => {
   useEffect(() => {
     const authenticated = !!auth?.accessToken || pathname === '/login';
     setIsLogged(authenticated);
-    console.log('isLogged');
-    
-    if (!authenticated) {
+    if (!authenticated && pathname !== '/login') {
       router.push('/login');
     }
-  }, [auth]);
+  }, [auth, pathname]);
 
   useEffect(() => {
     EventBus.on('logout', logout, { once: true });

@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { Badge, Table } from 'antd';
 import moment from 'moment';
 
-import { listTransaction } from '../../apis/transactions';
+import { listTransaction } from '../../apis/transaction';
 import { shortAddress } from '../../common/helpers';
 
 const Transactions: NextPage = (props) => {

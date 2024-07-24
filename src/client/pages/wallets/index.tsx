@@ -1,59 +1,84 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
-import { Table } from 'antd';
+import { Switch, Table } from 'antd';
+import ArrowLeftOutlined from '@ant-design/icons/lib/icons/ArrowLeftOutlined';
+import ArrowRightOutlined from '@ant-design/icons/lib/icons/ArrowRightOutlined';
+
+import { listPaymentWallet } from '../../apis/payment-wallet';
+import { NETWORKS } from '../../common/constants/networks';
+import { shortAddress } from '../../common/helpers';
 
 const Wallets: NextPage = (props) => {
-  const dataSource = [
-    {
-      key: '1',
-      username: 'Tài khoản',
-      productName: 'AZ 9 Mini',
-      amount: '90$',
-      createdAt: '',
-      status: '',
-    },
-    {
-      key: '2',
-      username: 'Tài khoản',
-      productName: 'AZ 9 Mini',
-      price: '90$',
-      createdAt: '',
-      status: '',
-    },
-  ];
+  const [wallets, setWallets] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    const data = await listPaymentWallet();
+    setWallets(data);
+  }
 
   const columns = [
     {
-      title: 'Tài khoản',
-      dataIndex: 'username',
-      key: 'username',
+      title: 'Tên ví',
+      dataIndex: 'name',
+      key: 'name',
     },
     {
-      title: 'Sản phẩm',
-      dataIndex: 'productName',
-      key: 'productName',
+      title: 'Đồng',
+      dataIndex: 'coin',
+      key: 'coin',
     },
     {
-      title: 'Số tiền',
-      dataIndex: 'amount',
-      key: 'amount',
+      title: 'Loại ví',
+      dataIndex: 'isOut',
+      key: 'isOut',
+      render: (data) =>
+        data ? (
+          <>
+            <ArrowLeftOutlined style={{ color: 'green' }} />
+            {` `} Ví nạp
+          </>
+        ) : (
+          <>
+            <ArrowRightOutlined style={{ color: 'red' }} />
+            {` `} Ví rút
+          </>
+        ),
     },
     {
-      title: 'Ngày tạo',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: 'Địa chỉ ví',
+      dataIndex: 'walletAddress',
+      key: 'walletAddress',
+      render: (data) => shortAddress(data),
+    },
+    {
+      title: 'Mạng',
+      dataIndex: 'chainId',
+      key: 'chainId',
+      render: (data) => NETWORKS?.[data]?.name,
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      dataIndex: 'published',
+      key: 'published',
+      render: (data) => (
+        <Switch
+          checkedChildren="Hoạt động"
+          unCheckedChildren="Khóa"
+          defaultChecked={data}
+          disabled
+        />
+      ),
     },
   ];
 
   return (
     <div>
       <h1>Cổng thanh toán</h1>
-      <Table dataSource={dataSource} columns={columns} />
+      <Table dataSource={wallets} columns={columns} />
     </div>
   );
 };

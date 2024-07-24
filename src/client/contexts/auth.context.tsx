@@ -64,6 +64,8 @@ const AuthInitBase: FC<WithChildren> = ({ children }) => {
   useEffect(() => {
     const authenticated = !!auth?.accessToken || pathname === '/login';
     setIsLogged(authenticated);
+    console.log('isLogged');
+    
     if (!authenticated) {
       router.push('/login');
     }

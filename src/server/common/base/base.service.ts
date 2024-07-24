@@ -20,6 +20,7 @@ export class BaseService<T extends ObjectLiteral> {
   async getAll(
     query?: any,
     select?: FindOptionsSelect<T>,
+    relations?: FindOptionsRelations<any>,
   ): Promise<[T[], number]> {
     const qr: FindManyOptions = {};
     qr.take = query?.hasOwnProperty('pageSize')
@@ -32,6 +33,9 @@ export class BaseService<T extends ObjectLiteral> {
     qr.where = query;
     if (select) {
       qr.select = select;
+    }
+    if (relations) {
+      qr.relations = relations;
     }
     if (query?.sort) {
       qr.order = {

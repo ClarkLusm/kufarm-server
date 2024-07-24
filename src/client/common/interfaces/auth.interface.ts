@@ -1,5 +1,5 @@
 export interface IAuth {
   [x: string]: any;
-  token: string;
+  accessToken: string;
   refreshToken?: string;
 }

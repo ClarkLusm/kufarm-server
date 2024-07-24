@@ -19,14 +19,19 @@ export class OrderService extends BaseService<Order> {
     const qr = buildQueryFilter(query);
     qr.select = {
       id: true,
-      price: true,
+      amount: true,
+      quantity: true,
+      coin: true,
       status: true,
       createdAt: true,
       updatedAt: true,
       user: {
-        username: true,
+        email: true,
       },
-      product: true,
+      product: {
+        name: true,
+        price: true,
+      },
     };
     qr.relations = {
       user: true,

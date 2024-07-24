@@ -1,17 +1,19 @@
-import { Controller, Get, Query, Param, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Query, Param, ParseUUIDPipe, UseGuards, Req } from '@nestjs/common';
 import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import * as moment from 'moment';
 
+import { JwtAdminGuard } from '../admin-auth/jwt/jwt-auth.guard';
 import { OrderService } from './order.service';
 import { SearchOrderDto } from './dto/search-order.dto';
 import { SEARCH_DATE_FORMAT } from 'src/server/common/constants';
 
 @Controller()
+@UseGuards(JwtAdminGuard)
 export class OrderController {
   constructor(private readonly service: OrderService) {}
 
   @Get('/')
-  async getList(@Query() query: SearchOrderDto) {
+  async getList(@Req() req, @Query() query: SearchOrderDto) {
     if (query.fromDate) {
       query['created_at'] = MoreThanOrEqual(
         moment(query.fromDate, SEARCH_DATE_FORMAT, true)

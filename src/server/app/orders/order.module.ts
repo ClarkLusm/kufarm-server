@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { JwtAdminAuthModule } from '../admin-auth/jwt/jwt-auth.module';
 import { Order } from './order.entity';
 import { OrderService } from './order.service';
+import { OrderController } from './order.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order])],
+  controllers: [OrderController],
+  imports: [TypeOrmModule.forFeature([Order]), JwtAdminAuthModule],
   providers: [OrderService],
   exports: [OrderService],
 })

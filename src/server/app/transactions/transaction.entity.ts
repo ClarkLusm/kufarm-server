@@ -6,9 +6,11 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 
 import { User } from '../users/user.entity';
+import { PaymentAccount } from '../payment-wallet/payment-account.entity';
 
 @Entity({ name: 'transaction' })
 export class Transaction {
@@ -60,4 +62,8 @@ export class Transaction {
   @ManyToOne(() => User, (user) => user.transactions)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @OneToOne(() => PaymentAccount)
+  @JoinColumn({ name: 'payment_account_id', referencedColumnName: 'id' })
+  paymentAccount: PaymentAccount;
 }

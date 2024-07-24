@@ -1,5 +1,6 @@
 'use client';
 
+import { jwtDecode } from 'jwt-decode';
 import { IAuth } from '../interfaces/auth.interface';
 
 const AUTH_LOCAL_STORAGE_KEY = 'auth';
@@ -17,7 +18,10 @@ const getAuth = (): IAuth | undefined => {
   try {
     const auth: IAuth = JSON.parse(lsValue) as IAuth;
     if (auth) {
-      // You can easily check auth_token expiration also
+      if (tokenIsExpired(auth.accessToken)) {
+        localStorage.removeItem(AUTH_LOCAL_STORAGE_KEY);
+        return;
+      }
       return auth;
     }
   } catch (error) {
@@ -27,6 +31,7 @@ const getAuth = (): IAuth | undefined => {
 
 const setAuth = (auth: IAuth) => {
   if (!localStorage) {
+    console.error('localStorage unavailable');
     return;
   }
 
@@ -50,4 +55,9 @@ const removeAuth = () => {
   }
 };
 
-export { getAuth, setAuth, removeAuth, AUTH_LOCAL_STORAGE_KEY };
+const tokenIsExpired = (token) => {
+  const decode = jwtDecode(token);
+  return decode?.exp! * 1000 < new Date().getTime();
+};
+
+export { getAuth, setAuth, removeAuth, tokenIsExpired, AUTH_LOCAL_STORAGE_KEY };

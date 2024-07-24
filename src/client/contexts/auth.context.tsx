@@ -10,6 +10,7 @@ import React, {
 import { EventBus } from '../common/event-bus';
 import { IAuth } from '../common/interfaces/auth.interface';
 import * as AuthHelper from '../common/helpers/auth.helper';
+import { usePathname, useRouter } from 'next/navigation';
 
 type AuthContextProps = {
   auth: IAuth | undefined;
@@ -54,24 +55,34 @@ type WithChildren = {
   children?: ReactNode;
 };
 
-const AuthInit: FC<WithChildren> = ({ children }) => {
-  const { logout } = useAuth();
+const AuthInitBase: FC<WithChildren> = ({ children }) => {
+  const { logout, auth } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isLogged, setIsLogged] = useState(false);
 
   useEffect(() => {
-    EventBus.on(
-      'logout',
-      () => {
-        logout();
-      },
-      { once: true },
-    );
+    const authenticated = !!auth?.accessToken || pathname === '/login';
+    setIsLogged(authenticated);
+    if (!authenticated) {
+      router.push('/login');
+    }
+  }, [auth]);
 
+  useEffect(() => {
+    EventBus.on('logout', logout, { once: true });
     return () => {
       EventBus.off('logout', () => {});
     };
   }, []);
 
-  return <>{children}</>;
+  return isLogged ? children : null;
 };
+
+const AuthInit = ({ children }) => (
+  <AuthProvider>
+    <AuthInitBase>{children}</AuthInitBase>
+  </AuthProvider>
+);
 
 export { AuthProvider, AuthInit, useAuth };

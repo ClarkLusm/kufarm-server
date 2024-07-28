@@ -152,5 +152,13 @@ export class UserService extends BaseService<User> {
         balance: userData.balance,
       };
     }
+    return {
+      dailyIncome: 0,
+      monthlyIncome: 0,
+      hashPower: 0,
+      maxOut: user.maxOut,
+      income: userData.income,
+      balance: userData.balance,
+    };
   }
 }

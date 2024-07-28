@@ -2,9 +2,11 @@ import { DataSource, MoreThan } from 'typeorm';
 import * as moment from 'moment';
 import {
   BadRequestException,
+  NotFoundException,
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   Req,
@@ -97,7 +99,8 @@ export class AccountController {
       pool: 'stratum+tcp://sha256d.kupool.com:443',
       balance: user.balance,
       username: user.username,
-      wallet: user.walletAddress,
+      email: user.email,
+      walletAddress: user.walletAddress,
       referralCommission: user.referralCommission,
       ...miningInfo,
     };
@@ -312,5 +315,40 @@ export class AccountController {
       throw new BadRequestException('Account has verified already');
     }
     await this.userService.updateById(user.id, { emailVerified: true });
+  }
+
+  @Get('invoice/:code')
+  async getInvoice(@Req() req, @Param('code') code: string) {
+    const { sub } = req.user;
+    console.log(sub);
+    
+    const invoice = await this.orderService.getOne(
+      {
+        code,
+        userId: sub,
+        expiredAt: MoreThan(new Date()),
+      },
+      {
+        id: true,
+        code: true,
+        walletAddress: true,
+        amount: true,
+        coin: true,
+        expiredAt: true,
+        status: true,
+        product: {
+          price: true,
+        },
+      },
+      {
+        product: true,
+      },
+    );
+    if (!invoice)
+      throw new NotFoundException('Not found invoice or invoice is expired');
+    invoice['price'] = invoice.product.price;
+    delete invoice.id;
+    delete invoice.product;
+    return invoice;
   }
 }

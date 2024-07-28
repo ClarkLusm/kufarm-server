@@ -113,6 +113,6 @@ TypeORM CLI:
 docker-compose exec web yarn typeorm -- --help
 ```
 
-## Resources
+## Requirements
 
-- https://github.com/jmcdo29/testing-nestjs
+- Node 18

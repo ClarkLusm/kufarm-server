@@ -57,27 +57,23 @@ export class AuthService {
 
     const tokens = await this.generateToken({ ...userData });
     return {
-      statusCode: HttpStatus.OK,
-      message: 'User information',
-      user: {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
         user: userData,
-      },
     };
   }
 
   async generateToken(user: any) {
-    const payload = { email: user.email, id: user.id };
+    const payload = { email: user.email, sub: user.id };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn: '10m',
+      expiresIn: process.env.JWT_EXPIRES_IN,
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: '7d',
+      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
     });
     return {
       accessToken,

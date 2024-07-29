@@ -26,17 +26,21 @@ export class SettingService extends BaseService<Setting> {
   async getExchangeRate() {
     // Check the rate config whether is fixed or not
     const setting = await this.repository.findOneBy({
-      key: Constants.SETTING_EXCHANGE_RATE,
+      key: Constants.SETTING_SYSTEM,
     });
     return setting?.value;
   }
 
-  async convertUsdToBitCo2(usdAmount: number) {
+  async convertUsdToBTCO2(usdAmount: number) {
     const exchangeRate = await this.getExchangeRate();
     if (!exchangeRate) {
       throw new Error('Cannot fetch exchange rate');
     }
-    const { usd: usdRate, token: tokenRate } = exchangeRate;
+    const {
+      exchangeUsd: usdRate,
+      exchangeToken: tokenRate,
+      exchangeFixed: fixed,
+    } = exchangeRate;
     const rate = usdRate / tokenRate; // token to usd
     const tokenBalance = numberToBigInt(
       usdAmount / rate,

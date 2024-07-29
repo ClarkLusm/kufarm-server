@@ -106,25 +106,15 @@ export class SeedService {
   async initialConfiguration() {
     return await this.settingService.create([
       {
-        name: 'Tỉ giá',
-        key: Constants.SETTING_EXCHANGE_RATE,
+        name: 'Cấu hình hệ thống',
+        key: Constants.SETTING_SYSTEM,
         value: {
-          usd: 1,
-          token: 1,
+          incomeRate: 300,
+          withdrawMin: 100,
+          exchangeFixed: true,
+          exchangeUsd: 1,
+          exchangeToken: 1,
         },
-      },
-      {
-        name: 'Đăng ký thành viên',
-        key: Constants.SETTING_NEW_USER_PROMOTION,
-        value: {
-          hashPower: 1,
-          maxOut: 3,
-        },
-      },
-      {
-        name: 'Tỉ lệ lợi nhuận',
-        key: Constants.SETTING_ICOME_RATE,
-        value: 300,
       },
       {
         name: 'Tỉ lệ hoa hồng',

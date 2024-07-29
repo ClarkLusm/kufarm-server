@@ -121,8 +121,8 @@ const Wallets: NextPage = (props) => {
   const onCloseForm = (refreshList?: boolean) => {
     if (refreshList) {
       fetchData();
-      onCloseDrawer();
     }
+    onCloseDrawer();
   };
 
   return (

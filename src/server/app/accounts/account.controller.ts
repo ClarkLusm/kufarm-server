@@ -176,7 +176,7 @@ export class AccountController {
       let priceBigint = orderPrice * Math.pow(10, TOKENS.USDT.decimal);
 
       if (wallet.coin === TOKENS.BTCO2.symbol) {
-        const [btco2Amount] = await this.settingService.convertUsdToBitCo2(
+        const [btco2Amount] = await this.settingService.convertUsdToBTCO2(
           orderPrice,
         );
         priceBigint = btco2Amount;
@@ -239,7 +239,7 @@ export class AccountController {
       const user = await this.userService.getById(sub);
 
       const amountBigInt = numberToBigInt(amount, TOKENS.BTCO2.decimal);
-      const [tokenBalance, rate] = await this.settingService.convertUsdToBitCo2(
+      const [tokenBalance, rate] = await this.settingService.convertUsdToBTCO2(
         userBalance,
       );
       if (tokenBalance < amountBigInt) {

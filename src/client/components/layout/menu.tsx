@@ -47,6 +47,7 @@ const items: MenuItem[] = [
     icon: <SettingOutlined />,
     children: [
       { key: '/wallets', label: 'Ví thanh toán' },
+      { key: '/settings', label: 'Cấu hình hệ thống' },
     ],
   },
 ];

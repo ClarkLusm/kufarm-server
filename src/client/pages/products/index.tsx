@@ -34,31 +34,31 @@ const Products: NextPage = (props) => {
       title: 'Giá',
       dataIndex: 'price',
       key: 'price',
-      render: (data) => Number(data).toLocaleString('vi-VN'),
+      render: (data) => Number(data).toLocaleString('en-EN'),
     },
     {
       title: 'Tốc độ xử lý',
       dataIndex: 'hashPower',
       key: 'hashPower',
-      render: (data) => Number(data).toLocaleString('vi-VN'),
+      render: (data) => Number(data).toLocaleString('en-EN'),
     },
     {
       title: 'Lợi nhuận ngày',
       dataIndex: 'dailyIncome',
       key: 'dailyIncome',
-      render: (data) => Number(data).toLocaleString('vi-VN'),
+      render: (data) => Number(data).toLocaleString('en-EN'),
     },
     {
       title: 'Lợi nhuận tháng',
       dataIndex: 'monthlyIncome',
       key: 'monthlyIncome',
-      render: (data) => Number(data).toLocaleString('vi-VN'),
+      render: (data) => Number(data).toLocaleString('en-EN'),
     },
     {
       title: 'Tối đa',
       dataIndex: 'maxOut',
       key: 'maxOut',
-      render: (data) => Number(data).toLocaleString('vi-VN'),
+      render: (data) => Number(data).toLocaleString('en-EN'),
     },
     {
       title: 'Trạng thái',
@@ -110,8 +110,8 @@ const Products: NextPage = (props) => {
   const onCloseForm = (refreshList?: boolean) => {
     if (refreshList) {
       fetchData();
-      onCloseDrawer();
     }
+    onCloseDrawer();
   };
 
   return (
@@ -129,7 +129,7 @@ const Products: NextPage = (props) => {
       <Drawer
         closable
         destroyOnClose
-        title={<p>{!item ? 'Thêm mới ví' : 'Cập nhật thông tin ví'}</p>}
+        title={<p>{!item ? 'Thêm mới sản phẩm' : 'Cập nhật thông tin sản phẩm'}</p>}
         placement="right"
         open={open}
         onClose={onCloseDrawer}

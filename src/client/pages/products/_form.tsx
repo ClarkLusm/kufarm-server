@@ -86,7 +86,7 @@ export const ProductForm = (props: FormProps) => {
             />
           </Form.Item>
           <Form.Item
-            label="Tốc độ băm"
+            label="Công suất băm"
             required
             validateStatus={!!errors.hashPower ? 'error' : 'validating'}
             help={errors.hashPower?.message}
@@ -98,7 +98,7 @@ export const ProductForm = (props: FormProps) => {
             />
           </Form.Item>
           <Form.Item
-            label="Lợi nhận ngày"
+            label="Lợi nhuận ngày"
             required
             validateStatus={!!errors.dailyIncome ? 'error' : 'validating'}
             help={errors.dailyIncome?.message}

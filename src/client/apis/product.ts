@@ -12,3 +12,7 @@ export const detailProduct = (id: string) => {
 export const createProduct = (data: IProduct) => {
   return axios.post('/products', data);
 };
+
+export const updateProduct = (id: string, data: IProduct) => {
+  return axios.put(`/products/${id}`, data);
+};

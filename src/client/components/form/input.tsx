@@ -1,6 +1,8 @@
 import React from 'react';
 import { Form, Input } from 'antd';
 
+import { strToNumberFormat } from '../../common/helpers';
+
 export const InputField = (props) => {
   const { field, form, label, placeholder, required } = props,
     { name, value, onChange, onBlur } = field,
@@ -32,3 +34,17 @@ export const InputField = (props) => {
     </Form.Item>
   );
 };
+
+export const NumberInput = ({ onChange, onBlur, ...rest }) => {
+  return (
+    <Input
+      {...rest}
+      onChange={(e) => onChange(strToNumberFormat(e.target.value))}
+      onBlur={(e) => {
+        onChange(strToNumberFormat(e.target.value, true));
+        onBlur();
+      }}
+    />
+  );
+};
+

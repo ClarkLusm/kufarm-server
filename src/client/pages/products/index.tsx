@@ -1,22 +1,29 @@
-import React from 'react';
-import {
-  GetServerSideProps,
-  InferGetServerSidePropsType,
-  NextPage,
-} from 'next';
-import { Table, Switch } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { NextPage } from 'next';
+import { Table, Switch, Dropdown, Button, Drawer } from 'antd';
+import { EditOutlined, MoreOutlined } from '@ant-design/icons';
+import { PageHeader } from '@ant-design/pro-components';
 
+import { Product } from '../../common/types';
 import { listProduct } from '../../apis';
+import { ProductForm } from './_form';
 
-export const getServerSideProps = (async () => {
-  const data = await listProduct();
-  return { props: { products: data.data, total: data.total } };
-}) satisfies GetServerSideProps<{ products: []; total: number }>;
+const Products: NextPage = (props) => {
+  const [products, setProducts] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [open, setOpen] = React.useState<boolean>(false);
+  const [item, setItem] = useState<Product | null>(null);
 
-const Products: NextPage = ({
-  products,
-  total,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    const { data, total } = await listProduct();
+    setProducts(data);
+    setTotal(total);
+  }
+
   const columns = [
     {
       title: 'Tên sản phẩm',
@@ -66,12 +73,73 @@ const Products: NextPage = ({
         />
       ),
     },
+    {
+      key: 'action',
+      render: (_, record) => (
+        <Dropdown
+          placement="bottomRight"
+          menu={{
+            items: [
+              {
+                label: (
+                  <span onClick={() => onEdit(record)}>
+                    <EditOutlined /> Edit
+                  </span>
+                ),
+                key: '0',
+              },
+            ],
+          }}
+        >
+          <MoreOutlined />
+        </Dropdown>
+      ),
+    },
   ];
+
+  const onCloseDrawer = () => {
+    setItem(null);
+    setOpen(false);
+  };
+
+  const onEdit = (record) => {
+    setItem(record);
+    setOpen(true);
+  };
+
+  const onCloseForm = (refreshList?: boolean) => {
+    if (refreshList) {
+      fetchData();
+      onCloseDrawer();
+    }
+  };
 
   return (
     <div>
-      <h1>Danh sách sản phẩm</h1>
+      <PageHeader
+        ghost={false}
+        title="Danh sách sản phẩm"
+        extra={[
+          <Button key="1" type="primary" onClick={() => setOpen(true)}>
+            Thêm mới
+          </Button>,
+        ]}
+      />
       <Table dataSource={products} columns={columns} />
+      <Drawer
+        closable
+        destroyOnClose
+        title={<p>{!item ? 'Thêm mới ví' : 'Cập nhật thông tin ví'}</p>}
+        placement="right"
+        open={open}
+        onClose={onCloseDrawer}
+      >
+        <ProductForm
+          key={item?.id}
+          defaultValues={item}
+          onClose={onCloseForm}
+        />
+      </Drawer>
     </div>
   );
 };

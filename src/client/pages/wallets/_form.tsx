@@ -7,15 +7,15 @@ import {
 } from '@ant-design/icons';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import router from 'next/router';
+import { useState } from 'react';
 
 import { createPaymentWallet, updatePaymentWallet } from '../../apis';
 import { PaymentWallet } from '../../common/types';
 import { schema } from './_schema';
-import { useState } from 'react';
 
 type FormProps = {
   defaultValues?: PaymentWallet | null;
+  onClose: Function;
 };
 
 export const WalletForm = (props: FormProps) => {
@@ -32,8 +32,6 @@ export const WalletForm = (props: FormProps) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const onSubmit: SubmitHandler<PaymentWallet> = async (data) => {
-    console.log(data);
-    
     try {
       setLoading(true);
       const walletId = props.defaultValues?.id;
@@ -44,12 +42,13 @@ export const WalletForm = (props: FormProps) => {
       }
       api.success({
         message: `Thành công`,
-        description: data?.id
+        description: walletId
           ? 'Cập nhật thông tin ví thành công'
           : 'Thêm mới ví thành công',
         placement: 'topRight',
         icon: <CheckCircleFilled style={{ color: '#52c41a' }} />,
       });
+      props.onClose(true);
     } catch (error) {
       api.error({
         message: `Thất bại`,
@@ -182,7 +181,7 @@ export const WalletForm = (props: FormProps) => {
           <div className="grid grid-cols-2 gap-8">
             <Button
               icon={<CloseCircleOutlined />}
-              onClick={() => router.push('/wallets')}
+              onClick={() => props.onClose(false)}
             >
               Hủy
             </Button>

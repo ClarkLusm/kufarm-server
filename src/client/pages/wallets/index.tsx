@@ -2,15 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
 import { Button, Switch, Table, Drawer, Dropdown } from 'antd';
 import { PageHeader } from '@ant-design/pro-components';
-import ArrowLeftOutlined from '@ant-design/icons/lib/icons/ArrowLeftOutlined';
-import ArrowRightOutlined from '@ant-design/icons/lib/icons/ArrowRightOutlined';
+import {
+  EditOutlined,
+  MoreOutlined,
+  ArrowLeftOutlined,
+  ArrowRightOutlined,
+} from '@ant-design/icons';
 
 import { listPaymentWallet } from '../../apis/payment-wallet';
 import { NETWORKS } from '../../common/constants/networks';
 import { shortAddress } from '../../common/helpers';
-import { EditOutlined, MoreOutlined } from '@ant-design/icons';
-import { WalletForm } from './_form';
 import { PaymentWallet } from '../../common/types';
+import { WalletForm } from './_form';
 
 const Wallets: NextPage = (props) => {
   const [wallets, setWallets] = useState([]);
@@ -89,7 +92,11 @@ const Wallets: NextPage = (props) => {
           menu={{
             items: [
               {
-                label: <span onClick={() => onEdit(record)}><EditOutlined /> Edit</span>,
+                label: (
+                  <span onClick={() => onEdit(record)}>
+                    <EditOutlined /> Edit
+                  </span>
+                ),
                 key: '0',
               },
             ],
@@ -104,11 +111,18 @@ const Wallets: NextPage = (props) => {
   const onCloseDrawer = () => {
     setItem(null);
     setOpen(false);
-  }
+  };
 
   const onEdit = (record) => {
     setItem(record);
     setOpen(true);
+  };
+
+  const onCloseForm = (refreshList?: boolean) => {
+    if (refreshList) {
+      fetchData();
+      onCloseDrawer();
+    }
   };
 
   return (
@@ -131,7 +145,7 @@ const Wallets: NextPage = (props) => {
         open={open}
         onClose={onCloseDrawer}
       >
-        <WalletForm key={item?.id} defaultValues={item} />
+        <WalletForm key={item?.id} defaultValues={item} onClose={onCloseForm} />
       </Drawer>
     </div>
   );

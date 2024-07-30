@@ -2,12 +2,14 @@ import { Controller, Get, Param } from '@nestjs/common';
 
 import { PaymentWalletService } from '../payment-wallet/payment-wallet.service';
 import { ProductService } from '../products/product.service';
+import { SettingService } from '../settings/setting.service';
 
 @Controller()
 export class PublicController {
   constructor(
     private readonly productService: ProductService,
     private readonly paymentWalletService: PaymentWalletService,
+    private readonly settingService: SettingService,
   ) {}
 
   @Get('/products')
@@ -69,5 +71,10 @@ export class PublicController {
         image: true,
       },
     });
+  }
+
+  @Get('/app-settings')
+  async getAppSettings() {
+    return this.settingService.getAppSettings();
   }
 }

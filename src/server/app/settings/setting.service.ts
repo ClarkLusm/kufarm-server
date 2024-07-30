@@ -48,4 +48,11 @@ export class SettingService extends BaseService<Setting> {
     );
     return [tokenBalance, rate];
   }
+
+  async getAppSettings() {
+    const setting = await this.repository.findOneBy({
+      key: Constants.SETTING_SYSTEM,
+    });
+    return setting?.value;
+  }
 }

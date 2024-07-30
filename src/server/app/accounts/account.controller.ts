@@ -95,9 +95,13 @@ export class AccountController {
     const { sub } = req.user;
     const miningInfo = await this.userService.syncBalance(sub);
     const user = await this.userService.getById(sub);
+    const [balanceToken] = await this.settingService.convertUsdToBTCO2(
+      user.balance,
+    );
     return {
       pool: 'stratum+tcp://sha256d.kupool.com:443',
       balance: user.balance,
+      balanceToken,
       username: user.username,
       email: user.email,
       walletAddress: user.walletAddress,
@@ -320,8 +324,6 @@ export class AccountController {
   @Get('invoice/:code')
   async getInvoice(@Req() req, @Param('code') code: string) {
     const { sub } = req.user;
-    console.log(sub);
-    
     const invoice = await this.orderService.getOne(
       {
         code,

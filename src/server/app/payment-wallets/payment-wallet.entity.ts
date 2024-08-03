@@ -29,9 +29,6 @@ export class PaymentWallet {
   secret: string;
 
   @Column({ nullable: false })
-  path: string;
-
-  @Column({ nullable: false })
   coin: string;
 
   @Column()

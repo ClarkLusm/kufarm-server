@@ -11,6 +11,7 @@ import {
 import { Order } from '../orders/order.entity';
 import { UserProduct } from '../user-products/user-product.entity';
 import { Transaction } from '../transactions/transaction.entity';
+import { ReferralCommission } from '../referral-commissions/referral-commission.entity';
 
 @Entity()
 export class User {
@@ -57,6 +58,9 @@ export class User {
   @Column({ name: 'referral_commission', type: 'numeric', comment: 'USD' })
   referralCommission: number;
 
+  @Column({ name: 'count_f1_referral' })
+  countF1Referral?: number;
+
   @Column({ name: 'email_verified' })
   emailVerified?: boolean;
 
@@ -83,4 +87,10 @@ export class User {
 
   @OneToMany(() => Transaction, (transaction) => transaction.user)
   transactions: Transaction[];
+
+  @OneToMany(() => ReferralCommission, (ref) => ref.user)
+  referralCommissions: ReferralCommission[];
+
+  @OneToMany(() => ReferralCommission, (ref) => ref.receiver)
+  receiverCommissions: ReferralCommission[];
 }

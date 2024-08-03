@@ -47,7 +47,7 @@ export class JwtAdminGuard implements CanActivate {
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
         throw new HttpException(
-          `Срок действия access токена истек`,
+          `Access token expired`,
           HttpStatus.UNAUTHORIZED,
         );
       }

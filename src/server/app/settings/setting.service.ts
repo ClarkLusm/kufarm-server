@@ -55,4 +55,11 @@ export class SettingService extends BaseService<Setting> {
     });
     return setting?.value;
   }
+
+  async getReferralIncomeSettings() {
+    const setting = await this.repository.findOneBy({
+      key: Constants.SETTING_REFERRAL_INCOME,
+    });
+    return setting?.value;
+  }
 }

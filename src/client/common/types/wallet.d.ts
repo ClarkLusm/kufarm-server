@@ -9,3 +9,8 @@ export type PaymentWallet = {
   path: string;
   published: boolean;
 };
+
+export type Network = {
+  chainId: number;
+  name: string;
+}

@@ -40,7 +40,7 @@ const Login: NextPage = (props) => {
     login(values.username, values.password)
       .then((res) => {
         saveAuth(res.data.user);
-        const redirectUrl = searchParams.get('redirect_url');
+        const redirectUrl = searchParams.get('redirect');
         if (redirectUrl) {
           navigation.push(redirectUrl);
         } else {

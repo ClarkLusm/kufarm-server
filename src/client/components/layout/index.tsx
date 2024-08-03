@@ -10,7 +10,6 @@ const { Header, Content, Sider } = BaseLayout;
 
 export const Layout = ({ children }) => {
   const pathname = usePathname();
-  const paths = pathname?.split('/') || [];
   const isPublicRoute = pathname === '/login';
   const auth = useAuth();
   const [collapsed, setCollapsed] = useState(false);

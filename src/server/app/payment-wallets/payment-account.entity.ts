@@ -23,9 +23,6 @@ export class PaymentAccount {
   @Column()
   balance?: number;
 
-  @Column()
-  path: string;
-
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

@@ -4,7 +4,7 @@ import { Card, InputNumber, Space, Spin, Button, Switch } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 
 import { listSetting, updateSetting } from '../../apis';
-import * as Constants from '../../../server/common/constants';
+import * as Constants from '../../common/constants';
 
 const Configs: NextPage = (props) => {
   const [settings, setSettings] = useState([]);
@@ -31,9 +31,6 @@ const Configs: NextPage = (props) => {
   }
 
   const referralIncome = getSettingByKey(Constants.SETTING_REFERRAL_INCOME);
-  const referralIncomeCondition = getSettingByKey(
-    Constants.SETTING_REFERRAL_INCOME_CONDITION,
-  );
   const systemConfig = getSettingByKey(Constants.SETTING_SYSTEM);
 
   const onChangeSettings = (key: string, value: any) => {
@@ -51,30 +48,12 @@ const Configs: NextPage = (props) => {
     }
   };
 
-  const CardBase = ({ children, settingKey, title }) => {
-    return (
-      <Card
-        title={title}
-        className="mb-4"
-        style={{ marginBottom: 16 }}
-        bordered={false}
-        extra={
-          <Button type="primary" onClick={() => onSave(settingKey)}>
-            <SaveOutlined />
-            Lưu
-          </Button>
-        }
-      >
-        {children}
-      </Card>
-    );
-  };
-
   return (
     <Spin spinning={loading}>
       <CardBase
         title={'Cấu hình hệ thống'}
         settingKey={Constants.SETTING_SYSTEM}
+        onSave={onSave}
       >
         {typeof systemConfig !== 'undefined' && (
           <>
@@ -104,6 +83,19 @@ const Configs: NextPage = (props) => {
                 }
               />
             </div>
+            <div style={{ marginBottom: 16 }}>
+              <InputNumber
+                addonBefore="Phí rút BTCO2"
+                addonAfter="%"
+                value={systemConfig?.withdrawFeePercent}
+                onChange={(value) =>
+                  onChangeSettings(Constants.SETTING_SYSTEM, {
+                    ...systemConfig,
+                    withdrawFeePercent: value,
+                  })
+                }
+              />
+            </div>
             <div>
               <Switch
                 checkedChildren="Cố định tỉ giá"
@@ -128,7 +120,7 @@ const Configs: NextPage = (props) => {
                         exchangeUsd: value,
                       })
                     }
-                    disabled={!systemConfig.fixed}
+                    disabled={!systemConfig.exchangeFixed}
                   />
                   <InputNumber
                     addonBefore="BTCO2"
@@ -140,7 +132,7 @@ const Configs: NextPage = (props) => {
                         exchangeToken: value,
                       })
                     }
-                    disabled={!systemConfig.fixed}
+                    disabled={!systemConfig.exchangeFixed}
                   />
                 </Space.Compact>
               </Space>
@@ -148,50 +140,76 @@ const Configs: NextPage = (props) => {
           </>
         )}
       </CardBase>
-      <CardBase
-        title="Tỉ lệ hoa hồng"
-        settingKey={Constants.SETTING_REFERRAL_INCOME}
-      >
-        {typeof referralIncome !== 'undefined' &&
-          Object.entries(referralIncome).map((s) => (
-            <Card.Grid style={{ width: '20%' }}>
-              <InputNumber
-                addonBefore={s[0]}
-                value={s?.[1]?.toString()}
-                onChange={(value) =>
-                  onChangeSettings(Constants.SETTING_REFERRAL_INCOME, {
-                    ...referralIncome,
-                    [s[0]]: value,
-                  })
-                }
-              />
-            </Card.Grid>
-          ))}
-      </CardBase>
-      <CardBase
-        title={'Điều kiện nhận hoa hồng'}
-        settingKey={Constants.SETTING_REFERRAL_INCOME_CONDITION}
-      >
-        {typeof referralIncomeCondition !== 'undefined' &&
-          Object.entries(referralIncomeCondition).map((s) => (
-            <Card.Grid style={{ width: '20%' }}>
-              <InputNumber
-                addonBefore={s[0]}
-                value={s?.[1]?.toString()}
-                onChange={(value) =>
-                  onChangeSettings(
-                    Constants.SETTING_REFERRAL_INCOME_CONDITION,
-                    {
-                      ...referralIncomeCondition,
-                      [s[0]]: value,
-                    },
-                  )
-                }
-              />
-            </Card.Grid>
-          ))}
-      </CardBase>
+      {typeof referralIncome !== 'undefined' && (
+        <>
+          <CardBase
+            title="Tỉ lệ hoa hồng"
+            settingKey={Constants.SETTING_REFERRAL_INCOME}
+            onSave={onSave}
+          >
+            {Object.entries(referralIncome.commission).map((s) => (
+              <Card.Grid key={s[0]} style={{ width: '20%' }}>
+                <InputNumber
+                  addonBefore={s[0]}
+                  value={s?.[1]?.toString()}
+                  onChange={(value) =>
+                    onChangeSettings(Constants.SETTING_REFERRAL_INCOME, {
+                      ...referralIncome,
+                      commission: {
+                        ...referralIncome.commission,
+                        [s[0]]: value,
+                      },
+                    })
+                  }
+                />
+              </Card.Grid>
+            ))}
+          </CardBase>
+          <CardBase
+            title={'Điều kiện nhận hoa hồng'}
+            settingKey={Constants.SETTING_REFERRAL_INCOME}
+            onSave={onSave}
+          >
+            {Object.entries(referralIncome.condition).map((s) => (
+              <Card.Grid key={s[0]} style={{ width: '20%' }}>
+                <InputNumber
+                  addonBefore={s[0]}
+                  value={s?.[1]?.toString()}
+                  onChange={(value) =>
+                    onChangeSettings(Constants.SETTING_REFERRAL_INCOME, {
+                      ...referralIncome,
+                      condition: {
+                        ...referralIncome.condition,
+                        [s[0]]: value,
+                      },
+                    })
+                  }
+                />
+              </Card.Grid>
+            ))}
+          </CardBase>
+        </>
+      )}
     </Spin>
+  );
+};
+
+const CardBase = ({ children, settingKey, title, onSave }) => {
+  return (
+    <Card
+      title={title}
+      className="mb-4"
+      style={{ marginBottom: 16 }}
+      bordered={false}
+      extra={
+        <Button type="primary" onClick={() => onSave(settingKey)}>
+          <SaveOutlined />
+          Lưu
+        </Button>
+      }
+    >
+      {children}
+    </Card>
   );
 };
 

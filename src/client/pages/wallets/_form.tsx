@@ -10,12 +10,13 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useState } from 'react';
 
 import { createPaymentWallet, updatePaymentWallet } from '../../apis';
-import { PaymentWallet } from '../../common/types';
+import { Network, PaymentWallet } from '../../common/types';
 import { schema } from './_schema';
 
 type FormProps = {
   defaultValues?: PaymentWallet | null;
   onClose: Function;
+  networks: Network[];
 };
 
 export const WalletForm = (props: FormProps) => {
@@ -38,7 +39,7 @@ export const WalletForm = (props: FormProps) => {
       if (walletId) {
         await updatePaymentWallet(walletId, data);
       } else {
-        await createPaymentWallet(data);
+        await createPaymentWallet({ ...data, isOut: data?.isOut || false });
       }
       api.success({
         message: `Thành công`,
@@ -95,8 +96,11 @@ export const WalletForm = (props: FormProps) => {
               control={control}
               render={({ field }) => (
                 <Select {...field}>
-                  <Select.Option value={56}>Binance Smart Chain</Select.Option>
-                  <Select.Option value={1}>Etherium</Select.Option>
+                  {props.networks.map((n) => (
+                    <Select.Option key={n.chainId} value={n.chainId}>
+                      {n.name}
+                    </Select.Option>
+                  ))}
                 </Select>
               )}
             />

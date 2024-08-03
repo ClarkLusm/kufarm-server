@@ -13,7 +13,7 @@ export class CreateOrder1719971652894 implements MigrationInterface {
         "product_id" UUID,
         "quantity" SMALLINT,
         "amount" NUMERIC(38),
-        "coin" VARCHAR NOT NULL,
+        "coin" VARCHAR(10) NOT NULL,
         "status" SMALLINT DEFAULT 0,
         "expired_at" TIMESTAMP,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),

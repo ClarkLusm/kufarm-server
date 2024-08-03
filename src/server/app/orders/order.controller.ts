@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Param, ParseUUIDPipe, UseGuards, Req } from '@nestjs/common';
 import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { JwtAdminGuard } from '../admin-auth/jwt/jwt-auth.guard';
 import { OrderService } from './order.service';

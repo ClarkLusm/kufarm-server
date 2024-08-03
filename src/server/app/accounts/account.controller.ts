@@ -1,5 +1,5 @@
 import { DataSource, MoreThan } from 'typeorm';
-import * as moment from 'moment';
+import moment from 'moment';
 import {
   BadRequestException,
   NotFoundException,
@@ -16,7 +16,7 @@ import {
 import { EthersService } from '../../libs/ethers/ethers.service';
 import { OrderStatusEnum, TransactStatusEnum } from '../../common/enums';
 import { UserProductStatusEnum } from '../../common/enums/user-product.enum';
-import { PaymentWalletService } from '../payment-wallet/payment-wallet.service';
+import { PaymentWalletService } from '../payment-wallets/payment-wallet.service';
 import { UserProductService } from '../user-products/user-product.service';
 import { TransactionService } from '../transactions/transaction.service';
 import { UserProduct } from '../user-products/user-product.entity';
@@ -26,6 +26,11 @@ import { UserService } from '../users/user.service';
 import { Order } from '../orders/order.entity';
 import { User } from '../users/user.entity';
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
+import { TOKENS } from '../../common/constants';
+import { numberToBigInt } from '../../common/helpers/number.utils';
+import { SettingService } from '../settings/setting.service';
+import { Transaction } from '../transactions/transaction.entity';
+import { ReferralCommissionService } from '../referral-commissions/referral-commission.service';
 import {
   CreateOrderDto,
   RequestWithdrawDto,
@@ -33,11 +38,6 @@ import {
   SearchReferralDto,
   VerifyAccountDto,
 } from './dto';
-import { TOKENS } from '../../common/constants';
-import { numberToBigInt } from '../../common/helpers/number.utils';
-import { SettingService } from '../settings/setting.service';
-import { Transaction } from '../transactions/transaction.entity';
-import { PaymentAccount } from '../payment-wallet/payment-account.entity';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -51,6 +51,7 @@ export class AccountController {
     private readonly transactionService: TransactionService,
     private readonly orderService: OrderService,
     private readonly settingService: SettingService,
+    private readonly referralCommissionService: ReferralCommissionService,
     private readonly ethersService: EthersService,
   ) {}
 
@@ -113,10 +114,9 @@ export class AccountController {
   @Get('/my-orders')
   async getOrderHistory(@Req() req, @Query() query: SearchOrderDto) {
     const { sub } = req.user;
-    const user = await this.userService.getOne({ uid: sub }, { id: true });
     const [data, total] = await this.orderService.getAll({
       ...query,
-      userId: user.id,
+      userId: sub,
     });
     return { data, total };
   }
@@ -198,38 +198,35 @@ export class AccountController {
       });
     }
 
-    this.ethersService.onBalanceChange(
-      wallet,
-      order.walletAddress,
-      async (res) => {
-        //Just update transaciton when amount equal
-        if (
-          res.address === order.walletAddress &&
-          BigInt(order.amount) === res.amount
-        ) {
-          // Sync before add new user-product
-          await this.userService.syncBalance(sub);
-          // TODO: push event to FE
-          this.dataSource.transaction(async (tx) => {
-            await tx.getRepository(Order).update(order.id, {
-              status: OrderStatusEnum.Success,
-            });
-            await tx.getRepository(UserProduct).save({
-              userId: sub,
-              productId,
-              maxOut: product.maxOut,
-              hashPower: product.hashPower,
-              dailyIncome: product.dailyIncome,
-              monthlyIncome: product.monthlyIncome,
-              status: UserProductStatusEnum.Activated,
-            });
-            await tx.getRepository(User).update(sub, {
-              maxOut: user.maxOut + product.maxOut,
-            });
+    this.ethersService.subBalanceChange(order.walletAddress, async (res) => {
+      //Just update transaciton when amount equal
+      if (
+        res.address === order.walletAddress
+        //  &&
+        // BigInt(order.amount) === res.amount
+      ) {
+        // Sync before add new user-product
+        await this.userService.syncBalance(sub);
+        // TODO: push event to FE
+        this.dataSource.transaction(async (tx) => {
+          await tx.getRepository(Order).update(order.id, {
+            status: OrderStatusEnum.Success,
           });
-        }
-      },
-    );
+          await tx.getRepository(UserProduct).save({
+            userId: sub,
+            productId,
+            maxOut: product.maxOut,
+            hashPower: product.hashPower,
+            dailyIncome: product.dailyIncome,
+            monthlyIncome: product.monthlyIncome,
+            status: UserProductStatusEnum.Activated,
+          });
+          await tx.getRepository(User).update(sub, {
+            maxOut: user.maxOut + product.maxOut,
+          });
+        });
+      }
+    });
 
     return order;
   }
@@ -262,6 +259,8 @@ export class AccountController {
         userId: user.id,
         paymentWalletId: accountPayout.paymentWalletId,
         paymentAccountId: accountPayout.id,
+        userAddress: user.walletAddress,
+        walletBalance: accountPayout.balance,
         amount: amountBigInt,
         amountUsd,
         exchangeRate: rate,
@@ -270,16 +269,18 @@ export class AccountController {
       });
 
       try {
-        const txHash = await this.ethersService.transferToken(
-          accountPayout.paymentWallet,
+        const txHash = await this.ethersService.sendBTCO2Token(
+          accountPayout.paymentWallet.secret,
           user.walletAddress,
-          BigInt(amountBigInt),
+          amount.toString(),
         );
         // fetch account balance again
-        const accountBalance = await this.ethersService.getAccountBalance(
-          accountPayout.paymentWallet.chainId,
-          accountPayout.accountAddress,
-        );
+        const accountBalance =
+          await this.paymentWalletService.syncAccountBalance(
+            accountPayout.id,
+            accountPayout.accountAddress,
+            accountPayout.paymentWallet.coin,
+          );
 
         await this.dataSource.transaction(async (tx) => {
           await tx.getRepository(User).update(user.id, {
@@ -288,14 +289,13 @@ export class AccountController {
           await tx.getRepository(Transaction).update(transaction.id, {
             status: TransactStatusEnum.Success,
             txHash: txHash.hash,
-            walletBalance: Number(accountBalance),
+            walletBalance: accountBalance ? accountBalance.balance : null,
             userAddress: txHash.to,
           });
-          await tx.getRepository(PaymentAccount).update(accountPayout.id, {
-            balance: Number(accountBalance),
-          });
         });
+        this.referralCommissionService.addReferralCommission(sub, amount);
       } catch (error) {
+        console.error(error);
         await this.dataSource
           .getRepository(Transaction)
           .update(transaction.id, { status: TransactStatusEnum.Error });
@@ -352,5 +352,26 @@ export class AccountController {
     delete invoice.id;
     delete invoice.product;
     return invoice;
+  }
+
+  @Get('/my-referrals')
+  async getReferrals(@Req() req) {
+    const { sub } = req.user;
+    const [data, total] = await this.referralCommissionService.getAll(
+      {
+        receiverId: sub,
+      },
+      {
+        value: true,
+        coin: true,
+        user: {
+          email: true,
+        },
+      },
+      {
+        user: true,
+      },
+    );
+    return { data, total };
   }
 }

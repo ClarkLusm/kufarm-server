@@ -9,8 +9,10 @@ import {
   ArrowRightOutlined,
 } from '@ant-design/icons';
 
-import { listPaymentWallet } from '../../apis/payment-wallet';
-import { NETWORKS } from '../../common/constants/networks';
+import {
+  listPaymentWallet,
+  listSupportedNetworks,
+} from '../../apis/payment-wallet';
 import { shortAddress } from '../../common/helpers';
 import { PaymentWallet } from '../../common/types';
 import { WalletForm } from './_form';
@@ -18,6 +20,7 @@ import { WalletForm } from './_form';
 const Wallets: NextPage = (props) => {
   const [wallets, setWallets] = useState([]);
   const [total, setTotal] = useState(0);
+  const [networks, setNetworks] = useState({});
   const [open, setOpen] = React.useState<boolean>(false);
   const [item, setItem] = useState<PaymentWallet | null>(null);
 
@@ -26,9 +29,18 @@ const Wallets: NextPage = (props) => {
   }, []);
 
   async function fetchData() {
-    const { data, total } = await listPaymentWallet();
-    setWallets(data);
-    setTotal(total);
+    try {
+      const [walletRes, networks] = await Promise.all([
+        listPaymentWallet(),
+        listSupportedNetworks(),
+      ]);
+      const { data, total } = walletRes;
+      setWallets(data);
+      setTotal(total);
+      setNetworks(networks);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   const columns = [
@@ -69,7 +81,7 @@ const Wallets: NextPage = (props) => {
       title: 'Mạng',
       dataIndex: 'chainId',
       key: 'chainId',
-      render: (data) => NETWORKS?.[data]?.name,
+      render: (data) => networks?.[data]?.name,
     },
     {
       title: 'Trạng thái',
@@ -145,7 +157,12 @@ const Wallets: NextPage = (props) => {
         open={open}
         onClose={onCloseDrawer}
       >
-        <WalletForm key={item?.id} defaultValues={item} onClose={onCloseForm} />
+        <WalletForm
+          key={item?.id}
+          networks={Object.values(networks)}
+          defaultValues={item}
+          onClose={onCloseForm}
+        />
       </Drawer>
     </div>
   );

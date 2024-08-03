@@ -8,8 +8,8 @@ import {
   Not,
   Repository,
 } from 'typeorm';
-import { ethers } from 'ethers';
 
+import { EthersService } from '../../libs/ethers/ethers.service';
 import { BaseService } from '../../common/base/base.service';
 import { OrderStatusEnum } from '../../common/enums';
 import { Order } from '../orders/order.entity';
@@ -22,8 +22,25 @@ export class PaymentWalletService extends BaseService<PaymentWallet> {
     @InjectRepository(PaymentWallet)
     public repository: Repository<PaymentWallet>,
     private dataSource: DataSource,
+    private ethersService: EthersService,
   ) {
     super(repository);
+  }
+
+  async createWallet(data: PaymentWallet) {
+    const accountBalance = await this.ethersService.getBalance(
+      data.walletAddress,
+      data.coin,
+    );
+    return this.dataSource.transaction(async (tx) => {
+      const wallet = await tx.getRepository(PaymentWallet).save(data);
+      await tx.getRepository(PaymentAccount).save({
+        paymentWalletId: wallet.id,
+        accountAddress: wallet.walletAddress,
+        balance: Number(accountBalance),
+        coin: wallet.coin,
+      });
+    });
   }
 
   async getAvaiableAccount(wallet: PaymentWallet) {
@@ -47,49 +64,20 @@ export class PaymentWalletService extends BaseService<PaymentWallet> {
           paymentWalletId: wallet.id,
           accountAddress: Not(In(busyAddresses)),
         },
-        order: {
-          path: 'DESC',
-        },
       });
 
-    if (account) return account.accountAddress;
-
-    const lastAccount = await this.dataSource
-      .getRepository(PaymentAccount)
-      .findOne({
-        select: {
-          path: true,
-        },
-        where: {
-          paymentWalletId: wallet.id,
-        },
-        order: {
-          path: 'DESC',
-        },
-      });
-
-    const nextPath = lastAccount ? Number(lastAccount.path) + 1 : 1;
-    const accountAddress = await this.genWalletAccount(wallet, nextPath);
-    // Save new account
-    if (accountAddress) {
-      const newAccount = new PaymentAccount();
-      newAccount.paymentWalletId = wallet.id;
-      newAccount.accountAddress = accountAddress;
-      newAccount.path = nextPath.toString();
-      await this.dataSource.getRepository(PaymentAccount).save(newAccount);
-    }
-    return accountAddress;
+    return account?.accountAddress;
   }
 
-  async genWalletAccount(wallet: PaymentWallet, index: number) {
-    const HDWallet = ethers.HDNodeWallet.fromPhrase(
-      wallet.secret,
-      null,
-      wallet.path,
-    );
-    const childAccount = HDWallet.derivePath(`${index}`);
-    return childAccount.address;
-  }
+  // async genWalletAccount(wallet: PaymentWallet, index: number) {
+  //   const HDWallet = ethers.HDNodeWallet.fromPhrase(
+  //     wallet.secret,
+  //     null,
+  //     wallet.path,
+  //   );
+  //   const childAccount = HDWallet.derivePath(`${index}`);
+  //   return childAccount.address;
+  // }
 
   async getAccountPayout(minBalance: number) {
     return this.dataSource
@@ -116,5 +104,26 @@ export class PaymentWalletService extends BaseService<PaymentWallet> {
 
   async getAndCountAccounts(query: FindManyOptions) {
     return this.dataSource.getRepository(PaymentAccount).findAndCount(query);
+  }
+
+  async syncAccountBalance(
+    paymentAccountId: string,
+    address: string,
+    coin: string,
+  ) {
+    try {
+      const accountReBalance = await this.ethersService.getBalance(
+        address,
+        coin,
+      );
+      await this.dataSource
+        .getRepository(PaymentAccount)
+        .update(paymentAccountId, {
+          balance: Number(accountReBalance),
+        });
+      return accountReBalance;
+    } catch (error) {
+      console.error('account/withdraw::Cannot fetch account balance');
+    }
   }
 }

@@ -48,7 +48,7 @@ export class AdminAuthService {
   async tokenSession(userData: any) {
     if (!userData)
       throw new UnauthorizedException({
-        message: '',
+        message: 'Token invalid',
       });
 
     const tokens = await this.generateToken({ ...userData });
@@ -68,12 +68,12 @@ export class AdminAuthService {
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn: '10m',
+      expiresIn: process.env.JWT_EXPIRES_IN,
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: '60d',
+      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
     });
     return {
       accessToken,

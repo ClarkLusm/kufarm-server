@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 import { User } from '../users/user.entity';
-import { PaymentAccount } from '../payment-wallet/payment-account.entity';
+import { PaymentAccount } from '../payment-wallets/payment-account.entity';
 
 @Entity({ name: 'transaction' })
 export class Transaction {

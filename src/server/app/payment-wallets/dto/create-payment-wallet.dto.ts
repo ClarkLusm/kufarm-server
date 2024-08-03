@@ -17,9 +17,6 @@ export class CreatePaymentWalletDto {
   secret: string;
 
   @IsNotEmpty()
-  path: string;
-
-  @IsNotEmpty()
   coin: string;
 
   image?: string;

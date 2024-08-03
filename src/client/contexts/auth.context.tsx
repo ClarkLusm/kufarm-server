@@ -10,7 +10,8 @@ import React, {
 import { EventBus } from '../common/event-bus';
 import { IAuth } from '../common/interfaces/auth.interface';
 import * as AuthHelper from '../common/helpers/auth.helper';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import router from 'next/router';
 
 type AuthContextProps = {
   auth: IAuth | undefined;
@@ -58,14 +59,22 @@ type WithChildren = {
 const AuthInitBase: FC<WithChildren> = ({ children }) => {
   const { logout, auth } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
   const [isLogged, setIsLogged] = useState(false);
 
   useEffect(() => {
     const authenticated = !!auth?.accessToken || pathname === '/login';
     setIsLogged(authenticated);
+    console.log(authenticated, pathname);
+
     if (!authenticated && pathname !== '/login') {
-      router.push('/login');
+      const query: any = {};
+      if (pathname !== '/login') {
+        query.redirect = pathname;
+      }
+      router.push({
+        pathname: '/login',
+        query,
+      });
     }
   }, [auth, pathname]);
 

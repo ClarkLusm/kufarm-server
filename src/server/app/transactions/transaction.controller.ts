@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { TransactionService } from './transaction.service';
 import { SearchTransactionDto } from './dto/search-transaction.dto';

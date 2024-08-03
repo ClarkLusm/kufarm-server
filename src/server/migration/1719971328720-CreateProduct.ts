@@ -11,7 +11,7 @@ export class CreateProduct1719971328720 implements MigrationInterface {
         "alias" VARCHAR NOT NULL,
         "image" VARCHAR,
         "hash_power" NUMERIC(10,2),
-        "max_out" INTEGER,
+        "max_out" SERIAL,
         "daily_income" NUMERIC(10,2),
         "monthly_income" NUMERIC(10,2),
         "price" NUMERIC(10,2),

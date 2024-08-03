@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, DataSource } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import * as moment from 'moment';
+import bcrypt from 'bcrypt';
+import moment from 'moment';
 
 import { BaseService } from '../..//common/base/base.service';
 import { UserProductStatusEnum } from '../../common/enums/user-product.enum';

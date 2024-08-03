@@ -20,7 +20,9 @@ export class UserProductService extends BaseService<UserProduct> {
   async countProductByUserId(userId: number) {
     const result = await this.repository
       .createQueryBuilder('user_product')
-      .select('user_product.product_id, COUNT(user_product.id) AS count')
+      .select(
+        'user_product.product_id as "productId", COUNT(user_product.id) AS count',
+      )
       .where('user_product.user_id = :userId', { userId })
       .andWhere('user_product.status != :stop', {
         stop: USERPRODUCT_EXPIRED,

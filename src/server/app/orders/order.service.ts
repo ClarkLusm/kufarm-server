@@ -27,6 +27,7 @@ export class OrderService extends BaseService<Order> {
       updatedAt: true,
       user: {
         email: true,
+        walletAddress: true,
       },
       product: {
         name: true,

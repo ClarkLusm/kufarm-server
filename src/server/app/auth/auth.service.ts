@@ -23,10 +23,10 @@ export class AuthService {
       throw new UnauthorizedException({
         message: `Your account has been banned ${user.banReason}`,
       });
-    if (!user.emailVerified)
-      throw new UnauthorizedException({
-        message: `Your account has not yet activated`,
-      });
+    // if (!user.emailVerified)
+    //   throw new UnauthorizedException({
+    //     message: `Your account has not yet activated`,
+    //   });
     const userDataAndTokens = await this.tokenSession(user);
     return userDataAndTokens;
   }
@@ -57,9 +57,9 @@ export class AuthService {
 
     const tokens = await this.generateToken({ ...userData });
     return {
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        user: userData,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      user: userData,
     };
   }
 

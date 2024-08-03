@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 
-import { PaymentWalletService } from '../payment-wallet/payment-wallet.service';
+import { PaymentWalletService } from '../payment-wallets/payment-wallet.service';
 import { ProductService } from '../products/product.service';
 import { SettingService } from '../settings/setting.service';
 
@@ -69,6 +69,8 @@ export class PublicController {
         id: true,
         name: true,
         image: true,
+        coin: true,
+        chainId: true,
       },
     });
   }

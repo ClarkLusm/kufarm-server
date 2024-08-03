@@ -19,6 +19,7 @@ export class CreateUser1619278600863 implements MigrationInterface {
         "referral_by" UUID,
         "referral_path" VARCHAR,
         "referral_commission" NUMERIC(19,4) DEFAULT 0,
+        "count_f1_referral" SERIAL,
         "email_verified" BOOLEAN DEFAULT false,
         "banned_at" TIMESTAMP,
         "ban_reason" VARCHAR,

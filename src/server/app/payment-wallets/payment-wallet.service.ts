@@ -43,31 +43,31 @@ export class PaymentWalletService extends BaseService<PaymentWallet> {
     });
   }
 
-  async getAvaiableAccount(wallet: PaymentWallet) {
-    const busyAccounts = await this.dataSource.getRepository(Order).find({
-      where: {
-        status: OrderStatusEnum.Pending,
-        expiredAt: LessThan(new Date()),
-      },
-      select: {
-        walletAddress: true,
-      },
-    });
+  // async getAvaiableAccount(wallet: PaymentWallet) {
+  //   const busyAccounts = await this.dataSource.getRepository(Order).find({
+  //     where: {
+  //       status: OrderStatusEnum.Pending,
+  //       expiredAt: LessThan(new Date()),
+  //     },
+  //     select: {
+  //       walletAddress: true,
+  //     },
+  //   });
 
-    if (!busyAccounts.length) return wallet.walletAddress;
+  //   if (!busyAccounts.length) return wallet.walletAddress;
 
-    const busyAddresses = busyAccounts.map((a) => a.walletAddress);
-    const account = await this.dataSource
-      .getRepository(PaymentAccount)
-      .findOne({
-        where: {
-          paymentWalletId: wallet.id,
-          accountAddress: Not(In(busyAddresses)),
-        },
-      });
+  //   const busyAddresses = busyAccounts.map((a) => a.walletAddress);
+  //   const account = await this.dataSource
+  //     .getRepository(PaymentAccount)
+  //     .findOne({
+  //       where: {
+  //         paymentWalletId: wallet.id,
+  //         accountAddress: Not(In(busyAddresses)),
+  //       },
+  //     });
 
-    return account?.accountAddress;
-  }
+  //   return account?.accountAddress;
+  // }
 
   // async genWalletAccount(wallet: PaymentWallet, index: number) {
   //   const HDWallet = ethers.HDNodeWallet.fromPhrase(

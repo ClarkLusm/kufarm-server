@@ -1,9 +1,10 @@
 import { ethers } from 'ethers';
-import BITCO2AbiTestnet from './BTCO2_test.abi.json';
-import BITCO2AbiMainnet from './BTCO2_main.abi.json';
-import USDTAbiTestnet from './USDT_test.abi.json';
-import USDTAbiMainnet from './USDT_main.abi.json';
-import { TOKENS } from 'src/server/common/constants';
+
+import BITCO2AbiTestnet from '../abis/BTCO2_test.abi.json';
+import BITCO2AbiMainnet from '../abis/BTCO2_main.abi.json';
+import USDTAbiTestnet from '../abis/USDT_test.abi.json';
+import USDTAbiMainnet from '../abis/USDT_main.abi.json';
+import { getContractToken } from 'src/server/common/helpers/token.helper';
 
 export class EthersService {
   private provider: ethers.JsonRpcApiProvider;
@@ -18,10 +19,10 @@ export class EthersService {
   }
 
   public async getBalance(address: string, coin: string) {
-    if (coin === TOKENS.BTCO2.symbol) {
+    if (coin === 'BTCO2') {
       return this.getBITCO2Balance(address);
     }
-    if (coin === TOKENS.USDT.symbol) {
+    if (coin === 'USDT') {
       return this.getUSDTBalance(address);
     }
   }
@@ -97,7 +98,7 @@ export class EthersService {
       this.USDTABI,
       this.provider,
     );
-    
+
     // contract.on('Transfer', (from, to, value, event) => {
     //   console.log('Transfer event detected:');
     //   console.log('From:', from);
@@ -106,26 +107,26 @@ export class EthersService {
 
     // contract.on(contract.filters.Transfer(address), (e) => {
     //   console.log('====', e);
-      
+
     // })
 
-  //   Log {
-  //     provider: JsonRpcProvider {},
-  //     transactionHash: '0x3121c5ea6116912fbf5a2c8a7e4ab22ebfda8c95f054141209be95725cd748d3',
-  //     blockHash: '0x4660822654d3f4238c8c68d99887f66f9a9403841cd25f8ddfc51358af501d9a',
-  //     blockNumber: 42632866,
-  //     removed: false,
-  //     address: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
-  //     data: '0x00000000000000000000000000000000000000000000000000038d7ea4c68000',
-  //     topics: [
-  //       '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
-  //       '0x000000000000000000000000807974b411b6b2277d73d3d017f5749fb7bd5e62',
-  //       '0x0000000000000000000000000b37d0d50528995072ceadc303c352f3b75f39a6'
-  //     ],
-  //     index: 11,
-  //     transactionIndex: 9
-  //   }
-  // ]
+    //   Log {
+    //     provider: JsonRpcProvider {},
+    //     transactionHash: '0x3121c5ea6116912fbf5a2c8a7e4ab22ebfda8c95f054141209be95725cd748d3',
+    //     blockHash: '0x4660822654d3f4238c8c68d99887f66f9a9403841cd25f8ddfc51358af501d9a',
+    //     blockNumber: 42632866,
+    //     removed: false,
+    //     address: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
+    //     data: '0x00000000000000000000000000000000000000000000000000038d7ea4c68000',
+    //     topics: [
+    //       '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+    //       '0x000000000000000000000000807974b411b6b2277d73d3d017f5749fb7bd5e62',
+    //       '0x0000000000000000000000000b37d0d50528995072ceadc303c352f3b75f39a6'
+    //     ],
+    //     index: 11,
+    //     transactionIndex: 9
+    //   }
+    // ]
 
     this.provider.on('block', async (n) => {
       console.log(n);
@@ -134,26 +135,24 @@ export class EthersService {
         toBlock: 'latest',
         address: process.env.USDT_CONTRACT_ADDRESS,
         topics: [
-            ethers.id("Transfer(address,address,uint256)"),
-            null,
-            [
-              ethers.zeroPadValue(address, 32),
-            ]
-        ]
-      })
+          ethers.id('Transfer(address,address,uint256)'),
+          null,
+          [ethers.zeroPadValue(address, 32)],
+        ],
+      });
       if (logs.length) {
-        const log = logs[0]
+        const log = logs[0];
       }
       console.log(logs);
-      
-    //   const filter = contract.filters.Transfer(address, null, null)
-    //   contract.on(filter, (from, to, value, event) => {
-    //     console.log("event: ", event);
-    // });
+
+      //   const filter = contract.filters.Transfer(address, null, null)
+      //   contract.on(filter, (from, to, value, event) => {
+      //     console.log("event: ", event);
+      // });
       const a = await contract.queryFilter('Transfer', n);
       if (a.length) {
         console.log(a?.[0]?.toJSON().topics);
       }
-    })
+    });
   }
 }

@@ -26,7 +26,6 @@ import { UserService } from '../users/user.service';
 import { Order } from '../orders/order.entity';
 import { User } from '../users/user.entity';
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
-import { TOKENS } from '../../common/constants';
 import { numberToBigInt } from '../../common/helpers/number.utils';
 import { SettingService } from '../settings/setting.service';
 import { Transaction } from '../transactions/transaction.entity';
@@ -38,6 +37,9 @@ import {
   SearchReferralDto,
   VerifyAccountDto,
 } from './dto';
+import { getContractToken } from 'src/server/common/helpers/token.helper';
+import { NETWORKS } from 'src/server/common/constants';
+import { PayInvoiceDto } from './dto/invoice.dto';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -142,7 +144,10 @@ export class AccountController {
   }
 
   @Post('/order')
-  async createNewOrder(@Req() req, @Body() body: CreateOrderDto) {
+  async createNewOrder(
+    @Req() req,
+    @Body() body: CreateOrderDto,
+  ): Promise<Order> {
     const { sub } = req.user;
     const { productId, paymentWalletId, quantity } = body;
 
@@ -162,73 +167,35 @@ export class AccountController {
     }
 
     // Find a pending order
-    let order = await this.orderService.findOneBy({
-      userId: sub,
+    let order = await this.orderService.getOrderPending(
+      sub,
       productId,
       quantity,
-      status: OrderStatusEnum.Pending,
-      expiredAt: MoreThan(new Date()),
-    });
+    );
 
     // Create new order
     if (!order) {
-      const walletAddress = await this.paymentWalletService.getAvaiableAccount(
-        wallet,
-      );
-
       const orderPrice = product.price * quantity;
-      let priceBigint = orderPrice * Math.pow(10, TOKENS.USDT.decimal);
-
-      if (wallet.coin === TOKENS.BTCO2.symbol) {
-        const [btco2Amount] = await this.settingService.convertUsdToBTCO2(
-          orderPrice,
-        );
-        priceBigint = btco2Amount;
-      }
-
+      const token = getContractToken(wallet.chainId, wallet.coin);
+      const amount = orderPrice * Math.pow(10, token.decimals);
       order = await this.orderService.create({
         code: `${user.sid}${moment().format('YYMMDDHHmmss')}`,
-        walletAddress,
+        walletAddress: wallet.walletAddress,
         userId: sub,
         productId,
         quantity,
-        amount: priceBigint,
+        amount,
         coin: wallet.coin,
+        chainId: wallet.chainId,
         expiredAt: moment().add(15, 'minutes').format(),
       });
     }
-
-    this.ethersService.subBalanceChange(order.walletAddress, async (res) => {
-      //Just update transaciton when amount equal
-      if (
-        res.address === order.walletAddress
-        //  &&
-        // BigInt(order.amount) === res.amount
-      ) {
-        // Sync before add new user-product
-        await this.userService.syncBalance(sub);
-        // TODO: push event to FE
-        this.dataSource.transaction(async (tx) => {
-          await tx.getRepository(Order).update(order.id, {
-            status: OrderStatusEnum.Success,
-          });
-          await tx.getRepository(UserProduct).save({
-            userId: sub,
-            productId,
-            maxOut: product.maxOut,
-            hashPower: product.hashPower,
-            dailyIncome: product.dailyIncome,
-            monthlyIncome: product.monthlyIncome,
-            status: UserProductStatusEnum.Activated,
-          });
-          await tx.getRepository(User).update(sub, {
-            maxOut: user.maxOut + product.maxOut,
-          });
-        });
-      }
-    });
-
-    return order;
+    const token = getContractToken(order.chainId, order.coin);
+    if (token) {
+      order['tokenAddress'] = token.address;
+      order['tokenDecimals'] = token.decimals;
+      return order;
+    }
   }
 
   @Post('/withdraw')
@@ -239,7 +206,12 @@ export class AccountController {
       const { balance: userBalance } = await this.userService.syncBalance(sub);
       const user = await this.userService.getById(sub);
 
-      const amountBigInt = numberToBigInt(amount, TOKENS.BTCO2.decimal);
+      const token = getContractToken(
+        (process.env.NODE_ENV === 'production' ? NETWORKS[56] : NETWORKS[97])
+          .chainId,
+        'BTCO2',
+      );
+      const amountBigInt = numberToBigInt(amount, token.decimals);
       const [tokenBalance, rate] = await this.settingService.convertUsdToBTCO2(
         userBalance,
       );
@@ -264,7 +236,7 @@ export class AccountController {
         amount: amountBigInt,
         amountUsd,
         exchangeRate: rate,
-        coin: TOKENS.BTCO2.symbol,
+        coin: 'BTCO2',
         status: TransactStatusEnum.Pending,
       });
 
@@ -324,34 +296,37 @@ export class AccountController {
   @Get('invoice/:code')
   async getInvoice(@Req() req, @Param('code') code: string) {
     const { sub } = req.user;
-    const invoice = await this.orderService.getOne(
-      {
-        code,
-        userId: sub,
-        expiredAt: MoreThan(new Date()),
-      },
-      {
-        id: true,
-        code: true,
-        walletAddress: true,
-        amount: true,
-        coin: true,
-        expiredAt: true,
-        status: true,
-        product: {
-          price: true,
-        },
-      },
-      {
-        product: true,
-      },
-    );
+    const invoice = await this.orderService.getInvoiceByOrderCode(sub, code);
     if (!invoice)
       throw new NotFoundException('Not found invoice or invoice is expired');
     invoice['price'] = invoice.product.price;
     delete invoice.id;
     delete invoice.product;
-    return invoice;
+    const token = getContractToken(invoice.chainId, invoice.coin);
+    if (token) {
+      return {
+        ...invoice,
+        contractAddress: token.address,
+        decimals: token.decimals,
+      };
+    }
+  }
+
+  @Post('invoice')
+  async paidInvoice(@Req() req, @Body() body: PayInvoiceDto) {
+    const { sub } = req.user;
+    const invoice = await this.orderService.findOneBy({
+      userId: sub,
+      code: body.code,
+      status: OrderStatusEnum.Pending,
+    });
+    if (!invoice)
+      throw new NotFoundException('Not found invoice or invoice is expired');
+    //TODO: Verify via txHash on the blockchain
+    await this.orderService.update(invoice.id, {
+      status: OrderStatusEnum.Success,
+      txHash: body.txHash,
+    });
   }
 
   @Get('/my-referrals')

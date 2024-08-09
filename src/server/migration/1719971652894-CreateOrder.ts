@@ -14,6 +14,8 @@ export class CreateOrder1719971652894 implements MigrationInterface {
         "quantity" SMALLINT,
         "amount" NUMERIC(38),
         "coin" VARCHAR(10) NOT NULL,
+        "chain_id" SMALLINT,
+        "tx_hash" VARCHAR(66),
         "status" SMALLINT DEFAULT 0,
         "expired_at" TIMESTAMP,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),

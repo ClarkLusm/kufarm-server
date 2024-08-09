@@ -11,6 +11,48 @@ export const SETTING_NEW_USER_PROMOTION = 'new_user_promotion';
 export const SETTING_REFERRAL_INCOME = 'referral_income';
 export const SETTING_SYSTEM = 'systems';
 
+export const ETH_TOKENS = {
+  USDT: {
+    decimals: 18,
+    symbol: 'USDT',
+    address: '',
+  },
+};
+
+export const BNB_TOKENS = {
+  BTCO2: {
+    decimals: 18,
+    symbol: 'BTCO2',
+    address: '',
+  },
+  USDT: {
+    decimals: 18,
+    symbol: 'USDT',
+    address: '',
+  },
+};
+
+export const BNB_TESTNET_TOKENS = {
+  BTCO2: {
+    decimals: 18,
+    symbol: 'BTCO2',
+    address: '0x480BD7c61B7D0AD02Ab7c57e4cdab1482A9F43E7',
+  },
+  USDT: {
+    decimals: 18,
+    symbol: 'USDT',
+    address: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
+  },
+};
+
+export const SEPOLIA_TOKENS = {
+  USDT: {
+    decimals: 18,
+    symbol: 'USDT',
+    address: '',
+  },
+};
+
 export const NETWORKS = {
   1: {
     chainId: 1,
@@ -19,6 +61,7 @@ export const NETWORKS = {
     nativeCurrency: 'ETH',
     explorerUrl: 'https://etherscan.io/',
     alias: 'ethereum',
+    tokens: Object.values(ETH_TOKENS),
   },
   56: {
     chainId: 56,
@@ -27,6 +70,7 @@ export const NETWORKS = {
     nativeCurrency: 'BNB',
     explorerUrl: 'https://bscscan.com/',
     alias: 'binance',
+    tokens: Object.values(BNB_TOKENS),
   },
   97: {
     chainId: 97,
@@ -35,6 +79,7 @@ export const NETWORKS = {
     nativeCurrency: 'BNB',
     explorerUrl: 'https://testnet.bscscan.com/',
     alias: 'binance',
+    tokens: Object.values(BNB_TESTNET_TOKENS),
   },
   11155111: {
     chainId: 11155111,
@@ -43,22 +88,6 @@ export const NETWORKS = {
     nativeCurrency: 'ETH',
     explorerUrl: 'https://sepolia.etherscan.io/',
     alias: 'sepolia',
+    tokens: Object.values(SEPOLIA_TOKENS),
   },
-};
-
-export const TOKENS = {
-  BTCO2: {
-    decimal: 18,
-    symbol: 'BTCO2',
-  },
-  USDT: {
-    decimal: 6,
-    symbol: 'USDT',
-  },
-};
-
-export const DERIVATION_PATH = {
-  1: "m/44'/60'/0'/0",
-  56: "m/44'/714'/0'/0",
-  97: "m/44'/1656'/0'/0",
 };

@@ -40,6 +40,12 @@ export class Order {
   @Column({ nullable: false })
   coin: string;
 
+  @Column({ name: 'chain_id', nullable: false })
+  chainId: number;
+
+  @Column({ name: 'tx_hash', nullable: false })
+  txHash: string;
+
   @Column()
   status: number;
 

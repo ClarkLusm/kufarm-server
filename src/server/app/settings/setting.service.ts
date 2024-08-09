@@ -42,10 +42,7 @@ export class SettingService extends BaseService<Setting> {
       exchangeFixed: fixed,
     } = exchangeRate;
     const rate = usdRate / tokenRate; // token to usd
-    const tokenBalance = numberToBigInt(
-      usdAmount / rate,
-      Constants.TOKENS.BTCO2.decimal,
-    );
+    const tokenBalance = numberToBigInt(usdAmount / rate, 18);
     return [tokenBalance, rate];
   }
 

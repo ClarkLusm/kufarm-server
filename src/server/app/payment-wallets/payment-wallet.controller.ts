@@ -22,18 +22,7 @@ export class PaymentWalletController {
   constructor(
     private readonly service: PaymentWalletService,
     private readonly ethersService: EthersService,
-  ) {
-    // 5d6c8322ad8edff07cc2294e68ed32a6f14a4b2c97aa8f3ea9457202cfd3e245
-    // this.ethersService.sendBTCO2Token(
-    //   '5d6c8322ad8edff07cc2294e68ed32a6f14a4b2c97aa8f3ea9457202cfd3e245',
-    //   '0x807974B411B6b2277d73d3D017f5749Fb7bD5E62',
-    //   '10',
-    // );
-    this.ethersService.subBalanceChange(
-      '0x0b37D0D50528995072ceaDC303C352F3b75f39A6',
-      () => {},
-    );
-  }
+  ) {}
 
   @Get('/')
   async getList(@Query() query: SearchPaymentWalletDto) {

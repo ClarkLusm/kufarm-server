@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, ValidateIf } from 'class-validator';
 
 export class CreatePaymentWalletDto {
   @IsNotEmpty()
@@ -13,8 +13,9 @@ export class CreatePaymentWalletDto {
   @IsNotEmpty()
   walletAddress: string;
 
+  @ValidateIf((data) => data.isOut === true)
   @IsNotEmpty()
-  secret: string;
+  secret?: string;
 
   @IsNotEmpty()
   coin: string;

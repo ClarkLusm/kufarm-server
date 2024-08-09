@@ -7,7 +7,8 @@ export const schema = yup
     walletAddress: yup.string().required(),
     chainId: yup.number().required(),
     coin: yup.string().required(),
-    secret: yup.string().required(),
-    path: yup.string().required(),
+    secret: yup.string().when('isOut', ([isOut], schema) => {
+      return isOut ? schema.required() : schema.nullable();
+    }),
   })
   .required();

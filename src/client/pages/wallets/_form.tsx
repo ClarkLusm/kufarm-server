@@ -25,6 +25,7 @@ export const WalletForm = (props: FormProps) => {
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
   } = useForm<PaymentWallet>({
     defaultValues: props.defaultValues,
     resolver: yupResolver(schema),
@@ -129,32 +130,6 @@ export const WalletForm = (props: FormProps) => {
               render={({ field }) => <Input {...field} />}
             />
           </Form.Item>
-          <Form.Item
-            required
-            label="Mã bảo mật"
-            validateStatus={!!errors.secret ? 'error' : 'validating'}
-            help={errors.secret?.message}
-          >
-            <Controller
-              {...register('secret')}
-              control={control}
-              render={({ field }) => <Input {...field} />}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Đường dẫn phát sinh"
-            required
-            validateStatus={!!errors.path ? 'error' : 'validating'}
-            help={errors.path?.message}
-          >
-            <Controller
-              {...register('path')}
-              control={control}
-              render={({ field }) => (
-                <Input {...field} placeholder="Vd: m/44'/60'/0'/0" />
-              )}
-            />
-          </Form.Item>
           <Form.Item label="Kiểu ví" valuePropName="checked">
             <Controller
               {...register('isOut')}
@@ -169,6 +144,20 @@ export const WalletForm = (props: FormProps) => {
               )}
             />
           </Form.Item>
+          {getValues('isOut') === true && (
+            <Form.Item
+              required
+              label="Mã bảo mật"
+              validateStatus={!!errors.secret ? 'error' : 'validating'}
+              help={errors.secret?.message}
+            >
+              <Controller
+                {...register('secret')}
+                control={control}
+                render={({ field }) => <Input {...field} />}
+              />
+            </Form.Item>
+          )}
           <Form.Item label="Trạng thái hoạt động" valuePropName="checked">
             <Controller
               {...register('published')}

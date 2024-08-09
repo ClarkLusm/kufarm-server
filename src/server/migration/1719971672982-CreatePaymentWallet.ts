@@ -13,6 +13,7 @@ export class CreatePaymentWallet1719971672982 implements MigrationInterface {
         "wallet_address" VARCHAR(42) NOT NULL,
         "secret" VARCHAR(255),
         "coin" VARCHAR(10),
+        "balance" NUMERIC(38),
         "image" VARCHAR(255),
         "published" BOOLEAN DEFAULT false,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),

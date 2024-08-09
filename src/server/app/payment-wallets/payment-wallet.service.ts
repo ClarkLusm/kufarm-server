@@ -1,19 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  DataSource,
-  FindManyOptions,
-  In,
-  LessThan,
-  Not,
-  Repository,
-} from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 
 import { EthersService } from '../../libs/ethers/ethers.service';
 import { BaseService } from '../../common/base/base.service';
-import { OrderStatusEnum } from '../../common/enums';
-import { Order } from '../orders/order.entity';
-import { PaymentAccount } from './payment-account.entity';
 import { PaymentWallet } from './payment-wallet.entity';
 
 @Injectable()
@@ -21,7 +11,6 @@ export class PaymentWalletService extends BaseService<PaymentWallet> {
   constructor(
     @InjectRepository(PaymentWallet)
     public repository: Repository<PaymentWallet>,
-    private dataSource: DataSource,
     private ethersService: EthersService,
   ) {
     super(repository);
@@ -116,14 +105,20 @@ export class PaymentWalletService extends BaseService<PaymentWallet> {
         address,
         coin,
       );
-      await this.dataSource
-        .getRepository(PaymentAccount)
-        .update(paymentAccountId, {
-          balance: Number(accountReBalance),
-        });
+      await this.update(walletId, {
+        balance: Number(accountReBalance),
+      });
       return accountReBalance;
     } catch (error) {
       console.error('account/withdraw::Cannot fetch account balance');
     }
+  }
+
+  async getWalletPayout(minBalance: number) {
+    return this.findOneBy({
+      isOut: true,
+      published: true,
+      balance: MoreThan(minBalance)
+    })
   }
 }

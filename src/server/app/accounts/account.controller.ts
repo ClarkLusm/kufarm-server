@@ -219,20 +219,19 @@ export class AccountController {
         throw new Error('Your balance is not enough');
       }
 
-      const accountPayout = await this.paymentWalletService.getAccountPayout(
+      const paymentWallet = await this.paymentWalletService.getWalletPayout(
         amountBigInt,
       );
-      if (!accountPayout) {
+      if (!paymentWallet) {
         throw new Error('The system is busy');
       }
 
       const amountUsd = amount * rate;
       const transaction = await this.transactionService.create({
         userId: user.id,
-        paymentWalletId: accountPayout.paymentWalletId,
-        paymentAccountId: accountPayout.id,
+        paymentWalletId: paymentWallet.id,
         userAddress: user.walletAddress,
-        walletBalance: accountPayout.balance,
+        walletBalance: paymentWallet.balance,
         amount: amountBigInt,
         amountUsd,
         exchangeRate: rate,
@@ -242,16 +241,16 @@ export class AccountController {
 
       try {
         const txHash = await this.ethersService.sendBTCO2Token(
-          accountPayout.paymentWallet.secret,
+          paymentWallet.secret,
           user.walletAddress,
           amount.toString(),
         );
         // fetch account balance again
         const accountBalance =
           await this.paymentWalletService.syncAccountBalance(
-            accountPayout.id,
-            accountPayout.accountAddress,
-            accountPayout.paymentWallet.coin,
+            paymentWallet.id,
+            paymentWallet.walletAddress,
+            paymentWallet.coin,
           );
 
         await this.dataSource.transaction(async (tx) => {

@@ -43,9 +43,6 @@ export class TransactionController {
           email: true,
           walletAddress: true,
         },
-        paymentAccount: {
-          accountAddress: true,
-        },
       },
       {
         user: true,

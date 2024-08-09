@@ -4,9 +4,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
 } from 'typeorm';
-import { PaymentAccount } from './payment-account.entity';
 
 @Entity()
 export class PaymentWallet {
@@ -31,6 +29,9 @@ export class PaymentWallet {
   @Column({ nullable: false })
   coin: string;
 
+  @Column({ nullable: false })
+  balance: number;
+
   @Column()
   image: string;
 
@@ -42,7 +43,4 @@ export class PaymentWallet {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-
-  @OneToMany(() => PaymentAccount, (account) => account.paymentWallet)
-  paymentAccounts?: PaymentAccount[];
 }

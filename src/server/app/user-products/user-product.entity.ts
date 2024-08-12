@@ -8,6 +8,8 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
+
+import { UserProductStatusEnum } from '../../common/enums';
 import { User } from '../users/user.entity';
 import { Product } from '../products/product.entity';
 
@@ -50,7 +52,7 @@ export class UserProduct {
   monthlyIncome: number;
 
   @Column()
-  status: number;
+  status: UserProductStatusEnum;
 
   @ManyToOne(() => User, (user) => user.userProducts)
   @JoinColumn({ name: 'user_id' })

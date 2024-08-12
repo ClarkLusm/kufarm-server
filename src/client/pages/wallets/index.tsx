@@ -8,11 +8,10 @@ import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
 } from '@ant-design/icons';
+import moment from 'moment';
+import * as ethers from 'ethers';
 
-import {
-  listPaymentWallet,
-  listSupportedNetworks,
-} from '../../apis/payment-wallet';
+import { listPaymentWallet } from '../../apis/payment-wallet';
 import { shortAddress } from '../../common/helpers';
 import { PaymentWallet } from '../../common/types';
 import { WalletForm } from './_form';
@@ -30,11 +29,8 @@ const Wallets: NextPage = (props) => {
 
   async function fetchData() {
     try {
-      const [walletRes, networks] = await Promise.all([
-        listPaymentWallet(),
-        listSupportedNetworks(),
-      ]);
-      const { data, total } = walletRes;
+      const res = await listPaymentWallet();
+      const { data, total, networks } = res;
       setWallets(data);
       setTotal(total);
       setNetworks(networks);
@@ -48,11 +44,6 @@ const Wallets: NextPage = (props) => {
       title: 'Tên ví',
       dataIndex: 'name',
       key: 'name',
-    },
-    {
-      title: 'Đồng',
-      dataIndex: 'coin',
-      key: 'coin',
     },
     {
       title: 'Loại ví',
@@ -84,6 +75,24 @@ const Wallets: NextPage = (props) => {
       render: (data) => networks?.[data]?.name,
     },
     {
+      title: 'Đồng',
+      dataIndex: 'coin',
+      key: 'coin',
+    },
+    {
+      title: 'Số dư',
+      dataIndex: 'balance',
+      key: 'balance',
+      render: (data, row) => {
+        const network = networks[row.chainId];
+        const token = network.tokens.find((t) => t.symbol === row.coin);
+        return ethers.formatUnits(
+          data.toLocaleString('fullwide', { useGrouping: false }),
+          token.decimals,
+        );
+      },
+    },
+    {
       title: 'Trạng thái',
       dataIndex: 'published',
       key: 'published',
@@ -95,6 +104,12 @@ const Wallets: NextPage = (props) => {
           disabled
         />
       ),
+    },
+    {
+      title: 'Đồng bộ lần cuối',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+      render: (data) => moment(data).format('HH:mm DD/MM/YYYY'),
     },
     {
       key: 'action',

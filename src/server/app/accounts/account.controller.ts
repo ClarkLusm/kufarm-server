@@ -1,4 +1,4 @@
-import { DataSource, MoreThan } from 'typeorm';
+import { DataSource } from 'typeorm';
 import moment from 'moment';
 import {
   BadRequestException,
@@ -14,22 +14,27 @@ import {
 } from '@nestjs/common';
 
 import { EthersService } from '../../libs/ethers/ethers.service';
-import { OrderStatusEnum, TransactStatusEnum } from '../../common/enums';
-import { UserProductStatusEnum } from '../../common/enums/user-product.enum';
+import {
+  OrderStatusEnum,
+  TransactStatusEnum,
+  UserProductStatusEnum,
+} from '../../common/enums';
+import { numberToBigInt } from '../../common/helpers/number.utils';
+import { getContractToken } from '../../common/helpers/token.helper';
+import { NETWORKS } from '../../common/constants';
+import { SettingService } from '../settings/setting.service';
 import { PaymentWalletService } from '../payment-wallets/payment-wallet.service';
 import { UserProductService } from '../user-products/user-product.service';
 import { TransactionService } from '../transactions/transaction.service';
-import { UserProduct } from '../user-products/user-product.entity';
 import { ProductService } from '../products/product.service';
 import { OrderService } from '../orders/order.service';
 import { UserService } from '../users/user.service';
 import { Order } from '../orders/order.entity';
 import { User } from '../users/user.entity';
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
-import { numberToBigInt } from '../../common/helpers/number.utils';
-import { SettingService } from '../settings/setting.service';
 import { Transaction } from '../transactions/transaction.entity';
 import { ReferralCommissionService } from '../referral-commissions/referral-commission.service';
+import { UserProduct } from '../user-products/user-product.entity';
 import {
   CreateOrderDto,
   RequestWithdrawDto,
@@ -37,9 +42,7 @@ import {
   SearchReferralDto,
   VerifyAccountDto,
 } from './dto';
-import { getContractToken } from 'src/server/common/helpers/token.helper';
-import { NETWORKS } from 'src/server/common/constants';
-import { PayInvoiceDto } from './dto/invoice.dto';
+import { PayOrderDto } from './dto/pay-order.dto';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -235,23 +238,19 @@ export class AccountController {
         amount: amountBigInt,
         amountUsd,
         exchangeRate: rate,
-        coin: 'BTCO2',
+        coin: 'BTCO2', // TODO: Only withdraw BTCO2
         status: TransactStatusEnum.Pending,
       });
 
       try {
         const txHash = await this.ethersService.sendBTCO2Token(
-          paymentWallet.secret,
+          paymentWallet,
           user.walletAddress,
           amount.toString(),
         );
         // fetch account balance again
         const accountBalance =
-          await this.paymentWalletService.syncAccountBalance(
-            paymentWallet.id,
-            paymentWallet.walletAddress,
-            paymentWallet.coin,
-          );
+          await this.paymentWalletService.syncAccountBalance(paymentWallet);
 
         await this.dataSource.transaction(async (tx) => {
           await tx.getRepository(User).update(user.id, {
@@ -261,7 +260,7 @@ export class AccountController {
             status: TransactStatusEnum.Success,
             txHash: txHash.hash,
             walletBalance: accountBalance ? accountBalance.balance : null,
-            userAddress: txHash.to,
+            userAddress: user.walletAddress,
           });
         });
         this.referralCommissionService.addReferralCommission(sub, amount);
@@ -311,20 +310,50 @@ export class AccountController {
     }
   }
 
-  @Post('invoice')
-  async paidInvoice(@Req() req, @Body() body: PayInvoiceDto) {
+  @Post('/payorder')
+  async payOrder(@Req() req, @Body() body: PayOrderDto) {
     const { sub } = req.user;
-    const invoice = await this.orderService.findOneBy({
-      userId: sub,
-      code: body.code,
-      status: OrderStatusEnum.Pending,
-    });
-    if (!invoice)
-      throw new NotFoundException('Not found invoice or invoice is expired');
+    const invoice = await this.orderService.getOne(
+      {
+        userId: sub,
+        code: body.code,
+        status: OrderStatusEnum.Pending,
+      },
+      {
+        id: true,
+        product: {
+          id: true,
+          hashPower: true,
+          dailyIncome: true,
+          monthlyIncome: true,
+          maxOut: true,
+        },
+      },
+      {
+        product: true,
+      },
+    );
+    if (!invoice) throw new NotFoundException('Not found invoice');
+    //TODO: check first order to count f1
     //TODO: Verify via txHash on the blockchain
-    await this.orderService.update(invoice.id, {
-      status: OrderStatusEnum.Success,
-      txHash: body.txHash,
+    const user = await this.userService.getById(sub);
+    await this.dataSource.transaction(async (tx) => {
+      await tx.getRepository(Order).update(invoice.id, {
+        status: OrderStatusEnum.Success,
+        txHash: body.tx.hash,
+      });
+      await tx.getRepository(UserProduct).save({
+        userId: sub,
+        productId: invoice.product.id,
+        maxOut: invoice.product.maxOut,
+        hashPower: invoice.product.hashPower,
+        dailyIncome: invoice.product.dailyIncome,
+        monthlyIncome: invoice.product.monthlyIncome,
+        status: UserProductStatusEnum.Activated,
+      });
+      await tx.getRepository(User).update(sub, {
+        maxOut: user.maxOut + invoice.product.maxOut,
+      });
     });
   }
 

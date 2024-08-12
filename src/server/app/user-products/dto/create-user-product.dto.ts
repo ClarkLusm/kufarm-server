@@ -1,10 +1,22 @@
+import { IsEnum, IsInt, IsNumber, IsUUID } from 'class-validator';
+import { UserProductStatusEnum } from 'src/server/common/enums';
+
 export class CreateUserProductDto {
+  @IsUUID()
   userId: string;
+
+  @IsUUID()
   productId: string;
-  duration: number;
-  maxOut: number;
+
+  @IsInt()
   hasPower: number;
+
+  @IsNumber()
   dailyIncome: number;
+
+  @IsNumber()
   monthlyIncome: number;
-  status: number;
+
+  @IsEnum(UserProductStatusEnum)
+  status: UserProductStatusEnum;
 }

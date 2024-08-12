@@ -37,9 +37,6 @@ export class Transaction {
   @Column({ nullable: false })
   amount: number;
 
-  @Column({ name: 'amount_usd' })
-  amountUsd: number;
-
   @Column({ name: 'exchange_rate', nullable: false })
   exchangeRate: number;
 

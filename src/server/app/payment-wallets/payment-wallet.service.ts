@@ -19,24 +19,27 @@ export class PaymentWalletService extends BaseService<PaymentWallet> {
 
   async createWallet(data: PaymentWallet) {
     const balance = await this.ethersService.getBalance(
+      data.chainId,
       data.walletAddress,
       data.coin,
     );
     return this.create({ ...data, balance });
   }
 
-  async syncAccountBalance(walletId: string, address: string, coin: string) {
+  async syncAccountBalance(wallet: PaymentWallet) {
     try {
       const accountReBalance = await this.ethersService.getBalance(
-        address,
-        coin,
+        wallet.chainId,
+        wallet.walletAddress,
+        wallet.coin,
       );
-      await this.update(walletId, {
-        balance: Number(accountReBalance),
+      await this.updateById(wallet.id, {
+        balance: Number(accountReBalance.balance),
+        updatedAt: new Date(),
       });
       return accountReBalance;
     } catch (error) {
-      console.error('account/withdraw::Cannot fetch account balance');
+      console.error('ERROR::syncAccountBalance', error);
     }
   }
 

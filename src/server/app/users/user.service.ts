@@ -48,6 +48,7 @@ export class UserService extends BaseService<User> {
       }
       userData.referralBy = referralUser.id;
       userData.referralPath = referralUser.referralPath;
+      //TODO: count f1
     }
 
     const promotion = await this.settingService.getNewUserPromotion();

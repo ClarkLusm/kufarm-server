@@ -15,7 +15,3 @@ export const updatePaymentWallet = (id: string, data) => {
 export const listPaymentAccount = (walletId) => {
   return axios.get(`/wallets/${walletId}/accounts`).then((res) => res.data);
 };
-
-export const listSupportedNetworks = () => {
-  return axios.get('/wallets/supported-networks').then((res) => res.data);
-}

@@ -2,9 +2,9 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import moment from 'moment';
 
+import { SEARCH_DATE_FORMAT } from '../../common/constants';
 import { TransactionService } from './transaction.service';
 import { SearchTransactionDto } from './dto/search-transaction.dto';
-import { SEARCH_DATE_FORMAT } from 'src/server/common/constants';
 
 @Controller()
 export class TransactionController {
@@ -32,7 +32,6 @@ export class TransactionController {
         id: true,
         txHash: true,
         amount: true,
-        amountUsd: true,
         exchangeRate: true,
         coin: true,
         walletBalance: true,
@@ -46,7 +45,6 @@ export class TransactionController {
       },
       {
         user: true,
-        paymentAccount: true,
       },
     );
     return {

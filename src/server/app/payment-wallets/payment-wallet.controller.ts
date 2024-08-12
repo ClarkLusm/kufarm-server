@@ -27,7 +27,7 @@ export class PaymentWalletController {
   @Get('/')
   async getList(@Query() query: SearchPaymentWalletDto) {
     const [data, total] = await this.service.getAll(query);
-    return { data, total };
+    return { data, total, networks: NETWORKS };
   }
 
   @Post()
@@ -44,12 +44,16 @@ export class PaymentWalletController {
     if (!wallet) {
       throw new NotFoundException('Not found wallet');
     }
-    await this.service.updateById(id, data);
+    const balance = await this.ethersService.getBalance(
+      data.chainId,
+      wallet.walletAddress,
+      wallet.coin,
+    );
+    await this.service.updateById(id, {
+      ...data,
+      balance: Number(balance.balance),
+      updatedAt: new Date(),
+    });
     return wallet;
-  }
-
-  @Get('/supported-networks')
-  async getSupportedNetworks() {
-    return NETWORKS;
   }
 }

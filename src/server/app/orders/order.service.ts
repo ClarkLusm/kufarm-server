@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThan, LessThanOrEqual, MoreThan, Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThan, Repository } from 'typeorm';
 
-import { BaseService } from 'src/server/common/base/base.service';
+import { buildQueryFilter } from '../../common/helpers/query-builder';
+import { BaseService } from '../../common/base/base.service';
+import { OrderStatusEnum } from '../../common/enums';
 import { Order } from './order.entity';
-import { buildQueryFilter } from 'src/server/common/helpers/query-builder';
-import { OrderStatusEnum } from 'src/server/common/enums';
 
 @Injectable()
 export class OrderService extends BaseService<Order> {
@@ -88,6 +88,7 @@ export class OrderService extends BaseService<Order> {
         amount: true,
         coin: true,
         chainId: true,
+        txHash: true,
         expiredAt: true,
         status: true,
         product: {

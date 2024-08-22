@@ -365,8 +365,7 @@ export class AccountController {
         receiverId: sub,
       },
       {
-        value: true,
-        coin: true,
+        btco2Value: true,
         user: {
           email: true,
         },

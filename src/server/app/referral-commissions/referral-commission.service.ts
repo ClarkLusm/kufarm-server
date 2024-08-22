@@ -53,10 +53,10 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                   });
                   this.dataSource.transaction(async (tx) => {
                     if (referralCom) {
-                      const referralComValue = referralCom.value + commission;
+                      const referralComValue = referralCom.btco2Value + commission;
                       await tx
                         .getRepository(ReferralCommission)
-                        .update(referralCom.id, { value: referralComValue });
+                        .update(referralCom.id, { btco2Value: referralComValue });
                     } else {
                       await tx.getRepository(ReferralCommission).save({
                         userId,

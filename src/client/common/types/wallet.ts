@@ -13,4 +13,11 @@ export type PaymentWallet = {
 export type Network = {
   chainId: number;
   name: string;
+  tokens: Token[]
+}
+
+export type Token = {
+  decimals: number
+  symbol: string
+  address: string
 }

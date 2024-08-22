@@ -7,7 +7,7 @@ import {
 } from '@ant-design/icons';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { createPaymentWallet, updatePaymentWallet } from '../../apis';
 import { Network, PaymentWallet } from '../../common/types';
@@ -24,6 +24,7 @@ export const WalletForm = (props: FormProps) => {
     control,
     register,
     handleSubmit,
+    watch,
     formState: { errors },
     getValues,
   } = useForm<PaymentWallet>({
@@ -32,6 +33,13 @@ export const WalletForm = (props: FormProps) => {
   });
   const [api, contextHolder] = notification.useNotification();
   const [loading, setLoading] = useState<boolean>(false);
+  const [tokens, setTokens] = useState([]);
+  const chainId = watch('chainId');
+
+  useEffect(() => {
+    const network = props.networks.find((n) => n.chainId === chainId);
+    setTokens(network?.tokens || []);
+  }, [chainId]);
 
   const onSubmit: SubmitHandler<PaymentWallet> = async (data) => {
     try {
@@ -115,7 +123,15 @@ export const WalletForm = (props: FormProps) => {
             <Controller
               {...register('coin')}
               control={control}
-              render={({ field }) => <Input {...field} />}
+              render={({ field }) => (
+                <Select {...field}>
+                  {tokens?.map((token) => (
+                    <Select.Option key={token.symbol} value={token.symbol}>
+                      {token.symbol}
+                    </Select.Option>
+                  ))}
+                </Select>
+              )}
             />
           </Form.Item>
           <Form.Item

@@ -4,7 +4,7 @@ import { EventBus } from './common/event-bus';
 import { getAuth, tokenIsExpired } from './common/helpers/auth.helper';
 
 const axiosSetup = axios.create({
-  baseURL: 'http://127.0.0.1:3001/api/admin',
+  baseURL: process.env.NEXT_PUBLIC_API_URL + '/api/admin',
   headers: {
     Accept: 'application/json',
     "Access-Control-Allow-Origin": "*"

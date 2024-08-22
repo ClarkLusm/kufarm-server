@@ -6,12 +6,12 @@ import React, {
   ReactNode,
   FC,
 } from 'react';
+import { usePathname } from 'next/navigation';
+import router from 'next/router';
 
 import { EventBus } from '../common/event-bus';
 import { IAuth } from '../common/interfaces/auth.interface';
 import * as AuthHelper from '../common/helpers/auth.helper';
-import { usePathname } from 'next/navigation';
-import router from 'next/router';
 
 type AuthContextProps = {
   auth: IAuth | undefined;
@@ -64,11 +64,9 @@ const AuthInitBase: FC<WithChildren> = ({ children }) => {
   useEffect(() => {
     const authenticated = !!auth?.accessToken || pathname === '/login';
     setIsLogged(authenticated);
-    console.log(authenticated, pathname);
-
     if (!authenticated && pathname !== '/login') {
       const query: any = {};
-      if (pathname !== '/login') {
+      if (!['/login', '/'].includes(pathname)) {
         query.redirect = pathname;
       }
       router.push({

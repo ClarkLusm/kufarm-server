@@ -1,9 +1,10 @@
 {
-  "name": "kufarm-mining",
+  "name": "bitcoino2fi",
   "private": true,
   "version": "1.0.0",
-  "description": "Kufarm mining",
+  "description": "Bitcoino2fi",
   "license": "MIT",
+  "author": "phanthanh.humg@gmail.com",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
@@ -29,6 +30,7 @@
     "@nestjs/jwt": "^10.0.1",
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.2.1",
+    "@nestjs/swagger": "^7.4.0",
     "@nestjs/typeorm": "^10.0.0",
     "apollo-server-express": "^3.11.1",
     "axios": "^1.2.2",

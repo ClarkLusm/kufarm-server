@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
+import { setupSwagger } from './swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.enableCors();
+  setupSwagger(app);
 
   await app.listen(process.env.PORT || 3000);
 }

@@ -353,6 +353,7 @@ export class AccountController {
       });
       await tx.getRepository(User).update(sub, {
         maxOut: user.maxOut + invoice.product.maxOut,
+        syncAt: user.syncAt || new Date(),
       });
     });
   }

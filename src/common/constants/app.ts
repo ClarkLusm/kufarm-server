@@ -7,7 +7,7 @@ export const SEARCH_DATE_FORMAT = 'YYYY-MM-DD';
 // user_product_status
 export const USERPRODUCT_EXPIRED = 3;
 
-export const SETTING_NEW_USER_PROMOTION = 'new_user_promotion';
+export const SETTING_NEW_USER = 'new_user';
 export const SETTING_REFERRAL_INCOME = 'referral_income';
 export const SETTING_SYSTEM = 'systems';
 

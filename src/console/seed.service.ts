@@ -106,6 +106,13 @@ export class SeedService {
   async initialConfiguration() {
     return await this.settingService.create([
       {
+        name: 'Cấu hình tài khoản mới',
+        key: Constants.SETTING_NEW_USER,
+        value: {
+          maxOut: 3,
+        },
+      },
+      {
         name: 'Cấu hình hệ thống',
         key: Constants.SETTING_SYSTEM,
         value: {

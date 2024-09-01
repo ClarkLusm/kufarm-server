@@ -49,6 +49,7 @@ export class EthersService {
       const balance = await contractToken.balanceOf(address);
       const decimals = await contractToken.decimals();
       const formattedBalance = ethers.formatUnits(balance, decimals);
+      console.log(balance);
       return {
         balance,
         decimals,

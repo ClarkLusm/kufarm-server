@@ -18,7 +18,7 @@ export class SettingService extends BaseService<Setting> {
 
   async getNewUserPromotion() {
     const setting = await this.repository.findOneBy({
-      key: Constants.SETTING_NEW_USER_PROMOTION,
+      key: Constants.SETTING_NEW_USER,
     });
     return setting?.value;
   }

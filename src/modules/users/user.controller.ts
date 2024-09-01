@@ -10,8 +10,7 @@ import {
 } from '@nestjs/common';
 
 import { UserService } from './user.service';
-import { SearchUserDto } from './dto/search-user.dto';
-import { BanUserDto } from './dto/ban-user.dto';
+import { SearchUserDto, BanUserDto, UpdateUserDto } from './dto';
 
 @Controller()
 export class UserController {
@@ -29,6 +28,36 @@ export class UserController {
   @Get(':id')
   async getDetail(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.getOne({ id });
+  }
+
+  @Put(':id')
+  async updateUser(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() data: UpdateUserDto,
+  ) {
+    const user = await this.service.getById(id);
+    if (!user) {
+      throw new NotFoundException('Not found user');
+    }
+    let letUpdate = false;
+    if (data.walletAddress) {
+      user.walletAddress = data.walletAddress;
+      letUpdate = true;
+    }
+    if (!user.bannedAt && data.banReason) {
+      user.bannedAt = new Date();
+      user.banReason = data.banReason;
+      letUpdate = true;
+    }
+    if (user.bannedAt && !data.banReason) {
+      user.bannedAt = null;
+      user.banReason = null;
+      letUpdate = true;
+    }
+    if (letUpdate) {
+      await this.service.updateById(id, data);
+    }
+    return user;
   }
 
   @Put(':id/ban-user')

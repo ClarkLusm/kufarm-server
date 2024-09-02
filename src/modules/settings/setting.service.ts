@@ -16,13 +16,6 @@ export class SettingService extends BaseService<Setting> {
     super(repository);
   }
 
-  async getNewUserPromotion() {
-    const setting = await this.repository.findOneBy({
-      key: Constants.SETTING_NEW_USER,
-    });
-    return setting?.value;
-  }
-
   async getExchangeRate() {
     // Check the rate config whether is fixed or not
     const setting = await this.repository.findOneBy({

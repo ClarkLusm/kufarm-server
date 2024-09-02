@@ -54,9 +54,9 @@ export class UserService extends BaseService<User> {
       //TODO: count f1
     }
 
-    const promotion = await this.settingService.getNewUserPromotion();
-    if (promotion?.maxOut) {
-      userData['maxOut'] = promotion?.maxOut;
+    const setting = await this.settingService.getAppSettings();
+    if (setting?.maxOutNewUser) {
+      userData['maxOut'] = setting?.maxOutNewUser;
     }
     const user = await this.create(userData);
     const createdUser = await this.getById(user.id);

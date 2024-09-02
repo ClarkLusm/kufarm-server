@@ -11,7 +11,7 @@ export class CreateUserDto {
   password: string;
 
   @IsOptional()
-  referralId?: string;
+  referralCode?: string;
 
   @IsNotEmpty()
   walletAddress: string;

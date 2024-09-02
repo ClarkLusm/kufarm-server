@@ -49,6 +49,9 @@ export class User {
   @Column({ type: 'numeric' })
   balance: number;
 
+  @Column({ name: 'referral_code' })
+  referralCode?: string;
+
   @Column({ name: 'referral_by', type: 'uuid' })
   referralBy?: string;
 

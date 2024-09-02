@@ -16,6 +16,7 @@ export class CreateUser1619278600863 implements MigrationInterface {
         "max_out" NUMERIC(11,2) DEFAULT 0,
         "income" NUMERIC(19,10) DEFAULT 0,
         "balance" NUMERIC(19,10) DEFAULT 0,
+        "referral_code" VARCHAR(10),
         "referral_by" UUID,
         "referral_path" VARCHAR,
         "referral_commission" NUMERIC(19,4) DEFAULT 0,

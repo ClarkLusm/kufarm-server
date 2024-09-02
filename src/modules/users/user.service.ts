@@ -4,6 +4,7 @@ import { Repository, Like, DataSource } from 'typeorm';
 import bcrypt from 'bcrypt';
 import moment from 'moment';
 
+import { genReferralCode } from '../../utils/string.utils';
 import { BaseService } from '../..//common/base/base.service';
 import { UserProductStatusEnum } from '../../common/enums/user-product.enum';
 import { SettingService } from '../settings/setting.service';
@@ -41,8 +42,10 @@ export class UserService extends BaseService<User> {
       syncAt: new Date(),
     };
 
-    if (data.referralId) {
-      const referralUser = await this.getById(data.referralId);
+    if (data.referralCode) {
+      const referralUser = await this.findOneBy({
+        referralCode: data.referralCode,
+      });
       if (!referralUser || !referralUser?.emailVerified) {
         throw new Error('Referral user is not existed');
       }
@@ -63,6 +66,7 @@ export class UserService extends BaseService<User> {
       referralPath = `${userData.referralPath}${createdUser.sid}/`;
     }
     await this.updateById(createdUser.id, { referralPath });
+    this.generateReferralCode(createdUser.id);
   }
 
   async getReferralsByPath(
@@ -161,5 +165,24 @@ export class UserService extends BaseService<User> {
       income: userData.income,
       balance: userData.balance,
     };
+  }
+
+  async generateReferralCode(userId: string) {
+    try {
+      let retry = 0;
+      const checkExist = async () => {
+        if (retry === 5) return;
+        ++retry;
+        const code = genReferralCode();
+        const exist = await this.findOneBy({ referralCode: code });
+        return exist ? checkExist() : code;
+      };
+      const code = await checkExist();
+      if (code) {
+        this.updateById(userId, { referralCode: code });
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 }

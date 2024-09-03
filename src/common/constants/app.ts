@@ -14,7 +14,7 @@ export const ETH_TOKENS = {
   USDT: {
     decimals: 18,
     symbol: 'USDT',
-    address: '',
+    address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
   },
 };
 
@@ -22,12 +22,12 @@ export const BNB_TOKENS = {
   BTCO2: {
     decimals: 18,
     symbol: 'BTCO2',
-    address: '',
+    address: '0xb846CAd46411d761d69A7F9c29FA37c7aB157Ce4',
   },
   USDT: {
     decimals: 18,
     symbol: 'USDT',
-    address: '',
+    address: '0x55d398326f99059fF775485246999027B3197955',
   },
 };
 

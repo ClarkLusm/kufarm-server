@@ -50,9 +50,9 @@ export class PaymentWalletController {
       throw new NotFoundException('Not found wallet');
     }
     const balance = await this.ethersService.getBalance(
-      data.chainId,
-      wallet.walletAddress,
-      wallet.coin,
+      data.chainId || wallet.chainId,
+      data.walletAddress || wallet.walletAddress,
+      data.coin || wallet.coin,
     );
     await this.service.updateById(id, {
       ...data,

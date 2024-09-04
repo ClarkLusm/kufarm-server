@@ -18,7 +18,15 @@ export class UserController {
 
   @Get('/')
   async getList(@Query() query: SearchUserDto) {
-    const [data, total] = await this.service.getAll(query);
+    const [data, total] = await this.service.getAll(query, {
+      id: true,
+      username: true,
+      email: true,
+      emailVerified: true,
+      walletAddress: true,
+      createdAt: true,
+      bannedAt: true,
+    });
     return {
       data,
       total,
@@ -54,8 +62,14 @@ export class UserController {
       user.banReason = null;
       letUpdate = true;
     }
+    if (data.password) {
+      const [passwordHash, salt] = this.service.hashPassword(data.password);
+      user.passwordHash = passwordHash;
+      user.salt = salt;
+      letUpdate = true;
+    }
     if (letUpdate) {
-      await this.service.updateById(id, data);
+      await this.service.save(user);
     }
     return user;
   }

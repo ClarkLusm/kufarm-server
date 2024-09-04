@@ -85,4 +85,6 @@ export class BaseService<T extends ObjectLiteral> {
   count = (query: any) => this.repository.count(query);
 
   countBy = (query: any) => this.repository.countBy(query);
+
+  save = (data: T) => this.repository.save(data);
 }

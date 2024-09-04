@@ -25,10 +25,15 @@ export class UserService extends BaseService<User> {
     super(repository);
   }
 
-  async createNewUser(data: CreateUserDto) {
+  hashPassword(password) {
     const saltRounds = 10;
     const salt = bcrypt.genSaltSync(saltRounds);
-    const passwordHash = bcrypt.hashSync(data.password, salt);
+    const passwordHash = bcrypt.hashSync(password, salt);
+    return [passwordHash, salt];
+  }
+
+  async createNewUser(data: CreateUserDto) {
+    const [passwordHash, salt] = this.hashPassword(data.password);
     const userData = {
       username: data.username,
       email: data.email,

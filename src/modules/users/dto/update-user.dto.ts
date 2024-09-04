@@ -6,4 +6,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   banReason?: string;
+
+  @IsOptional()
+  password?: string;
 }

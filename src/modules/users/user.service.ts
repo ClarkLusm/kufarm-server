@@ -129,7 +129,7 @@ export class UserService extends BaseService<User> {
           const reachMax = income > incomeNeedToMax; // true: the machine is fully
 
           await tx.getRepository(UserProduct).update(up.id, {
-            income: reachMax ? up.maxOut : (up.income + income),
+            income: reachMax ? up.maxOut : (Number(up.income) + income),
             status: reachMax
               ? UserProductStatusEnum.Stop
               : UserProductStatusEnum.Activated,

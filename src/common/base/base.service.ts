@@ -77,10 +77,10 @@ export class BaseService<T extends ObjectLiteral> {
   create = (data: any): Promise<T> => this.repository.save(data);
 
   deleteById = (id: any): Promise<DeleteResult> =>
-    this.repository.softDelete(id);
+    this.repository.delete(id);
 
   delete = (condition: any): Promise<DeleteResult> =>
-    this.repository.softDelete({ ...condition });
+    this.repository.delete({ ...condition });
 
   count = (query: any) => this.repository.count(query);
 

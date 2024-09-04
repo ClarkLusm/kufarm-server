@@ -211,8 +211,7 @@ export class AccountController {
       const user = await this.userService.getById(sub);
 
       const token = getContractToken(
-        (process.env.NODE_ENV === 'production' ? NETWORKS[56] : NETWORKS[97])
-          .chainId,
+        process.env.NODE_ENV === 'production' ? 56 : 97,
         'BTCO2',
       );
       const amountBigInt = numberToBigInt(amount, token.decimals);

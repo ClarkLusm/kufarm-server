@@ -51,8 +51,9 @@ export class UserService extends BaseService<User> {
       const referralUser = await this.findOneBy({
         referralCode: data.referralCode,
       });
-      if (!referralUser || !referralUser?.emailVerified) {
-        throw new Error('Referral user is not existed');
+      //TODO: Check emailVerified
+      if (!referralUser) {
+        throw new Error('Referring user does not exist');
       }
       userData.referralBy = referralUser.id;
       userData.referralPath = referralUser.referralPath;
@@ -118,7 +119,7 @@ export class UserService extends BaseService<User> {
 
       await this.dataSource.transaction(async (tx) => {
         for (let i = 0; i < userProducts.length; i++) {
-          const up: UserProduct = userProducts[0],
+          const up: UserProduct = userProducts[i],
             upIncome = Number(up.income),
             upMonthlyIncome = Number(up.monthlyIncome),
             upDailyIncome = Number(up.dailyIncome);
@@ -128,7 +129,7 @@ export class UserService extends BaseService<User> {
           const reachMax = income > incomeNeedToMax; // true: the machine is fully
 
           await tx.getRepository(UserProduct).update(up.id, {
-            income: reachMax ? up.maxOut : income,
+            income: reachMax ? up.maxOut : (up.income + income),
             status: reachMax
               ? UserProductStatusEnum.Stop
               : UserProductStatusEnum.Activated,
@@ -149,6 +150,9 @@ export class UserService extends BaseService<User> {
         if (totalIncome) {
           userData.income += totalIncome;
           userData.balance += totalIncome;
+        }
+        if (userData.income > user.maxOut) {
+          userData.income = user.maxOut;
         }
         await tx.getRepository(User).update(userId, userData);
       });

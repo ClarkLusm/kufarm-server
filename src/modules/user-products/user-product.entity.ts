@@ -27,7 +27,7 @@ export class UserProduct {
   @Column({ name: 'max_out', nullable: false })
   maxOut: number;
 
-  @Column({ nullable: false })
+  @Column({ type: 'numeric', precision: 19, scale: 10, nullable: false })
   income: number;
 
   @Column({ name: 'hash_power' })

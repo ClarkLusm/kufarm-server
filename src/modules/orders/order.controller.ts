@@ -38,7 +38,7 @@ export class OrderController {
     }
 
     // Remove the expired orders
-    await this.service.delete({ status: OrderStatusEnum.Expired });
+    await this.service.deleteExpired();
 
     const [data, total] = await this.service.getAll(query);
     return {

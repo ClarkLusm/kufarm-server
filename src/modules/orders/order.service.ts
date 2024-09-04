@@ -100,4 +100,17 @@ export class OrderService extends BaseService<Order> {
       },
     );
   }
+
+  deleteExpired() {
+    return this.repository
+      .createQueryBuilder()
+      .delete()
+      .from(Order)
+      .where('status = :status', { status: OrderStatusEnum.Expired })
+      .orWhere('status = :status AND expiredAt < :now', {
+        status: OrderStatusEnum.Pending,
+        now: new Date(),
+      })
+      .execute();
+  }
 }

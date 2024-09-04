@@ -1,8 +1,16 @@
-import { Controller, Get, Query, Param, ParseUUIDPipe, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Param,
+  ParseUUIDPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import moment from 'moment';
 
 import { SEARCH_DATE_FORMAT } from '../../common/constants';
+import { OrderStatusEnum } from '../../common/enums';
 import { JwtAdminGuard } from '../admin-auth/jwt/jwt-auth.guard';
 import { OrderService } from './order.service';
 import { SearchOrderDto } from './dto/search-order.dto';
@@ -13,7 +21,7 @@ export class OrderController {
   constructor(private readonly service: OrderService) {}
 
   @Get('/')
-  async getList(@Req() req, @Query() query: SearchOrderDto) {
+  async getList(@Query() query: SearchOrderDto) {
     if (query.fromDate) {
       query['created_at'] = MoreThanOrEqual(
         moment(query.fromDate, SEARCH_DATE_FORMAT, true)
@@ -28,6 +36,10 @@ export class OrderController {
       );
       delete query.toDate;
     }
+
+    // Remove the expired orders
+    await this.service.delete({ status: OrderStatusEnum.Expired });
+
     const [data, total] = await this.service.getAll(query);
     return {
       data,

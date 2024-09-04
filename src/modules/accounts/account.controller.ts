@@ -191,7 +191,7 @@ export class AccountController {
         amount,
         coin: wallet.coin,
         chainId: wallet.chainId,
-        expiredAt: moment().add(15, 'minutes').format(),
+        expiredAt: moment().add(30, 'minutes').format(),
       });
     }
     const token = getContractToken(order.chainId, order.coin);

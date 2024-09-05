@@ -12,7 +12,7 @@ export class CreateTransaction1719971654218
         "user_id" UUID,
         "payment_wallet_id" UUID,
         "payment_account_id" UUID,
-        "type" SERIAL,
+        "type" SMALLINT,
         "user_address" VARCHAR(42),
         "tx_hash" VARCHAR(100),
         "amount" NUMERIC(38),

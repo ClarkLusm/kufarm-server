@@ -67,10 +67,11 @@ export class AccountController {
       { id: sub },
       { id: true, referralPath: true },
     );
-    const offset = query.hasOwnProperty('pageSize') ? query.pageSize : 20;
+    const limit = query.hasOwnProperty('pageSize') ? query.pageSize : 20;
     const page = query.hasOwnProperty('page') ? query.page : 1;
-    const limit = (page - 1) * offset;
+    const offset = (page - 1) * limit;
     const [data, total] = await this.userService.getReferralsByPath(
+      sub,
       user.referralPath,
       offset,
       limit,
@@ -356,27 +357,5 @@ export class AccountController {
         syncAt: user.syncAt || new Date(),
       });
     });
-  }
-
-  @Get('/my-referrals')
-  async getReferrals(@Req() req) {
-    const { sub } = req.user;
-    const [data, total] = await this.referralCommissionService.getAll(
-      {
-        receiverId: sub,
-      },
-      {
-        id: true,
-        btco2Value: true,
-        updatedAt: true,
-        user: {
-          email: true,
-        },
-      },
-      {
-        user: true,
-      },
-    );
-    return { data, total };
   }
 }

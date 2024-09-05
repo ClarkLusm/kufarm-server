@@ -44,7 +44,12 @@ export class BaseService<T extends ObjectLiteral> {
       };
       delete query.sort;
       delete query.order;
+    } else {
+      qr.order = {
+        updatedAt: 'DESC',
+      };
     }
+
     return this.repository.findAndCount(qr);
   }
 
@@ -76,8 +81,7 @@ export class BaseService<T extends ObjectLiteral> {
 
   create = (data: any): Promise<T> => this.repository.save(data);
 
-  deleteById = (id: any): Promise<DeleteResult> =>
-    this.repository.delete(id);
+  deleteById = (id: any): Promise<DeleteResult> => this.repository.delete(id);
 
   delete = (condition: any): Promise<DeleteResult> =>
     this.repository.delete({ ...condition });

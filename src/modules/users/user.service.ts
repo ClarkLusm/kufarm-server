@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, DataSource } from 'typeorm';
+import { Repository, Like, DataSource, Not } from 'typeorm';
 import bcrypt from 'bcrypt';
 import moment from 'moment';
 
@@ -47,8 +47,9 @@ export class UserService extends BaseService<User> {
       syncAt: new Date(),
     };
 
+    let referralUser: User;
     if (data.referralCode) {
-      const referralUser = await this.findOneBy({
+      referralUser = await this.findOneBy({
         referralCode: data.referralCode,
       });
       //TODO: Check emailVerified
@@ -57,7 +58,6 @@ export class UserService extends BaseService<User> {
       }
       userData.referralBy = referralUser.id;
       userData.referralPath = referralUser.referralPath;
-      //TODO: count f1
     }
 
     const setting = await this.settingService.getAppSettings();
@@ -65,6 +65,13 @@ export class UserService extends BaseService<User> {
       userData['maxOut'] = setting?.maxOutNewUser;
     }
     const user = await this.create(userData);
+
+    if (referralUser) {
+      //TODO: should check the f1 condition
+      referralUser.countF1Referral += 1;
+      this.save(referralUser);
+    }
+
     const createdUser = await this.getById(user.id);
 
     let referralPath = `${createdUser.sid}/`;
@@ -76,18 +83,27 @@ export class UserService extends BaseService<User> {
   }
 
   async getReferralsByPath(
+    userId: string,
     referralPath: string,
     offset?: number,
     limit?: number,
   ) {
     return this.findAndCount({
       where: {
-        referralBy: Like(`${referralPath}%`),
+        referralPath: Like(`${referralPath}%`),
+        id: Not(userId)
       },
       select: {
         id: true,
         email: true,
-        referralIncomeUsd: true,
+        receiverCommissions: {
+          id: true,
+          btco2Value: true,
+          level: true,
+        },
+      },
+      relation: {
+        receiverCommissions: true,
       },
       skip: offset,
       take: limit,

@@ -27,6 +27,7 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
         let referralPath = user?.referralPath;
         const referralUserSids = referralPath.split('/');
         referralUserSids.pop();
+        referralUserSids.pop();
         const countReferralUser = referralUserSids.length;
         if (countReferralUser) {
           await Promise.all(
@@ -41,7 +42,7 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                   await this.settingService.getReferralIncomeSettings();
                 const commissionSetting = settings?.commission,
                   conditionSetting = settings?.condition;
-                const conditionLevel: number = conditionSetting?.[`f${level}`]; // Need x F1 to receive commission
+                const conditionLevel: number = conditionSetting?.[`f${level}`]; // Need n F1 to receive commission
                 const incomePercent: number = commissionSetting?.[`f${level}`];
                 // Enough the condition
                 if (user.countF1Referral >= conditionLevel && incomePercent) {
@@ -62,7 +63,7 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                         userId,
                         receiverId: user.id,
                         level,
-                        value: commission,
+                        btco2Value: commission,
                         coin: 'BITCO2', //Fixed
                       });
                     }

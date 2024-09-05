@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
   PrimaryColumn,
+  OneToOne,
 } from 'typeorm';
 
 import { Order } from '../orders/order.entity';
@@ -91,9 +92,6 @@ export class User {
   @OneToMany(() => Transaction, (transaction) => transaction.user)
   transactions: Transaction[];
 
-  @OneToMany(() => ReferralCommission, (ref) => ref.user)
-  referralCommissions: ReferralCommission[];
-
-  @OneToMany(() => ReferralCommission, (ref) => ref.receiver)
-  receiverCommissions: ReferralCommission[];
+  @OneToOne(() => ReferralCommission, (ref) => ref.user)
+  referredUser: ReferralCommission;
 }

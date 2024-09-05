@@ -5,8 +5,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryColumn,
+  OneToOne,
   JoinColumn,
-  ManyToOne,
 } from 'typeorm';
 
 import { User } from '../users/user.entity';
@@ -35,11 +35,7 @@ export class ReferralCommission {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.referralCommissions)
-  @JoinColumn({ name: 'user_id' })
+  @OneToOne(() => User, (user) => user.referredUser)
+  @JoinColumn({ name: 'user_id', foreignKeyConstraintName: 'id' })
   user: User;
-
-  @ManyToOne(() => User, (user) => user.receiverCommissions)
-  @JoinColumn({ name: 'receiver_id' })
-  receiver: User;
 }

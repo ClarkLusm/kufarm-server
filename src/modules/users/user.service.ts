@@ -96,14 +96,13 @@ export class UserService extends BaseService<User> {
       select: {
         id: true,
         email: true,
-        receiverCommissions: {
-          id: true,
+        referredUser: {
           btco2Value: true,
           level: true,
         },
       },
-      relation: {
-        receiverCommissions: true,
+      relations: {
+        referredUser: true,
       },
       skip: offset,
       take: limit,

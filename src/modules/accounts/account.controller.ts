@@ -229,51 +229,46 @@ export class AccountController {
         realAmountBigInt,
       );
       if (!paymentWallet) {
-        throw new Error('The system is busy');
+        throw new Error('The system is busy.');
       }
 
       const amountUsd = amount * rate;
-      const transaction = await this.transactionService.create({
-        userId: user.id,
-        paymentWalletId: paymentWallet.id,
-        userAddress: user.walletAddress,
-        walletBalance: paymentWallet.balance,
-        amount: amountBigInt,
-        amountUsd,
-        exchangeRate: rate,
-        coin: 'BTCO2', // TODO: Only withdraw BTCO2
-        status: TransactStatusEnum.Pending,
-      });
-
+      let txHash: { hash: string };
       try {
-        const txHash = await this.ethersService.sendBTCO2Token(
+        txHash = await this.ethersService.sendBTCO2Token(
           paymentWallet,
           user.walletAddress,
           realAmount.toString(),
         );
-        // fetch account balance again
-        const accountBalance =
-          await this.paymentWalletService.syncAccountBalance(paymentWallet);
-
-        await this.dataSource.transaction(async (tx) => {
-          await tx.getRepository(User).update(user.id, {
-            balance: userBalance - amountUsd,
-          });
-          await tx.getRepository(Transaction).update(transaction.id, {
-            status: TransactStatusEnum.Success,
-            txHash: txHash.hash,
-            walletBalance: accountBalance ? accountBalance.balance : null,
-            userAddress: user.walletAddress,
-          });
-        });
-        this.referralCommissionService.addReferralCommission(sub, amount);
       } catch (error) {
         console.error(error);
-        await this.dataSource
-          .getRepository(Transaction)
-          .update(transaction.id, { status: TransactStatusEnum.Error });
+        throw new Error('The system is busy.');
       }
+      // fetch account balance again
+      const accountBalance = await this.paymentWalletService.syncAccountBalance(
+        paymentWallet,
+      );
+
+      await this.dataSource.transaction(async (tx) => {
+        await tx.getRepository(User).update(user.id, {
+          balance: userBalance - amountUsd,
+        });
+        await tx.getRepository(Transaction).save({
+          userId: user.id,
+          paymentWalletId: paymentWallet.id,
+          userAddress: user.walletAddress,
+          amount: amountBigInt,
+          amountUsd,
+          exchangeRate: rate,
+          coin: 'BTCO2', // TODO: Only withdraw BTCO2
+          status: TransactStatusEnum.Success,
+          txHash: txHash?.hash,
+          walletBalance: accountBalance ? accountBalance.balance : null,
+        });
+      });
+      this.referralCommissionService.addReferralCommission(sub, amount);
     } catch (error) {
+      console.error(error);
       throw new BadRequestException(error.message);
     }
   }

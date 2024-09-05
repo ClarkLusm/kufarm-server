@@ -91,7 +91,7 @@ export class UserService extends BaseService<User> {
     return this.findAndCount({
       where: {
         referralPath: Like(`${referralPath}%`),
-        id: Not(userId)
+        id: Not(userId),
       },
       select: {
         id: true,
@@ -121,10 +121,10 @@ export class UserService extends BaseService<User> {
         userId,
       );
 
-    if (userProducts.length && user.income < user.maxOut) {
-      const daysDuration = moment().diff(user.syncAt, 'day', true);
-      let totalIncome = 0,
-        [dailyIncome, monthlyIncome, hashPower] = userProducts.reduce(
+    if (userProducts.length) {
+      if (user.income < user.maxOut) {
+        const daysDuration = moment().diff(user.syncAt, 'day', true);
+        const [dailyIncome, monthlyIncome, hashPower] = userProducts.reduce(
           (a, b) => [
             a[0] + Number(b.dailyIncome),
             a[1] + Number(b.monthlyIncome),
@@ -133,54 +133,52 @@ export class UserService extends BaseService<User> {
           [0, 0, 0],
         );
 
-      await this.dataSource.transaction(async (tx) => {
-        for (let i = 0; i < userProducts.length; i++) {
-          const up: UserProduct = userProducts[i],
-            upIncome = Number(up.income),
-            upMonthlyIncome = Number(up.monthlyIncome),
-            upDailyIncome = Number(up.dailyIncome);
+        let income = daysDuration * dailyIncome;
+        const up: UserProduct = userProducts[0],
+          upIncome = Number(up.income),
+          incomeNeedToMax = up.maxOut - upIncome;
 
-          const income = daysDuration * upDailyIncome;
-          const incomeNeedToMax = up.maxOut - upIncome;
-          const reachMax = income > incomeNeedToMax; // true: the machine is fully
+        const reachMax = income >= incomeNeedToMax; // true: the machine is fully
+        if (reachMax) income = incomeNeedToMax;
 
+        await this.dataSource.transaction(async (tx) => {
           await tx.getRepository(UserProduct).update(up.id, {
-            income: reachMax ? up.maxOut : (Number(up.income) + income),
+            income: reachMax ? up.maxOut : upIncome + income,
             status: reachMax
               ? UserProductStatusEnum.Stop
               : UserProductStatusEnum.Activated,
           });
 
-          if (reachMax) {
-            dailyIncome -= upDailyIncome;
-            monthlyIncome -= upMonthlyIncome;
-            hashPower -= up.hashPower;
-            totalIncome += incomeNeedToMax;
-          } else {
-            totalIncome += income;
-            break;
+          // Reach user maxout
+          if (userData.income + income > user.maxOut) {
+            income = user.maxOut - userData.income;
           }
+          // Update user data
+          userData.income += income;
+          userData.balance += income;
+          await tx.getRepository(User).update(userId, userData);
+        });
+
+        if (reachMax) {
+          return await this.syncBalance(userId);
         }
 
-        // Update user data
-        if (totalIncome) {
-          userData.income += totalIncome;
-          userData.balance += totalIncome;
-        }
-        if (userData.income > user.maxOut) {
-          userData.income = user.maxOut;
-        }
-        await tx.getRepository(User).update(userId, userData);
-      });
-
-      return {
-        dailyIncome,
-        monthlyIncome,
-        hashPower,
-        maxOut: user.maxOut,
-        income: userData.income,
-        balance: userData.balance,
-      };
+        return {
+          dailyIncome,
+          monthlyIncome,
+          hashPower,
+          maxOut: user.maxOut,
+          income: userData.income,
+          balance: userData.balance,
+        };
+      } else {
+        await this.dataSource.getRepository(UserProduct).update(
+          userProducts.map((up) => up.id),
+          {
+            status: UserProductStatusEnum.Stop,
+          },
+        );
+      }
     }
     return {
       dailyIncome: 0,

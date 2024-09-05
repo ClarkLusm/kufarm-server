@@ -6,6 +6,7 @@ import { BaseService } from '../../common/base/base.service';
 import { SettingService } from '../settings/setting.service';
 import { User } from '../users/user.entity';
 import { ReferralCommission } from './referral-commission.entity';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class ReferralCommissionService extends BaseService<ReferralCommission> {
@@ -44,20 +45,27 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                   conditionSetting = settings?.condition;
                 const conditionLevel: number = conditionSetting?.[`f${level}`]; // Need n F1 to receive commission
                 const incomePercent: number = commissionSetting?.[`f${level}`];
+
                 // Enough the condition
                 if (user.countF1Referral >= conditionLevel && incomePercent) {
                   const commission = amount * incomePercent * 1e16, // 1e16 = /100 * 1e18 BITCO2 decimals
-                    userCommission = user.referralCommission + commission;
+                    userCommission =
+                      Number(user.referralCommission) +
+                      Number(ethers.formatUnits(commission.toString(), 18));
+
                   const referralCom = await this.findOneBy({
                     userId,
                     receiverId: user.id,
                   });
                   this.dataSource.transaction(async (tx) => {
                     if (referralCom) {
-                      const referralComValue = referralCom.btco2Value + commission;
+                      const referralComValue =
+                        referralCom.btco2Value + commission;
                       await tx
                         .getRepository(ReferralCommission)
-                        .update(referralCom.id, { btco2Value: referralComValue });
+                        .update(referralCom.id, {
+                          btco2Value: referralComValue,
+                        });
                     } else {
                       await tx.getRepository(ReferralCommission).save({
                         userId,
@@ -77,6 +85,8 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
           );
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   }
 }

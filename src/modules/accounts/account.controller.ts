@@ -21,7 +21,6 @@ import {
 } from '../../common/enums';
 import { numberToBigInt } from '../../common/helpers/number.utils';
 import { getContractToken } from '../../common/helpers/token.helper';
-import { NETWORKS } from '../../common/constants';
 import { SettingService } from '../settings/setting.service';
 import { PaymentWalletService } from '../payment-wallets/payment-wallet.service';
 import { UserProductService } from '../user-products/user-product.service';
@@ -108,6 +107,7 @@ export class AccountController {
               ),
               updatedAt: null,
             }),
+            referralPath: undefined,
           })),
           total,
         };
@@ -123,6 +123,7 @@ export class AccountController {
           r.referralPath,
         ),
         updatedAt: null,
+        referralPath: undefined,
       })),
       total,
     };

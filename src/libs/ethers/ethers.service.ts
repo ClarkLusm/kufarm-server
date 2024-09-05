@@ -71,10 +71,9 @@ export class EthersService {
       wallet.coin,
       wallet.secret,
     );
-    const tx = await contract.transfer(
-      recipientAddress,
-      ethers.parseUnits(amount, 18),
-    );
+    const amountBigInt = ethers.parseUnits(amount, 18);
+    await contract.approve(wallet.walletAddress, amountBigInt);
+    const tx = await contract.transfer(recipientAddress, amountBigInt);
     await tx.wait();
     return tx;
   }

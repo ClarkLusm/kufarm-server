@@ -96,13 +96,7 @@ export class UserService extends BaseService<User> {
       select: {
         id: true,
         email: true,
-        referredUser: {
-          btco2Value: true,
-          level: true,
-        },
-      },
-      relations: {
-        referredUser: true,
+        referralPath: true,
       },
       skip: offset,
       take: limit,
@@ -206,5 +200,14 @@ export class UserService extends BaseService<User> {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  /**
+   * @param parentPath // 1/
+   * @param childPath // 1/2/3
+   * @returns 2
+   */
+  getReferralLevelByPath(parentPath: string, childPath: string) {
+    return childPath?.replace(parentPath, '')?.split('/')?.length - 1;
   }
 }

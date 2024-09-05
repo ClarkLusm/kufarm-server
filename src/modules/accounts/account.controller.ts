@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import moment from 'moment';
 import {
   BadRequestException,
@@ -76,7 +76,56 @@ export class AccountController {
       offset,
       limit,
     );
-    return { data, total };
+    if (total) {
+      const referralCommissions = await this.referralCommissionService.find({
+        select: {
+          userId: true,
+          btco2Value: true,
+          level: true,
+          updatedAt: true,
+        },
+        where: {
+          userId: In(data.map((r) => r.id)),
+          receiverId: sub,
+        },
+      });
+
+      const referralMap = new Map();
+      for (let index = 0; index < referralCommissions.length; index++) {
+        const { userId, ...value } = referralCommissions[index];
+        referralMap.set(userId, value);
+      }
+
+      if (referralCommissions.length) {
+        return {
+          data: data.map((r) => ({
+            ...r,
+            ...(referralMap.get(r.id) || {
+              btco2Value: 0,
+              level: this.userService.getReferralLevelByPath(
+                user.referralPath,
+                r.referralPath,
+              ),
+              updatedAt: null,
+            }),
+          })),
+          total,
+        };
+      }
+    }
+
+    return {
+      data: data.map((r) => ({
+        ...r,
+        btco2Value: 0,
+        level: this.userService.getReferralLevelByPath(
+          user.referralPath,
+          r.referralPath,
+        ),
+        updatedAt: null,
+      })),
+      total,
+    };
   }
 
   @Get('/my-products')

@@ -207,7 +207,7 @@ export class AccountController {
   async withdraw(@Req() req, @Body() body: RequestWithdrawDto) {
     try {
       const { sub } = req.user;
-      const { amount } = body;
+      const { amount, transactionFee } = body;
       const { balance: userBalance } = await this.userService.syncBalance(sub);
       const user = await this.userService.getById(sub);
 
@@ -215,7 +215,9 @@ export class AccountController {
         process.env.NODE_ENV === 'production' ? 56 : 97,
         'BTCO2',
       );
+      const realAmount = amount - transactionFee;
       const amountBigInt = numberToBigInt(amount, token.decimals);
+      const realAmountBigInt = numberToBigInt(realAmount, token.decimals);
       const [tokenBalance, rate] = await this.settingService.convertUsdToBTCO2(
         userBalance,
       );
@@ -224,7 +226,7 @@ export class AccountController {
       }
 
       const paymentWallet = await this.paymentWalletService.getWalletPayout(
-        amountBigInt,
+        realAmountBigInt,
       );
       if (!paymentWallet) {
         throw new Error('The system is busy');
@@ -247,7 +249,7 @@ export class AccountController {
         const txHash = await this.ethersService.sendBTCO2Token(
           paymentWallet,
           user.walletAddress,
-          amount.toString(),
+          realAmount.toString(),
         );
         // fetch account balance again
         const accountBalance =

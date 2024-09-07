@@ -42,9 +42,13 @@ export class TransactionController {
           email: true,
           walletAddress: true,
         },
+        paymentWallet: {
+          walletAddress: true,
+        },
       },
       {
         user: true,
+        paymentWallet: true,
       },
     );
     return {

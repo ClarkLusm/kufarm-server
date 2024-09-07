@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 
 import { User } from '../users/user.entity';
+import { PaymentWallet } from '../payment-wallets/payment-wallet.entity';
 
 @Entity({ name: 'transaction' })
 export class Transaction {
@@ -57,4 +58,8 @@ export class Transaction {
   @ManyToOne(() => User, (user) => user.transactions)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @ManyToOne(() => PaymentWallet, (pw) => pw.transactions)
+  @JoinColumn({ name: 'payment_wallet_id' })
+  paymentWallet: PaymentWallet;
 }

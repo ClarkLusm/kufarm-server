@@ -272,7 +272,7 @@ export class AccountController {
         userBalance,
       );
 
-      const refCommission: number = user.referralCommission || 0;
+      const refCommission: number = Number(user.referralCommission || 0);
       const sumBalanceToken = refCommission + tokenBalance;
       if (sumBalanceToken < amount) {
         throw new Error('Your balance is not enough');

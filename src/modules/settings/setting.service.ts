@@ -24,7 +24,7 @@ export class SettingService extends BaseService<Setting> {
     return setting?.value;
   }
 
-  async convertUsdToBTCO2(usdAmount: number) {
+  async convertUsdToBTCO2(usdAmount: number): Promise<[BigInt, number]> {
     const exchangeRate = await this.getExchangeRate();
     if (!exchangeRate) {
       throw new Error('Cannot fetch exchange rate');
@@ -32,9 +32,9 @@ export class SettingService extends BaseService<Setting> {
     const {
       exchangeUsd: usdRate,
       exchangeToken: tokenRate,
-      exchangeFixed: fixed,
+      exchangeFixed: fixed, //TODO: Check fixed or not
     } = exchangeRate;
-    const rate = usdRate / tokenRate; // token to usd
+    const rate: number = usdRate / tokenRate; // token to usd
     const tokenBalance = numberToBigInt(usdAmount / rate, 18);
     return [tokenBalance, rate];
   }

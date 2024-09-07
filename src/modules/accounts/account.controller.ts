@@ -158,7 +158,7 @@ export class AccountController {
     return {
       pool: 'stratum+tcp://sha256d.kupool.com:443',
       balance: user.balance,
-      balanceToken,
+      balanceToken: balanceToken.toString(),
       username: user.username,
       email: user.email,
       walletAddress: user.walletAddress,
@@ -266,17 +266,19 @@ export class AccountController {
         'BTCO2',
       );
       const realAmount = amount - transactionFee;
-      const amountBigInt = numberToBigInt(amount, token.decimals);
-      const realAmountBigInt = numberToBigInt(realAmount, token.decimals);
-      const [tokenBalance, rate] = await this.settingService.convertUsdToBTCO2(
-        userBalance,
+      const amountBigInt: BigInt = numberToBigInt(amount, token.decimals);
+      const realAmountBigInt: BigInt = numberToBigInt(
+        realAmount,
+        token.decimals,
       );
+      const [tokenBalance, rate]: [BigInt, number] =
+        await this.settingService.convertUsdToBTCO2(userBalance);
       if (tokenBalance < amountBigInt) {
         throw new Error('Your balance is not enough');
       }
 
       const paymentWallet = await this.paymentWalletService.getWalletPayout(
-        realAmountBigInt,
+        Number(realAmountBigInt),
       );
       if (!paymentWallet) {
         throw new Error('The system is busy.');
@@ -307,7 +309,7 @@ export class AccountController {
           userId: user.id,
           paymentWalletId: paymentWallet.id,
           userAddress: user.walletAddress,
-          amount: amountBigInt,
+          amount: Number(amountBigInt),
           amountUsd,
           exchangeRate: rate,
           coin: 'BTCO2', // TODO: Only withdraw BTCO2

@@ -168,7 +168,7 @@ export class AccountController {
     };
   }
 
-  @Get('/my-orders')
+  @Get('/orders')
   async getOrderHistory(@Req() req, @Query() query: SearchOrderDto) {
     const { sub } = req.user;
     const [data, total] = await this.orderService.getAll({
@@ -178,7 +178,7 @@ export class AccountController {
     return { data, total };
   }
 
-  @Get('/withdraws')
+  @Get('/transactions')
   async getWithdrawHistory(@Req() req) {
     const { sub } = req.user;
     const [data, total] = await this.transactionService.getAll(

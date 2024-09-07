@@ -36,12 +36,12 @@ import { ReferralCommissionService } from '../referral-commissions/referral-comm
 import { UserProduct } from '../user-products/user-product.entity';
 import {
   CreateOrderDto,
+  PayOrderDto,
   RequestWithdrawDto,
   SearchOrderDto,
   SearchReferralDto,
   VerifyAccountDto,
 } from './dto';
-import { PayOrderDto } from './dto/pay-order.dto';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -152,7 +152,7 @@ export class AccountController {
     const { sub } = req.user;
     const miningInfo = await this.userService.syncBalance(sub);
     const user = await this.userService.getById(sub);
-    const [balanceToken] = await this.settingService.convertUsdToBTCO2(
+    const [balanceToken, rate] = await this.settingService.convertUsdAndBTCO2(
       user.balance,
     );
     return {
@@ -265,26 +265,28 @@ export class AccountController {
         process.env.NODE_ENV === 'production' ? 56 : 97,
         'BTCO2',
       );
-      const realAmount = amount - transactionFee;
       const amountBigInt: BigInt = numberToBigInt(amount, token.decimals);
-      const realAmountBigInt: BigInt = numberToBigInt(
-        realAmount,
-        token.decimals,
+      const realAmount = amount - transactionFee; //TODO: Should checking the transaction fee from the db
+
+      const [tokenBalance, rate] = await this.settingService.convertUsdAndBTCO2(
+        userBalance,
       );
-      const [tokenBalance, rate]: [BigInt, number] =
-        await this.settingService.convertUsdToBTCO2(userBalance);
-      if (tokenBalance < amountBigInt) {
+
+      const refCommission: number = user.referralCommission || 0;
+      const sumBalanceToken = refCommission + tokenBalance;
+      if (sumBalanceToken < amount) {
         throw new Error('Your balance is not enough');
       }
 
       const paymentWallet = await this.paymentWalletService.getWalletPayout(
-        Number(realAmountBigInt),
+        Number(numberToBigInt(realAmount, token.decimals)),
       );
       if (!paymentWallet) {
-        throw new Error('The system is busy.');
+        throw new Error(
+          'The system is busy. Please contact our support to resolve your issue!',
+        );
       }
 
-      const amountUsd = amount * rate;
       let txHash: { hash: string };
       try {
         txHash = await this.ethersService.sendBTCO2Token(
@@ -301,9 +303,33 @@ export class AccountController {
         paymentWallet,
       );
 
+      let balanceRemain = userBalance,
+        refCommissionRemain = refCommission,
+        [amountUsd] = await this.settingService.convertUsdAndBTCO2(
+          amount,
+          rate,
+          true,
+        );
+
+      if (refCommission >= amount) {
+        refCommissionRemain = refCommission - amount;
+      } else if (refCommission <= 0) {
+        balanceRemain -= amountUsd;
+      } else {
+        const amountRemain = amount - refCommission;
+        const [amountUsd] = await this.settingService.convertUsdAndBTCO2(
+          amountRemain,
+          rate,
+          true,
+        );
+        refCommissionRemain = 0;
+        balanceRemain -= amountUsd;
+      }
+
       await this.dataSource.transaction(async (tx) => {
         await tx.getRepository(User).update(user.id, {
-          balance: userBalance - amountUsd,
+          balance: balanceRemain,
+          referralCommission: refCommissionRemain,
         });
         await tx.getRepository(Transaction).save({
           userId: user.id,

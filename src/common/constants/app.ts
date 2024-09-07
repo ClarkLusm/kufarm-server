@@ -10,6 +10,9 @@ export const USERPRODUCT_EXPIRED = 3;
 export const SETTING_REFERRAL_INCOME = 'referral_income';
 export const SETTING_SYSTEM = 'systems';
 
+export const BITCO2_DECIMALS = 18;
+export const USDT_DECIMALS = 18;
+
 export const ETH_TOKENS = {
   USDT: {
     decimals: 18,
@@ -20,12 +23,12 @@ export const ETH_TOKENS = {
 
 export const BNB_TOKENS = {
   BTCO2: {
-    decimals: 18,
+    decimals: BITCO2_DECIMALS,
     symbol: 'BTCO2',
     address: '0xb846CAd46411d761d69A7F9c29FA37c7aB157Ce4',
   },
   USDT: {
-    decimals: 18,
+    decimals: USDT_DECIMALS,
     symbol: 'USDT',
     address: '0x55d398326f99059fF775485246999027B3197955',
   },
@@ -33,12 +36,12 @@ export const BNB_TOKENS = {
 
 export const BNB_TESTNET_TOKENS = {
   BTCO2: {
-    decimals: 18,
+    decimals: BITCO2_DECIMALS,
     symbol: 'BTCO2',
     address: '0x480BD7c61B7D0AD02Ab7c57e4cdab1482A9F43E7',
   },
   USDT: {
-    decimals: 18,
+    decimals: USDT_DECIMALS,
     symbol: 'USDT',
     address: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
   },
@@ -46,7 +49,7 @@ export const BNB_TESTNET_TOKENS = {
 
 export const SEPOLIA_TOKENS = {
   USDT: {
-    decimals: 18,
+    decimals: USDT_DECIMALS,
     symbol: 'USDT',
     address: '',
   },

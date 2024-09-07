@@ -1,13 +1,3 @@
-declare global {
-  interface BigInt {
-    toJSON(): Number;
-  }
-}
-
-BigInt.prototype.toJSON = function () {
-  return Number(this);
-};
-
 export const numberToBigInt = (num: number, decimal: number): BigInt => {
   const numStr = num.toString();
   const countDecimals = numStr.split('.')?.[1]?.length || 0;

@@ -1,9 +1,12 @@
-import { IsNumber } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsInt, IsNumber } from 'class-validator';
 
 export class RequestWithdrawDto {
-  @IsNumber()
+  @ApiProperty()
+  @IsInt({ message: 'Amount is invalid number' })
   amount: number;
 
+  @ApiProperty()
   @IsNumber()
   transactionFee: number;
 }

@@ -10,6 +10,7 @@ import {
   Repository,
   UpdateResult,
 } from 'typeorm';
+import { PickKeysByType } from 'typeorm/common/PickKeysByType';
 
 import { PAGESIZE_DEFAULT, PAGE_DEFAULT } from '../constants/app';
 
@@ -91,4 +92,7 @@ export class BaseService<T extends ObjectLiteral> {
   countBy = (query: any) => this.repository.countBy(query);
 
   save = (data: T) => this.repository.save(data);
+
+  sum = (columnName: PickKeysByType<T, number>, query: any) =>
+    this.repository.sum(columnName, query);
 }

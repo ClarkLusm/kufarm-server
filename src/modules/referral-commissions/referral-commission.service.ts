@@ -6,7 +6,6 @@ import { BaseService } from '../../common/base/base.service';
 import { SettingService } from '../settings/setting.service';
 import { User } from '../users/user.entity';
 import { ReferralCommission } from './referral-commission.entity';
-import { ethers } from 'ethers';
 
 @Injectable()
 export class ReferralCommissionService extends BaseService<ReferralCommission> {
@@ -48,10 +47,9 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
 
                 // Enough the condition
                 if (user.countF1Referral >= conditionLevel && incomePercent) {
-                  const commission = amount * incomePercent * 1e16, // 1e16 = /100 * 1e18 BITCO2 decimals
+                  const commission = amount * (incomePercent / 100),
                     userCommission =
-                      Number(user.referralCommission) +
-                      Number(ethers.formatUnits(commission.toString(), 18));
+                      Number(user.referralCommission) + commission;
 
                   const referralCom = await this.findOneBy({
                     userId,
@@ -60,10 +58,12 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                   this.dataSource.transaction(async (tx) => {
                     if (referralCom) {
                       const referralComValue =
-                        referralCom.btco2Value + commission;
+                          referralCom.btco2Value + commission,
+                        withdrawValue = referralCom.withdrawValue + amount;
                       await tx
                         .getRepository(ReferralCommission)
                         .update(referralCom.id, {
+                          withdrawValue,
                           btco2Value: referralComValue,
                         });
                     } else {
@@ -71,6 +71,7 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                         userId,
                         receiverId: user.id,
                         level,
+                        withdrawValue: amount,
                         btco2Value: commission,
                         coin: 'BITCO2', //Fixed
                       });

@@ -106,8 +106,8 @@ export class UserService extends BaseService<User> {
   async syncBalance(userId: string) {
     const user = await this.getById(userId),
       userData = {
-        income: Number(user.income),
-        balance: Number(user.balance),
+        income: Number(user.income || 0),
+        balance: Number(user.balance || 0),
         syncAt: new Date(),
       },
       userProducts = await this.userProductService.getRunningProductsByUserId(

@@ -80,6 +80,7 @@ export class AccountController {
         select: {
           userId: true,
           btco2Value: true,
+          withdrawValue: true,
           level: true,
           updatedAt: true,
         },
@@ -96,6 +97,12 @@ export class AccountController {
       }
 
       if (referralCommissions.length) {
+        const withdrawTotal = await this.referralCommissionService.sum(
+          'withdrawValue',
+          {
+            receiverId: sub,
+          },
+        );
         return {
           data: data.map((r) => ({
             ...r,
@@ -110,6 +117,7 @@ export class AccountController {
             referralPath: undefined,
           })),
           total,
+          withdrawTotal,
         };
       }
     }
@@ -126,6 +134,7 @@ export class AccountController {
         referralPath: undefined,
       })),
       total,
+      withdrawTotal: 0,
     };
   }
 

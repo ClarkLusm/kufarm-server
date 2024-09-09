@@ -26,7 +26,10 @@ export class ReferralCommission {
   @Column({ nullable: false })
   level: number;
 
-  @Column({ nullable: false, name: 'btco2_value' })
+  @Column({ nullable: false, name: 'withdraw_value', type: 'numeric' })
+  withdrawValue: number;
+
+  @Column({ nullable: false, name: 'btco2_value', type: 'numeric' })
   btco2Value: number;
 
   @CreateDateColumn({ name: 'created_at' })

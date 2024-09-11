@@ -12,6 +12,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { ethers } from 'ethers';
 
 import { EthersService } from '../../libs/ethers/ethers.service';
 import {
@@ -21,6 +22,7 @@ import {
 } from '../../common/enums';
 import { numberToBigInt } from '../../common/helpers/number.utils';
 import { getContractToken } from '../../common/helpers/token.helper';
+import { USDT_DECIMALS } from '../../common/constants';
 import { SettingService } from '../settings/setting.service';
 import { PaymentWalletService } from '../payment-wallets/payment-wallet.service';
 import { UserProductService } from '../user-products/user-product.service';
@@ -76,16 +78,16 @@ export class AccountController {
       limit,
     );
     if (total) {
+      const referralUserIds = data.map((r) => r.id);
       const referralCommissions = await this.referralCommissionService.find({
         select: {
           userId: true,
           btco2Value: true,
-          withdrawValue: true,
           level: true,
           updatedAt: true,
         },
         where: {
-          userId: In(data.map((r) => r.id)),
+          userId: In(referralUserIds),
           receiverId: sub,
         },
       });
@@ -97,12 +99,11 @@ export class AccountController {
       }
 
       if (referralCommissions.length) {
-        const withdrawTotal = await this.referralCommissionService.sum(
-          'withdrawValue',
-          {
-            receiverId: sub,
-          },
-        );
+        const sumAmount =
+          (await this.orderService.sum('amount', {
+            userId: In(referralUserIds),
+            status: OrderStatusEnum.Success,
+          })) || 0;
         return {
           data: data.map((r) => ({
             ...r,
@@ -117,7 +118,9 @@ export class AccountController {
             referralPath: undefined,
           })),
           total,
-          withdrawTotal,
+          investTotal: Number(
+            ethers.formatUnits(sumAmount.toString(), USDT_DECIMALS),
+          ),
         };
       }
     }
@@ -134,7 +137,7 @@ export class AccountController {
         referralPath: undefined,
       })),
       total,
-      withdrawTotal: 0,
+      investTotal: 0,
     };
   }
 
@@ -443,3 +446,4 @@ export class AccountController {
     });
   }
 }
+

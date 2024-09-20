@@ -257,7 +257,7 @@ export class AccountController {
         expiredAt: moment().add(30, 'minutes').format(),
       });
     }
-    const token = getContractToken(order.chainId, order.coin);
+    const token = getContractToken(order.chainId, wallet.coin);
     if (token) {
       order['tokenAddress'] = token.address;
       order['tokenDecimals'] = token.decimals;

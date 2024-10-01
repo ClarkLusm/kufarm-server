@@ -84,6 +84,6 @@ export class PublicController {
 
   @Get('/app-notify')
   async getAppNotify() {
-    return this.notifyService.getAppNotify();
+    return await this.notifyService.getAppNotify();
   }
 }

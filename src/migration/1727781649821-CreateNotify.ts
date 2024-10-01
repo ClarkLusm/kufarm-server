@@ -10,9 +10,9 @@ export class CreateNotify1727781649821
       `CREATE TABLE IF NOT EXISTS "notify" (
         "id" UUID DEFAULT uuid_generate_v4(),
         "title" VARCHAR,
-        "description" VARCHAR,
+        "description" TEXT,
         "type" SMALLINT,
-        "platform" VARCHAR(10)
+        "platform" VARCHAR(10),
         "condition" JSONB,
         "auto" BOOLEAN DEFAULT false,
         "published" BOOLEAN DEFAULT false,

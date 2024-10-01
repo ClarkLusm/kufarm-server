@@ -22,4 +22,7 @@ export class UpdateNotifyDto {
 
   @IsOptional()
   endAt: Date;
+
+  @IsOptional()
+  condition: any;
 }

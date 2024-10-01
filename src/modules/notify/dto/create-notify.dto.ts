@@ -18,8 +18,11 @@ export class CreateNotifyDto {
   published: boolean;
 
   @IsOptional()
-  startAt: Date
+  startAt: Date;
 
   @IsOptional()
-  endAt: Date
+  endAt: Date;
+
+  @IsOptional()
+  condition: any;
 }

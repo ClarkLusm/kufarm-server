@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, LessThan, MoreThan, Repository } from 'typeorm';
+import { In, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { BaseService } from '../../common/base/base.service';
 import { Notify } from './notify.entity';
@@ -19,8 +19,8 @@ export class NotifyService extends BaseService<Notify> {
     return this.repository.findOneBy({
       published: true,
       platform: In([PlatformEnum.app, PlatformEnum.web]),
-      startAt: LessThan(new Date()),
-      endAt: MoreThan(new Date()),
+      startAt: LessThanOrEqual(new Date()),
+      endAt: MoreThanOrEqual(new Date()),
     });
   }
 }

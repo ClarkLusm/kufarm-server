@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 
 import { NotifyService } from './notify.service';
 import { UpdateNotifyDto } from './dto/update-notify.dto';
@@ -9,8 +18,9 @@ export class NotifyController {
   constructor(private readonly service: NotifyService) {}
 
   @Get()
-  getList() {
-    return this.service.find({});
+  async getList(@Query() query) {
+    const [data, total] = await this.service.getAll(query);
+    return { data, total };
   }
 
   @Post()
@@ -18,13 +28,11 @@ export class NotifyController {
     return this.service.create(body);
   }
 
-  @Post()
-  updateNotify(@Param() id: string, @Body() body: UpdateNotifyDto) {
-    return this.service.update(
-      {
-        id: id,
-      },
-      body,
-    );
+  @Put(':id')
+  updateNotify(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() data: UpdateNotifyDto,
+  ) {
+    return this.service.updateById(id, data);
   }
 }

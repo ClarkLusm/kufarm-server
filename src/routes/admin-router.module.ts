@@ -8,6 +8,7 @@ import { PaymentWalletModule } from '../modules/payment-wallets/payment-wallet.m
 import { SettingModule } from '../modules/settings/setting.module';
 import { OrderModule } from '../modules/orders/order.module';
 import { AdminAuthModule } from '../modules/admin-auth/admin-auth.module';
+import { NotifyModule } from '../modules/notify/notify.module';
 
 const routes: Routes = [
   {
@@ -19,6 +20,7 @@ const routes: Routes = [
       { path: '/wallets', module: PaymentWalletModule },
       { path: '/orders', module: OrderModule },
       { path: '/settings', module: SettingModule },
+      { path: '/notifies', module: NotifyModule },
       { path: '/', module: AdminAuthModule },
     ],
   },

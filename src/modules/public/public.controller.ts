@@ -3,6 +3,7 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { PaymentWalletService } from '../payment-wallets/payment-wallet.service';
 import { ProductService } from '../products/product.service';
 import { SettingService } from '../settings/setting.service';
+import { NotifyService } from '../notify/notify.service';
 
 @Controller()
 export class PublicController {
@@ -10,6 +11,7 @@ export class PublicController {
     private readonly productService: ProductService,
     private readonly paymentWalletService: PaymentWalletService,
     private readonly settingService: SettingService,
+    private readonly notifyService: NotifyService,
   ) {}
 
   @Get('/products')
@@ -78,5 +80,10 @@ export class PublicController {
   @Get('/app-settings')
   async getAppSettings() {
     return this.settingService.getAppSettings();
+  }
+
+  @Get('/app-notify')
+  async getAppNotify() {
+    return this.notifyService.getAppNotify();
   }
 }

@@ -13,6 +13,11 @@ import { NotifyService } from './notify.service';
 import { UpdateNotifyDto } from './dto/update-notify.dto';
 import { CreateNotifyDto } from './dto/create-notify.dto';
 
+const conditionDefault = {
+  access: '',
+  deplay: 0,
+};
+
 @Controller()
 export class NotifyController {
   constructor(private readonly service: NotifyService) {}
@@ -24,8 +29,11 @@ export class NotifyController {
   }
 
   @Post()
-  createNotify(@Body() body: CreateNotifyDto) {
-    return this.service.create(body);
+  createNotify(@Body() data: CreateNotifyDto) {
+    return this.service.create({
+      ...data,
+      condition: { ...conditionDefault, ...data.condition },
+    });
   }
 
   @Put(':id')
@@ -33,6 +41,9 @@ export class NotifyController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() data: UpdateNotifyDto,
   ) {
-    return this.service.updateById(id, data);
+    return this.service.updateById(id, {
+      ...data,
+      condition: { ...conditionDefault, ...data.condition },
+    });
   }
 }

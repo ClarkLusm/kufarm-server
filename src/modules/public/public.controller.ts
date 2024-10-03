@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req } from '@nestjs/common';
 
 import { PaymentWalletService } from '../payment-wallets/payment-wallet.service';
 import { ProductService } from '../products/product.service';
@@ -78,12 +78,14 @@ export class PublicController {
   }
 
   @Get('/app-settings')
-  async getAppSettings() {
+  getAppSettings() {
     return this.settingService.getAppSettings();
   }
 
   @Get('/app-notify')
-  async getAppNotify() {
-    return await this.notifyService.getAppNotify();
+  getAppNotify(@Query() query) {
+    return this.notifyService.getAppNotify({
+      access: query.user_logged == 1 ? 'user' : 'guest',
+    });
   }
 }

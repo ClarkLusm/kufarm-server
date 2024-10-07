@@ -98,31 +98,30 @@ export class AccountController {
         referralMap.set(userId, value);
       }
 
-      if (referralCommissions.length) {
-        const sumAmount =
-          (await this.orderService.sum('amount', {
-            userId: In(referralUserIds),
-            status: OrderStatusEnum.Success,
-          })) || 0;
-        return {
-          data: data.map((r) => ({
-            ...r,
-            ...(referralMap.get(r.id) || {
-              btco2Value: 0,
-              level: this.userService.getReferralLevelByPath(
-                user.referralPath,
-                r.referralPath,
-              ),
-              updatedAt: null,
-            }),
-            referralPath: undefined,
-          })),
-          total,
-          investTotal: Number(
-            ethers.formatUnits(sumAmount.toString(), USDT_DECIMALS),
-          ),
-        };
-      }
+      const sumAmount =
+        (await this.orderService.sum('amount', {
+          userId: In(referralUserIds),
+          status: OrderStatusEnum.Success,
+        })) || 0;
+
+      return {
+        data: data.map((r) => ({
+          ...r,
+          ...(referralMap.get(r.id) || {
+            btco2Value: 0,
+            level: this.userService.getReferralLevelByPath(
+              user.referralPath,
+              r.referralPath,
+            ),
+            updatedAt: null,
+          }),
+          referralPath: undefined,
+        })),
+        total,
+        investTotal: Number(
+          ethers.formatUnits(sumAmount.toString(), USDT_DECIMALS),
+        ),
+      };
     }
 
     return {
@@ -446,4 +445,3 @@ export class AccountController {
     });
   }
 }
-

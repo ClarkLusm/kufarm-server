@@ -20,6 +20,7 @@ import {
   TransactStatusEnum,
   UserProductStatusEnum,
 } from '../../common/enums';
+import { decryptedWalletKey } from '../../utils';
 import { numberToBigInt } from '../../common/helpers/number.utils';
 import { getContractToken } from '../../common/helpers/token.helper';
 import { USDT_DECIMALS } from '../../common/constants';
@@ -300,6 +301,9 @@ export class AccountController {
 
       let txHash: { hash: string };
       try {
+        if (paymentWallet.secret) {
+          paymentWallet.secret = decryptedWalletKey(paymentWallet.secret);
+        }
         txHash = await this.ethersService.sendBTCO2Token(
           paymentWallet,
           user.walletAddress,

@@ -10,6 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 
+import { encryptedWalletKey } from '../../utils';
 import { EthersService } from '../../libs/ethers/ethers.service';
 import { NETWORKS } from '../../common/constants';
 import { PaymentWalletService } from './payment-wallet.service';
@@ -26,7 +27,11 @@ export class PaymentWalletController {
 
   @Get('/')
   async getList(@Query() query: SearchPaymentWalletDto) {
-    const [data, total] = await this.service.getAll(query);
+    const [rows, total] = await this.service.getAll(query);
+    const data = rows.map((row) => ({
+      ...row,
+      secret: row.secret ? '**********' : null,
+    }));
     return { data, total, networks: NETWORKS };
   }
 
@@ -37,6 +42,9 @@ export class PaymentWalletController {
       body.walletAddress,
       body.coin,
     );
+    if (body.secret) {
+      body.secret = encryptedWalletKey(body.secret);
+    }
     return this.service.create({ ...body, balance: Number(balance.balance) });
   }
 
@@ -54,6 +62,13 @@ export class PaymentWalletController {
       data.walletAddress || wallet.walletAddress,
       data.coin || wallet.coin,
     );
+    if (
+      data.secret &&
+      data.secret != wallet.secret &&
+      !data.secret.startsWith('***')
+    ) {
+      data.secret = encryptedWalletKey(data.secret);
+    }
     await this.service.updateById(id, {
       ...data,
       balance: Number(balance.balance),

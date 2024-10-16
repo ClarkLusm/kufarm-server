@@ -67,7 +67,7 @@ export class PaymentWalletController {
       data.secret != wallet.secret &&
       !data.secret.startsWith('***')
     ) {
-      data.secret = encryptedWalletKey(data.secret);
+      // data.secret = encryptedWalletKey(data.secret);
     }
     await this.service.updateById(id, {
       ...data,

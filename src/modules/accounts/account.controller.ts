@@ -301,9 +301,9 @@ export class AccountController {
 
       let txHash: { hash: string };
       try {
-        if (paymentWallet.secret) {
-          paymentWallet.secret = decryptedWalletKey(paymentWallet.secret);
-        }
+        // if (paymentWallet.secret) {
+        //   paymentWallet.secret = decryptedWalletKey(paymentWallet.secret);
+        // }
         txHash = await this.ethersService.sendBTCO2Token(
           paymentWallet,
           user.walletAddress,

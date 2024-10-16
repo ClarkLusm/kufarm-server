@@ -397,6 +397,7 @@ export class AccountController {
         ...invoice,
         contractAddress: token.address,
         decimals: token.decimals,
+        amountText: Number(invoice.amount).toLocaleString('fullwide', { useGrouping: false }),
       };
     }
   }

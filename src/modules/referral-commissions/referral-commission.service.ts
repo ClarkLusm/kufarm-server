@@ -6,6 +6,9 @@ import { BaseService } from '../../common/base/base.service';
 import { SettingService } from '../settings/setting.service';
 import { User } from '../users/user.entity';
 import { ReferralCommission } from './referral-commission.entity';
+import { BTCO2_SYMBOL, KASPA_SYMBOL } from 'src/common/constants';
+
+const MAIN_TOKEN = process.env.MAIN_TOKEN;
 
 @Injectable()
 export class ReferralCommissionService extends BaseService<ReferralCommission> {
@@ -57,24 +60,31 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                   });
                   this.dataSource.transaction(async (tx) => {
                     if (referralCom) {
-                      const referralComValue =
-                          referralCom.btco2Value + commission,
-                        withdrawValue = referralCom.withdrawValue + amount;
+                      const values: any = {
+                        withdrawValue: referralCom.withdrawValue + amount,
+                      };
+                      if (MAIN_TOKEN == BTCO2_SYMBOL) {
+                        values.btco2Value = referralCom.btco2Value + commission;
+                      } else if (MAIN_TOKEN == KASPA_SYMBOL) {
+                        values.kasValue = referralCom.kasValue + commission;
+                      }
                       await tx
                         .getRepository(ReferralCommission)
-                        .update(referralCom.id, {
-                          withdrawValue,
-                          btco2Value: referralComValue,
-                        });
+                        .update(referralCom.id, values);
                     } else {
-                      await tx.getRepository(ReferralCommission).save({
+                      const values: any = {
                         userId,
                         receiverId: user.id,
                         level,
                         withdrawValue: amount,
-                        btco2Value: commission,
-                        coin: 'BITCO2', //Fixed
-                      });
+                        coin: MAIN_TOKEN,
+                      };
+                      if (MAIN_TOKEN == BTCO2_SYMBOL) {
+                        values.btco2Value = commission;
+                      } else if (MAIN_TOKEN == KASPA_SYMBOL) {
+                        values.kasValue = commission;
+                      }
+                      await tx.getRepository(ReferralCommission).save(values);
                     }
                     await tx
                       .getRepository(User)

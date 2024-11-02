@@ -31,4 +31,4 @@ docker-compose exec web yarn typeorm -- --help
 
 ## Requirements
 
-- Node 18
+- Node version >= 18

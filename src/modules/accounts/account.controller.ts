@@ -23,7 +23,12 @@ import {
 import { decryptedWalletKey } from '../../utils';
 import { numberToBigInt } from '../../common/helpers/number.utils';
 import { getContractToken } from '../../common/helpers/token.helper';
-import { USDT_DECIMALS } from '../../common/constants';
+import {
+  DECIMALS,
+  USDT_SYMBOL,
+  KASPA_SYMBOL,
+  BTCO2_SYMBOL,
+} from '../../common/constants';
 import { SettingService } from '../settings/setting.service';
 import { PaymentWalletService } from '../payment-wallets/payment-wallet.service';
 import { UserProductService } from '../user-products/user-product.service';
@@ -45,6 +50,8 @@ import {
   SearchReferralDto,
   VerifyAccountDto,
 } from './dto';
+
+const MAIN_TOKEN = process.env.MAIN_TOKEN;
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -84,6 +91,7 @@ export class AccountController {
         select: {
           userId: true,
           btco2Value: true,
+          kasValue: true,
           level: true,
           updatedAt: true,
         },
@@ -110,6 +118,7 @@ export class AccountController {
           ...r,
           ...(referralMap.get(r.id) || {
             btco2Value: 0,
+            kasValue: 0,
             level: this.userService.getReferralLevelByPath(
               user.referralPath,
               r.referralPath,
@@ -120,7 +129,7 @@ export class AccountController {
         })),
         total,
         investTotal: Number(
-          ethers.formatUnits(sumAmount.toString(), USDT_DECIMALS),
+          ethers.formatUnits(sumAmount.toString(), DECIMALS.USDT),
         ),
       };
     }
@@ -129,6 +138,7 @@ export class AccountController {
       data: data.map((r) => ({
         ...r,
         btco2Value: 0,
+        kasValue: 0,
         level: this.userService.getReferralLevelByPath(
           user.referralPath,
           r.referralPath,
@@ -164,11 +174,13 @@ export class AccountController {
     const { sub } = req.user;
     const miningInfo = await this.userService.syncBalance(sub);
     const user = await this.userService.getById(sub);
-    const [balanceToken, rate] = await this.settingService.convertUsdAndBTCO2(
+    console.log(user.balance);
+    const [balanceToken, rate] = await this.settingService.convertUsdAndToken(
       user.balance,
     );
+    const settings = await this.settingService.getAppSettings();
     return {
-      pool: 'stratum+tcp://sha256d.kupool.com:443',
+      pool: settings?.poolSrc ?? '',
       balance: user.balance,
       balanceToken: balanceToken.toString(),
       username: user.username,
@@ -187,7 +199,18 @@ export class AccountController {
       ...query,
       userId: sub,
     });
-    return { data, total };
+    const tokens = {
+      [USDT_SYMBOL]: {
+        decimals: DECIMALS.USDT,
+      },
+      [BTCO2_SYMBOL]: {
+        decimals: DECIMALS.BTCO2,
+      },
+      [KASPA_SYMBOL]: {
+        decimals: DECIMALS.KAS,
+      },
+    }
+    return { data, total, tokens };
   }
 
   @Get('/transactions')
@@ -233,6 +256,14 @@ export class AccountController {
       throw new BadRequestException('User invalid');
     }
 
+    const usdPrice = product.price * quantity;
+    let amount = 0;
+    if (wallet.coin === KASPA_SYMBOL) {
+      [amount] = await this.settingService.convertUsdAndKas(usdPrice);
+    } else if (wallet.coin === BTCO2_SYMBOL) {
+      [amount] = await this.settingService.convertUsdAndBTCO2(usdPrice);
+    }
+
     // Find a pending order
     let order = await this.orderService.getOrderPending(
       sub,
@@ -242,21 +273,27 @@ export class AccountController {
 
     // Create new order
     if (!order) {
-      const orderPrice = product.price * quantity;
       const token = getContractToken(wallet.chainId, wallet.coin);
-      const amount = orderPrice * Math.pow(10, token.decimals);
+      const amountBigInt = amount * Math.pow(10, token.decimals);
       order = await this.orderService.create({
         code: `${user.sid}${moment().format('YYMMDDHHmmss')}`,
         walletAddress: wallet.walletAddress,
         userId: sub,
         productId,
         quantity,
-        amount,
+        amount: amountBigInt,
         coin: wallet.coin,
         chainId: wallet.chainId,
-        expiredAt: moment().add(30, 'minutes').format(),
+        expiredAt: moment().add(300, 'minutes').format(),
       });
     }
+    // Update KAS price since the exchange is changed
+    else if (wallet.coin === KASPA_SYMBOL) {
+      const token = getContractToken(wallet.chainId, wallet.coin);
+      order.amount = amount * Math.pow(10, token.decimals);
+      this.orderService.updateById(order.id, { amount });
+    }
+
     const token = getContractToken(order.chainId, wallet.coin);
     if (token) {
       order['tokenAddress'] = token.address;
@@ -275,12 +312,12 @@ export class AccountController {
 
       const token = getContractToken(
         process.env.NODE_ENV === 'production' ? 56 : 97,
-        'BTCO2',
+        MAIN_TOKEN,
       );
       const amountBigInt: BigInt = numberToBigInt(amount, token.decimals);
       const realAmount = amount - transactionFee; //TODO: Should checking the transaction fee from the db
 
-      const [tokenBalance, rate] = await this.settingService.convertUsdAndBTCO2(
+      const [tokenBalance, rate] = await this.settingService.convertUsdAndToken(
         userBalance,
       );
 
@@ -301,10 +338,10 @@ export class AccountController {
 
       let txHash: { hash: string };
       try {
-        // if (paymentWallet.secret) {
-        //   paymentWallet.secret = decryptedWalletKey(paymentWallet.secret);
-        // }
-        txHash = await this.ethersService.sendBTCO2Token(
+        if (paymentWallet.secret) {
+          paymentWallet.secret = decryptedWalletKey(paymentWallet.secret);
+        }
+        txHash = await this.ethersService.sendBEP20Token(
           paymentWallet,
           user.walletAddress,
           realAmount.toString(),
@@ -320,7 +357,7 @@ export class AccountController {
 
       let balanceRemain = userBalance,
         refCommissionRemain = refCommission,
-        [amountUsd] = await this.settingService.convertUsdAndBTCO2(
+        [amountUsd] = await this.settingService.convertUsdAndToken(
           amount,
           rate,
           true,
@@ -332,7 +369,7 @@ export class AccountController {
         balanceRemain -= amountUsd;
       } else {
         const amountRemain = amount - refCommission;
-        const [amountUsd] = await this.settingService.convertUsdAndBTCO2(
+        const [amountUsd] = await this.settingService.convertUsdAndToken(
           amountRemain,
           rate,
           true,
@@ -353,7 +390,7 @@ export class AccountController {
           amount: Number(amountBigInt),
           amountUsd,
           exchangeRate: rate,
-          coin: 'BTCO2', // TODO: Only withdraw BTCO2
+          coin: MAIN_TOKEN,
           status: TransactStatusEnum.Success,
           txHash: txHash?.hash,
           walletBalance: accountBalance ? accountBalance.balance : null,
@@ -397,7 +434,9 @@ export class AccountController {
         ...invoice,
         contractAddress: token.address,
         decimals: token.decimals,
-        amountText: Number(invoice.amount).toLocaleString('fullwide', { useGrouping: false }),
+        amountText: Number(invoice.amount).toLocaleString('fullwide', {
+          useGrouping: false,
+        }),
       };
     }
   }

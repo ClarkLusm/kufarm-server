@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import path from 'path';
 import fs from 'fs';
 
-import { NETWORKS } from '../../common/constants';
+import { DECIMALS, NETWORKS } from '../../common/constants';
 import { getContractToken } from '../../common/helpers/token.helper';
 import { PaymentWallet } from '../../modules/payment-wallets/payment-wallet.entity';
 
@@ -61,7 +61,7 @@ export class EthersService {
     }
   }
 
-  async sendBTCO2Token(
+  async sendBEP20Token(
     wallet: PaymentWallet,
     recipientAddress: string,
     amount: string,
@@ -71,7 +71,7 @@ export class EthersService {
       wallet.coin,
       wallet.secret,
     );
-    const amountBigInt = ethers.parseUnits(amount, 18);
+    const amountBigInt = ethers.parseUnits(amount, DECIMALS[wallet.coin]);
     // await contract.approve(wallet.walletAddress, amountBigInt);
     const tx = await contract.transfer(recipientAddress, amountBigInt);
     await tx.wait();

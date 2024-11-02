@@ -116,6 +116,7 @@ export class SeedService {
           exchangeToken: 1,
           withdrawFeePercent: 1,
           maxOutNewUser: 3,
+          poolSrc: 'stratum+tcp://eu1.kaspa-pool.org:4444',
         },
       },
       {

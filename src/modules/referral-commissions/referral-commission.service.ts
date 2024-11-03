@@ -3,10 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 
 import { BaseService } from '../../common/base/base.service';
+import { SYMBOLS } from '../../common/constants';
 import { SettingService } from '../settings/setting.service';
 import { User } from '../users/user.entity';
 import { ReferralCommission } from './referral-commission.entity';
-import { BTCO2_SYMBOL, KASPA_SYMBOL } from 'src/common/constants';
 
 const MAIN_TOKEN = process.env.MAIN_TOKEN;
 
@@ -63,9 +63,9 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                       const values: any = {
                         withdrawValue: referralCom.withdrawValue + amount,
                       };
-                      if (MAIN_TOKEN == BTCO2_SYMBOL) {
+                      if (MAIN_TOKEN == SYMBOLS.BTCO2) {
                         values.btco2Value = referralCom.btco2Value + commission;
-                      } else if (MAIN_TOKEN == KASPA_SYMBOL) {
+                      } else if (MAIN_TOKEN == SYMBOLS.KASPA) {
                         values.kasValue = referralCom.kasValue + commission;
                       }
                       await tx
@@ -79,9 +79,9 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                         withdrawValue: amount,
                         coin: MAIN_TOKEN,
                       };
-                      if (MAIN_TOKEN == BTCO2_SYMBOL) {
+                      if (MAIN_TOKEN == SYMBOLS.BTCO2) {
                         values.btco2Value = commission;
-                      } else if (MAIN_TOKEN == KASPA_SYMBOL) {
+                      } else if (MAIN_TOKEN == SYMBOLS.KASPA) {
                         values.kasValue = commission;
                       }
                       await tx.getRepository(ReferralCommission).save(values);

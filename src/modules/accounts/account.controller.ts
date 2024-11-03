@@ -23,12 +23,7 @@ import {
 import { decryptedWalletKey } from '../../utils';
 import { numberToBigInt } from '../../common/helpers/number.utils';
 import { getContractToken } from '../../common/helpers/token.helper';
-import {
-  DECIMALS,
-  USDT_SYMBOL,
-  KASPA_SYMBOL,
-  BTCO2_SYMBOL,
-} from '../../common/constants';
+import { DECIMALS, SYMBOLS } from '../../common/constants';
 import { SettingService } from '../settings/setting.service';
 import { PaymentWalletService } from '../payment-wallets/payment-wallet.service';
 import { UserProductService } from '../user-products/user-product.service';
@@ -177,6 +172,7 @@ export class AccountController {
     const user = await this.userService.getById(sub);
     console.log(user.balance);
     const [balanceToken, rate] = await this.settingService.convertUsdAndToken(
+      MAIN_TOKEN,
       user.balance,
     );
     const settings = await this.settingService.getAppSettings();
@@ -201,14 +197,17 @@ export class AccountController {
       userId: sub,
     });
     const tokens = {
-      [USDT_SYMBOL]: {
+      [SYMBOLS.USDT]: {
         decimals: DECIMALS.USDT,
       },
-      [BTCO2_SYMBOL]: {
+      [SYMBOLS.BTCO2]: {
         decimals: DECIMALS.BTCO2,
       },
-      [KASPA_SYMBOL]: {
+      [SYMBOLS.KASPA]: {
         decimals: DECIMALS.KAS,
+      },
+      [SYMBOLS.CAKE]: {
+        decimals: DECIMALS.CAKE,
       },
     };
     return { data, total, tokens };
@@ -258,12 +257,10 @@ export class AccountController {
     }
 
     const usdPrice = product.price * quantity;
-    let amount = 0;
-    if (wallet.coin === KASPA_SYMBOL) {
-      [amount] = await this.settingService.convertUsdAndKas(usdPrice);
-    } else if (wallet.coin === BTCO2_SYMBOL) {
-      [amount] = await this.settingService.convertUsdAndBTCO2(usdPrice);
-    }
+    const [amount] = await this.settingService.convertUsdAndToken(
+      wallet.coin,
+      usdPrice,
+    );
 
     // Find a pending order
     let order = await this.orderService.getOrderPending(
@@ -289,7 +286,7 @@ export class AccountController {
       });
     }
     // Update KAS price since the exchange is changed
-    else if (wallet.coin === KASPA_SYMBOL) {
+    else if (wallet.coin === SYMBOLS.KASPA) {
       const token = getContractToken(wallet.chainId, wallet.coin);
       order.amount = amount * Math.pow(10, token.decimals);
       this.orderService.updateById(order.id, { amount });
@@ -319,6 +316,7 @@ export class AccountController {
       const realAmount = amount - transactionFee; //TODO: Should checking the transaction fee from the db
 
       const [tokenBalance, rate] = await this.settingService.convertUsdAndToken(
+        MAIN_TOKEN,
         userBalance,
       );
 
@@ -359,8 +357,8 @@ export class AccountController {
       let balanceRemain = userBalance,
         refCommissionRemain = refCommission,
         [amountUsd] = await this.settingService.convertUsdAndToken(
+          MAIN_TOKEN,
           amount,
-          rate,
           true,
         );
 
@@ -371,8 +369,8 @@ export class AccountController {
       } else {
         const amountRemain = amount - refCommission;
         const [amountUsd] = await this.settingService.convertUsdAndToken(
+          MAIN_TOKEN,
           amountRemain,
-          rate,
           true,
         );
         refCommissionRemain = 0;

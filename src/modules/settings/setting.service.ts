@@ -16,7 +16,7 @@ export class SettingService extends BaseService<Setting> {
     super(repository);
   }
 
-  async getExchangeRate() {
+  async getSettingExchangeRate() {
     // Check the rate config whether is fixed or not
     const setting = await this.repository.findOneBy({
       key: Constants.SETTING_SYSTEM,
@@ -25,52 +25,26 @@ export class SettingService extends BaseService<Setting> {
   }
 
   async convertUsdAndToken(
+    tokenSymbol: string,
     amount: number,
-    rateFromCache?: number,
-    bep20ToUsd: boolean = false,
-  ) {
-    if (Constants.BTCO2_SYMBOL === process.env.MAIN_TOKEN) {
-      return this.convertUsdAndBTCO2(amount, rateFromCache, bep20ToUsd);
-    }
-    if (Constants.KASPA_SYMBOL === process.env.MAIN_TOKEN) {
-      return this.convertUsdAndKas(amount, bep20ToUsd);
-    }
-    return [];
-  }
-
-  async convertUsdAndBTCO2(
-    amount: number,
-    rateFromCache?: number,
-    btco2ToUsd: boolean = false, //default convert from usd to btco2
+    tokenToUsd: boolean = false,
   ): Promise<[number, number]> {
-    let rate: number = rateFromCache || 0;
-    if (!rate || rate < 0) {
-      const exchangeRate = await this.getExchangeRate();
-      if (!exchangeRate) {
-        throw new Error('Cannot fetch the exchange rate');
-      }
-      const {
-        exchangeUsd: usdRate,
-        exchangeToken: tokenRate,
-        exchangeFixed: fixed, //TODO: Check fixed or not
-      } = exchangeRate;
-      rate = usdRate / tokenRate; // token to usd
-    }
-    return [btco2ToUsd ? amount * rate : amount / rate, rate];
-  }
-
-  async convertUsdAndKas(
-    amount: number,
-    kasToUsd: boolean = false, //default convert usdt to kas
-  ): Promise<[number, number]> {
-    let rate: number | undefined = await this.getExchangeUSDPrice(
-      Constants.KASPA_SYMBOL,
-    );
-    console.log('>>>>convertUsdAndKas::', rate);
-    if (!rate || rate < 0) {
+    let rate: number = 0;
+    const exchangeRate = await this.getSettingExchangeRate();
+    if (!exchangeRate) {
       throw new Error('Cannot fetch the exchange rate');
     }
-    return [kasToUsd ? amount * rate : amount / rate, rate];
+    const {
+      exchangeUsd: usdRate,
+      exchangeToken: tokenRate,
+      exchangeFixed: fixed,
+    } = exchangeRate;
+    if (fixed) {
+      rate = usdRate / tokenRate;
+    } else {
+      rate = await this.getExchangeUSDPrice(tokenSymbol);
+    }
+    return [tokenToUsd ? amount * rate : amount / rate, rate];
   }
 
   async getAppSettings() {
@@ -103,6 +77,7 @@ export class SettingService extends BaseService<Setting> {
       }
     } catch (error) {
       console.error('>>>getExchangePrice', error);
+      throw new Error('Cannot fetch exchange rate');
     }
   }
 }

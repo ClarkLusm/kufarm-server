@@ -107,11 +107,14 @@ export class AccountController {
         referralMap.set(userId, value);
       }
 
-      const sumAmount =
+      const sumAmount = (
         (await this.orderService.sum('amount', {
           userId: In(referralUserIds),
           status: OrderStatusEnum.Success,
-        })) || 0;
+        })) || 0
+      )
+        .toLocaleString()
+        .replace(/,/g, '');
 
       return {
         data: data.map((r) => ({
@@ -128,9 +131,7 @@ export class AccountController {
           referralPath: undefined,
         })),
         total,
-        investTotal: Number(
-          ethers.formatUnits(sumAmount.toString(), DECIMALS.USDT),
-        ),
+        investTotal: Number(ethers.formatUnits(sumAmount, DECIMALS.USDT)),
       };
     }
 
@@ -209,7 +210,7 @@ export class AccountController {
       [KASPA_SYMBOL]: {
         decimals: DECIMALS.KAS,
       },
-    }
+    };
     return { data, total, tokens };
   }
 

@@ -67,6 +67,8 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                         values.btco2Value = referralCom.btco2Value + commission;
                       } else if (MAIN_TOKEN == SYMBOLS.KASPA) {
                         values.kasValue = referralCom.kasValue + commission;
+                      } else if (MAIN_TOKEN == SYMBOLS.CAKE) {
+                        values.cakeValue = referralCom.cakeValue + commission;
                       }
                       await tx
                         .getRepository(ReferralCommission)
@@ -83,6 +85,8 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                         values.btco2Value = commission;
                       } else if (MAIN_TOKEN == SYMBOLS.KASPA) {
                         values.kasValue = commission;
+                      } else if (MAIN_TOKEN == SYMBOLS.CAKE) {
+                        values.cakeValue = commission;
                       }
                       await tx.getRepository(ReferralCommission).save(values);
                     }

@@ -87,6 +87,7 @@ export class AccountController {
           userId: true,
           btco2Value: true,
           kasValue: true,
+          cakeValue: true,
           level: true,
           updatedAt: true,
         },
@@ -117,6 +118,7 @@ export class AccountController {
           ...(referralMap.get(r.id) || {
             btco2Value: 0,
             kasValue: 0,
+            cakeValue: 0,
             level: this.userService.getReferralLevelByPath(
               user.referralPath,
               r.referralPath,
@@ -135,6 +137,7 @@ export class AccountController {
         ...r,
         btco2Value: 0,
         kasValue: 0,
+        cakeValue: 0,
         level: this.userService.getReferralLevelByPath(
           user.referralPath,
           r.referralPath,

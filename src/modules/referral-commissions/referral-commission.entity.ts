@@ -35,6 +35,9 @@ export class ReferralCommission {
   @Column({ nullable: false, name: 'kas_value', type: 'numeric' })
   kasValue: number;
 
+  @Column({ nullable: false, name: 'cake_value', type: 'numeric' })
+  cakeValue: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

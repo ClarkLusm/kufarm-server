@@ -39,6 +39,9 @@ export class PaymentWallet {
   image: string;
 
   @Column()
+  iv: string;
+
+  @Column()
   published: boolean;
 
   @CreateDateColumn({ name: 'created_at' })

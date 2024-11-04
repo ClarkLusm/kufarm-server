@@ -46,8 +46,6 @@ import {
   VerifyAccountDto,
 } from './dto';
 
-const MAIN_TOKEN = process.env.MAIN_TOKEN;
-
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class AccountController {
@@ -175,7 +173,7 @@ export class AccountController {
     const user = await this.userService.getById(sub);
     console.log(user.balance);
     const [balanceToken, rate] = await this.settingService.convertUsdAndToken(
-      MAIN_TOKEN,
+      process.env.MAIN_TOKEN,
       user.balance,
     );
     const settings = await this.settingService.getAppSettings();
@@ -313,13 +311,13 @@ export class AccountController {
 
       const token = getContractToken(
         process.env.NODE_ENV === 'production' ? 56 : 97,
-        MAIN_TOKEN,
+        process.env.MAIN_TOKEN,
       );
       const amountBigInt: BigInt = numberToBigInt(amount, token.decimals);
       const realAmount = amount - transactionFee; //TODO: Should checking the transaction fee from the db
 
       const [tokenBalance, rate] = await this.settingService.convertUsdAndToken(
-        MAIN_TOKEN,
+        process.env.MAIN_TOKEN,
         userBalance,
       );
 
@@ -341,7 +339,7 @@ export class AccountController {
       let txHash: { hash: string };
       try {
         if (paymentWallet.secret) {
-          paymentWallet.secret = decryptedWalletKey(paymentWallet.secret);
+          paymentWallet.secret = decryptedWalletKey(paymentWallet.secret, paymentWallet.iv);
         }
         txHash = await this.ethersService.sendBEP20Token(
           paymentWallet,
@@ -360,7 +358,7 @@ export class AccountController {
       let balanceRemain = userBalance,
         refCommissionRemain = refCommission,
         [amountUsd] = await this.settingService.convertUsdAndToken(
-          MAIN_TOKEN,
+          process.env.MAIN_TOKEN,
           amount,
           true,
         );
@@ -372,7 +370,7 @@ export class AccountController {
       } else {
         const amountRemain = amount - refCommission;
         const [amountUsd] = await this.settingService.convertUsdAndToken(
-          MAIN_TOKEN,
+          process.env.MAIN_TOKEN,
           amountRemain,
           true,
         );
@@ -392,7 +390,7 @@ export class AccountController {
           amount: Number(amountBigInt),
           amountUsd,
           exchangeRate: rate,
-          coin: MAIN_TOKEN,
+          coin: process.env.MAIN_TOKEN,
           status: TransactStatusEnum.Success,
           txHash: txHash?.hash,
           walletBalance: accountBalance ? accountBalance.balance : null,

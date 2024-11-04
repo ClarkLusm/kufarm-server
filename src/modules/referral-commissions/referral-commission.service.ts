@@ -8,8 +8,6 @@ import { SettingService } from '../settings/setting.service';
 import { User } from '../users/user.entity';
 import { ReferralCommission } from './referral-commission.entity';
 
-const MAIN_TOKEN = process.env.MAIN_TOKEN;
-
 @Injectable()
 export class ReferralCommissionService extends BaseService<ReferralCommission> {
   constructor(
@@ -63,11 +61,11 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                       const values: any = {
                         withdrawValue: referralCom.withdrawValue + amount,
                       };
-                      if (MAIN_TOKEN == SYMBOLS.BTCO2) {
+                      if (process.env.MAIN_TOKEN == SYMBOLS.BTCO2) {
                         values.btco2Value = referralCom.btco2Value + commission;
-                      } else if (MAIN_TOKEN == SYMBOLS.KASPA) {
+                      } else if (process.env.MAIN_TOKEN == SYMBOLS.KASPA) {
                         values.kasValue = referralCom.kasValue + commission;
-                      } else if (MAIN_TOKEN == SYMBOLS.CAKE) {
+                      } else if (process.env.MAIN_TOKEN == SYMBOLS.CAKE) {
                         values.cakeValue = referralCom.cakeValue + commission;
                       }
                       await tx
@@ -79,13 +77,13 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                         receiverId: user.id,
                         level,
                         withdrawValue: amount,
-                        coin: MAIN_TOKEN,
+                        coin: process.env.MAIN_TOKEN,
                       };
-                      if (MAIN_TOKEN == SYMBOLS.BTCO2) {
+                      if (process.env.MAIN_TOKEN == SYMBOLS.BTCO2) {
                         values.btco2Value = commission;
-                      } else if (MAIN_TOKEN == SYMBOLS.KASPA) {
+                      } else if (process.env.MAIN_TOKEN == SYMBOLS.KASPA) {
                         values.kasValue = commission;
-                      } else if (MAIN_TOKEN == SYMBOLS.CAKE) {
+                      } else if (process.env.MAIN_TOKEN == SYMBOLS.CAKE) {
                         values.cakeValue = commission;
                       }
                       await tx.getRepository(ReferralCommission).save(values);

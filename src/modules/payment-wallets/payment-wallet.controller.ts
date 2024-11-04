@@ -43,7 +43,9 @@ export class PaymentWalletController {
       body.coin,
     );
     if (body.secret) {
-      body.secret = encryptedWalletKey(body.secret);
+      let ivRaw: string;
+      [body.secret, ivRaw] = encryptedWalletKey(body.secret);
+      body['iv'] = ivRaw;
     }
     return this.service.create({ ...body, balance: Number(balance.balance) });
   }
@@ -65,9 +67,11 @@ export class PaymentWalletController {
     if (
       data.secret &&
       data.secret != wallet.secret &&
-      !data.secret.startsWith('***')
+      !data.secret.includes('*')
     ) {
-      // data.secret = encryptedWalletKey(data.secret);
+      let ivRaw: string;
+      [data.secret, ivRaw] = encryptedWalletKey(data.secret);
+      data['iv'] = ivRaw;
     }
     await this.service.updateById(id, {
       ...data,

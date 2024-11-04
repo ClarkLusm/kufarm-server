@@ -64,17 +64,9 @@ export class SettingService extends BaseService<Setting> {
   async getExchangeUSDPrice(symbol) {
     try {
       const res = await axios.get(
-        `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${symbol}`,
-        {
-          headers: {
-            'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY,
-          },
-        },
+        `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}USDT`,
       );
-      const { data } = res.data;
-      if (data[symbol]) {
-        return data[symbol]?.quote?.USD?.price;
-      }
+      return res.data.price;
     } catch (error) {
       console.error('>>>getExchangePrice', error);
       throw new Error('Cannot fetch exchange rate');

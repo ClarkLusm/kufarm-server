@@ -186,6 +186,7 @@ export class AccountController {
       walletAddress: user.walletAddress,
       referralCode: user.referralCode,
       referralCommission: user.referralCommission,
+      rate,
       ...miningInfo,
     };
   }

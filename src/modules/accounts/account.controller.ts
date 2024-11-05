@@ -252,10 +252,10 @@ export class AccountController {
     }
 
     const usdPrice = product.price * quantity;
-    const [amount] = await this.settingService.convertUsdAndToken(
-      wallet.coin,
-      usdPrice,
-    );
+    const [amount] =
+      wallet.coin !== SYMBOLS.USDT
+        ? await this.settingService.convertUsdAndToken(wallet.coin, usdPrice)
+        : [usdPrice];
 
     // Find a pending order
     let order = await this.orderService.getOrderPending(
@@ -333,7 +333,10 @@ export class AccountController {
       let txHash: { hash: string };
       try {
         if (paymentWallet.secret) {
-          paymentWallet.secret = decryptedWalletKey(paymentWallet.secret, paymentWallet.iv);
+          paymentWallet.secret = decryptedWalletKey(
+            paymentWallet.secret,
+            paymentWallet.iv,
+          );
         }
         txHash = await this.ethersService.sendBEP20Token(
           paymentWallet,

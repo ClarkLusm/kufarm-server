@@ -72,6 +72,8 @@ export class PaymentWalletController {
       let ivRaw: string;
       [data.secret, ivRaw] = encryptedWalletKey(data.secret);
       data['iv'] = ivRaw;
+    } else {
+      delete data.secret;
     }
     await this.service.updateById(id, {
       ...data,

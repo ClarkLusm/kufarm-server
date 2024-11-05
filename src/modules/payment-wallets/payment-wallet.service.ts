@@ -48,6 +48,7 @@ export class PaymentWalletService extends BaseService<PaymentWallet> {
       isOut: true,
       published: true,
       balance: MoreThan(minBalance),
+      coin: process.env.MAIN_TOKEN,
     });
   }
 }

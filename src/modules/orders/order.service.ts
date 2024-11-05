@@ -42,7 +42,12 @@ export class OrderService extends BaseService<Order> {
     return this.repository.findAndCount(qr);
   }
 
-  async getOrderPending(userId: string, productId: string, quantity: number) {
+  async getOrderPending(
+    userId: string,
+    productId: string,
+    quantity: number,
+    coin: string,
+  ) {
     // Update the order status based on the expiredAt field
     this.update(
       {
@@ -68,6 +73,7 @@ export class OrderService extends BaseService<Order> {
         userId,
         productId,
         quantity,
+        coin,
         status: OrderStatusEnum.Pending,
         expiredAt: MoreThan(new Date()),
       },

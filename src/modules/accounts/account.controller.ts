@@ -262,6 +262,7 @@ export class AccountController {
       sub,
       productId,
       quantity,
+      wallet.coin,
     );
 
     // Create new order
@@ -280,8 +281,8 @@ export class AccountController {
         expiredAt: moment().add(300, 'minutes').format(),
       });
     }
-    // Update KAS price since the exchange is changed
-    else if (wallet.coin === SYMBOLS.KASPA) {
+    // Update KAS, CAKE price since the exchange is changed
+    else if (wallet.coin !== SYMBOLS.USDT) {
       const token = getContractToken(wallet.chainId, wallet.coin);
       order.amount = amount * Math.pow(10, token.decimals);
       this.orderService.updateById(order.id, { amount });

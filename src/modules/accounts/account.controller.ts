@@ -171,22 +171,15 @@ export class AccountController {
     const { sub } = req.user;
     const miningInfo = await this.userService.syncBalance(sub);
     const user = await this.userService.getById(sub);
-    console.log(user.balance);
-    const [balanceToken, rate] = await this.settingService.convertUsdAndToken(
-      process.env.MAIN_TOKEN,
-      user.balance,
-    );
     const settings = await this.settingService.getAppSettings();
     return {
       pool: settings?.poolSrc ?? '',
       balance: user.balance,
-      balanceToken: balanceToken.toString(),
       username: user.username,
       email: user.email,
       walletAddress: user.walletAddress,
       referralCode: user.referralCode,
       referralCommission: user.referralCommission,
-      rate,
       ...miningInfo,
     };
   }

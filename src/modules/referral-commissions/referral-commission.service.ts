@@ -62,11 +62,11 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                         withdrawValue: referralCom.withdrawValue + amount,
                       };
                       if (process.env.MAIN_TOKEN == SYMBOLS.BTCO2) {
-                        values.btco2Value = referralCom.btco2Value + commission;
+                        values.btco2Value = Number(referralCom.btco2Value) + commission;
                       } else if (process.env.MAIN_TOKEN == SYMBOLS.KASPA) {
-                        values.kasValue = referralCom.kasValue + commission;
+                        values.kasValue = Number(referralCom.kasValue) + commission;
                       } else if (process.env.MAIN_TOKEN == SYMBOLS.CAKE) {
-                        values.cakeValue = referralCom.cakeValue + commission;
+                        values.cakeValue = Number(referralCom.cakeValue) + commission;
                       }
                       await tx
                         .getRepository(ReferralCommission)

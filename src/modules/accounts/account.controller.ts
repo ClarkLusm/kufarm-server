@@ -101,15 +101,11 @@ export class AccountController {
         referralMap.set(userId, value);
       }
 
-      const sumAmount = (
-        (await this.orderService.sum('amount', {
+      const investTotal =
+        (await this.orderService.sum('usdAmount', {
           userId: In(referralUserIds),
           status: OrderStatusEnum.Success,
-        })) || 0
-      )
-        .toLocaleString()
-        .replace(/,/g, '');
-
+        })) || 0;
       return {
         data: data.map((r) => ({
           ...r,
@@ -126,7 +122,7 @@ export class AccountController {
           referralPath: undefined,
         })),
         total,
-        investTotal: Number(ethers.formatUnits(sumAmount, DECIMALS.USDT)),
+        investTotal,
       };
     }
 
@@ -277,6 +273,7 @@ export class AccountController {
         quantity,
         amount: amountBigInt,
         coin: wallet.coin,
+        usdAmount: usdPrice,
         chainId: wallet.chainId,
         expiredAt: moment().add(300, 'minutes').format(),
       });

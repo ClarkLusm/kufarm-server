@@ -25,11 +25,19 @@ export class AuthController {
         username: data.username,
       });
       if (existedUsername) {
-        throw new BadRequestException('Username has been used already');
+        throw new Error('Username has been used already');
       }
       const existedEmail = await this.userService.getOne({ email: data.email });
       if (existedEmail) {
-        throw new BadRequestException('Email has been used already');
+        throw new Error('Email has been used already');
+      }
+      const existedAddress = await this.userService.getOne({
+        walletAddress: data.walletAddress,
+      });
+      if (existedAddress) {
+        throw new Error(
+          'Wallet address has been registered for another account',
+        );
       }
       const user = await this.userService.createNewUser(data);
       return user;

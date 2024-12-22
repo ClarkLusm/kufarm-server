@@ -319,6 +319,7 @@ export class AccountController {
         throw new Error('Your balance is not enough');
       }
 
+      await this.paymentWalletService.syncBalancePayoutWallets();
       const paymentWallet = await this.paymentWalletService.getWalletPayout(
         Number(numberToBigInt(realAmount, token.decimals)),
       );

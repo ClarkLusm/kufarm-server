@@ -43,6 +43,36 @@ export class PaymentWalletService extends BaseService<PaymentWallet> {
     }
   }
 
+  /**
+   * Update all of the payout wallet balance
+   * @param coin e.g. BTCO2
+   * @returns
+   */
+  async syncBalancePayoutWallets(coin?: string) {
+    try {
+      const params = { isOut: true, published: true };
+      if (coin) Object.assign(params, { coin });
+
+      const wallets = await this.repository.findBy(params);
+      if (wallets.length) {
+        return Promise.all(
+          wallets.map(async (wallet) => {
+            const balanceData = await this.ethersService.getBalance(
+              wallet.chainId,
+              wallet.walletAddress,
+              wallet.coin,
+            );
+            await this.repository.update(wallet.id, {
+              balance: Number(balanceData.balance),
+            });
+          }),
+        );
+      }
+    } catch (error) {
+      console.error('ERROR::syncBalancePayoutWallets', error);
+    }
+  }
+
   async getWalletPayout(minBalance: number) {
     return this.findOneBy({
       isOut: true,

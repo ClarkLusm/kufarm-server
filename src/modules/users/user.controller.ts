@@ -20,7 +20,7 @@ export class UserController {
   async getList(@Query() query: SearchUserDto) {
     const [data, total] = await this.service.getAll(query, {
       id: true,
-      username: true,
+      // username: true,
       email: true,
       emailVerified: true,
       walletAddress: true,

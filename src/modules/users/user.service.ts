@@ -35,7 +35,7 @@ export class UserService extends BaseService<User> {
   async createNewUser(data: CreateUserDto) {
     const [passwordHash, salt] = this.hashPassword(data.password);
     const userData = {
-      username: data.username,
+      username: data.email,
       email: data.email,
       passwordHash,
       salt,

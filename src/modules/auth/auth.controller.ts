@@ -21,12 +21,12 @@ export class AuthController {
   @Post('/signup')
   async register(@Body() data: CreateUserDto) {
     try {
-      const existedUsername = await this.userService.getOne({
-        username: data.username,
-      });
-      if (existedUsername) {
-        throw new Error('Username has been used already');
-      }
+      // const existedUsername = await this.userService.getOne({
+      //   username: data.username,
+      // });
+      // if (existedUsername) {
+      //   throw new Error('Username has been used already');
+      // }
       const existedEmail = await this.userService.getOne({ email: data.email });
       if (existedEmail) {
         throw new Error('Email has been used already');

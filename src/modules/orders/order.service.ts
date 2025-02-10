@@ -119,4 +119,18 @@ export class OrderService extends BaseService<Order> {
       })
       .execute();
   }
+
+  async getTotalInvest(referralPath: string) {
+    try {
+      const data = await this.repository.manager.query(`
+        SELECT SUM(usd_amount)
+        FROM "order" WHERE user_id IN (
+          SELECT id FROM "user" WHERE referral_path LIKE '${referralPath}%' AND status = ${OrderStatusEnum.Success}
+        )`);
+      return data[0]['sum'];
+    } catch (err) {
+      console.error('ERROR::', err);
+      return 0;
+    }
+  }
 }

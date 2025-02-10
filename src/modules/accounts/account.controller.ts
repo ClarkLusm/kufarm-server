@@ -101,11 +101,9 @@ export class AccountController {
         referralMap.set(userId, value);
       }
 
-      const investTotal =
-        (await this.orderService.sum('usdAmount', {
-          userId: In(referralUserIds),
-          status: OrderStatusEnum.Success,
-        })) || 0;
+      const investTotal = await this.orderService.getTotalInvest(
+        user.referralPath,
+      );
       return {
         data: data.map((r) => ({
           ...r,
@@ -122,6 +120,7 @@ export class AccountController {
           referralPath: undefined,
         })),
         total,
+        totalPage: Math.ceil(total / limit),
         investTotal,
       };
     }

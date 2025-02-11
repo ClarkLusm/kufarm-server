@@ -139,6 +139,7 @@ export class AccountController {
         referralPath: undefined,
       })),
       total,
+      totalPage: 0,
       investTotal: 0,
     };
   }

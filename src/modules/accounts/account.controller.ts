@@ -420,20 +420,31 @@ export class AccountController {
     const invoice = await this.orderService.getInvoiceByOrderCode(sub, code);
     if (!invoice)
       throw new NotFoundException('Not found invoice or invoice is expired');
-    invoice['price'] = invoice.product.price;
+
+    const token = getContractToken(invoice.chainId, invoice.coin);
+    if (!token) throw new NotFoundException('Token unavailable');
+
+    // Re-calculate amount
+    let amount = invoice.usdAmount;
+    if (invoice.coin !== SYMBOLS.USDT) {
+      [amount] = await this.settingService.convertUsdAndToken(
+        invoice.coin,
+        invoice.usdAmount,
+      );
+      amount *= Math.pow(10, token.decimals);
+      this.orderService.updateById(invoice.id, { amount });
+    }
+
     delete invoice.id;
     delete invoice.product;
-    const token = getContractToken(invoice.chainId, invoice.coin);
-    if (token) {
-      return {
-        ...invoice,
-        contractAddress: token.address,
-        decimals: token.decimals,
-        amountText: Number(invoice.amount).toLocaleString('fullwide', {
-          useGrouping: false,
-        }),
-      };
-    }
+    return {
+      ...invoice,
+      contractAddress: token.address,
+      decimals: token.decimals,
+      amountText: Number(amount).toLocaleString('fullwide', {
+        useGrouping: false,
+      }),
+    };
   }
 
   @Post('/payorder')

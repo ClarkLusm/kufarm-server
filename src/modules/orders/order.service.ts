@@ -92,18 +92,13 @@ export class OrderService extends BaseService<Order> {
         code: true,
         walletAddress: true,
         amount: true,
+        usdAmount: true,
         coin: true,
         chainId: true,
         txHash: true,
         expiredAt: true,
-        status: true,
-        product: {
-          price: true,
-        },
-      },
-      {
-        product: true,
-      },
+        status: true
+      }
     );
   }
 

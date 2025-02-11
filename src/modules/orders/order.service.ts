@@ -61,6 +61,7 @@ export class OrderService extends BaseService<Order> {
     );
     return this.findOne({
       select: {
+        id: true,
         code: true,
         walletAddress: true,
         quantity: true,

@@ -59,7 +59,7 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                   this.dataSource.transaction(async (tx) => {
                     if (referralCom) {
                       const values: any = {
-                        withdrawValue: referralCom.withdrawValue + amount,
+                        withdrawValue: Number(referralCom.withdrawValue) + amount,
                       };
                       if (process.env.MAIN_TOKEN == SYMBOLS.BTCO2) {
                         values.btco2Value = Number(referralCom.btco2Value) + commission;

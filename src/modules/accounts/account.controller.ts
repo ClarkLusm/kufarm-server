@@ -44,6 +44,7 @@ import {
   SearchOrderDto,
   SearchReferralDto,
   VerifyAccountDto,
+  SearchTransactionDto,
 } from './dto';
 
 @Controller()
@@ -205,10 +206,11 @@ export class AccountController {
   }
 
   @Get('/transactions')
-  async getWithdrawHistory(@Req() req) {
+  async getWithdrawHistory(@Req() req, @Query() query: SearchTransactionDto) {
     const { sub } = req.user;
     const [data, total] = await this.transactionService.getAll(
       {
+        ...query,
         userId: sub,
       },
       {

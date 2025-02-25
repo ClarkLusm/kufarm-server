@@ -56,7 +56,7 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                     userId,
                     receiverId: user.id,
                   });
-                  this.dataSource.transaction(async (tx) => {
+                  await this.dataSource.transaction(async (tx) => {
                     if (referralCom) {
                       const values: any = {
                         withdrawValue: Number(referralCom.withdrawValue) + amount,

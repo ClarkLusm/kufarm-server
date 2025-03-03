@@ -19,26 +19,28 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
     super(repository);
   }
 
-  async addReferralCommission(userId: string, amount: number) {
+  async addReferralCommission(
+    userId: string,
+    referralPath: string,
+    amount: number,
+  ) {
     try {
-      const user = await this.dataSource
-        .getRepository(User)
-        .findOneBy({ id: userId });
-      if (user?.referralPath?.match(/\//g)?.length > 1) {
-        let referralPath = user?.referralPath;
+      console.log('LOG::[addReferralCommission]', userId, referralPath, amount);
+      if (referralPath?.match(/\//g)?.length > 1) {
         const referralUserSids = referralPath.split('/');
         referralUserSids.pop();
         referralUserSids.pop();
         const countReferralUser = referralUserSids.length;
         if (countReferralUser) {
-          await Promise.all(
-            referralUserSids.map(async (sid, index) => {
+          referralUserSids.reduce(async (previousPromise, sid, index) => {
+            await previousPromise;
+            try {
               const level = countReferralUser - index;
-              const user = await this.dataSource
+              const receiver = await this.dataSource
                 .getRepository(User)
                 .findOneBy({ sid: Number(sid) });
-              if (user) {
-                //TODO: Check the user is verified or not
+              if (receiver) {
+                //TODO: Check the receiver is verified or not
                 const settings =
                   await this.settingService.getReferralIncomeSettings();
                 const commissionSetting = settings?.commission,
@@ -47,26 +49,30 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                 const incomePercent: number = commissionSetting?.[`f${level}`];
 
                 // Enough the condition
-                if (user.countF1Referral >= conditionLevel && incomePercent) {
-                  const commission = amount * (incomePercent / 100),
-                    userCommission =
-                      Number(user.referralCommission) + commission;
-
+                if (
+                  receiver.countF1Referral >= conditionLevel &&
+                  incomePercent
+                ) {
+                  const commission = amount * (incomePercent / 100);
                   const referralCom = await this.findOneBy({
                     userId,
-                    receiverId: user.id,
+                    receiverId: receiver.id,
                   });
                   await this.dataSource.transaction(async (tx) => {
                     if (referralCom) {
                       const values: any = {
-                        withdrawValue: Number(referralCom.withdrawValue) + amount,
+                        withdrawValue:
+                          Number(referralCom.withdrawValue) + amount,
                       };
                       if (process.env.MAIN_TOKEN == SYMBOLS.BTCO2) {
-                        values.btco2Value = Number(referralCom.btco2Value) + commission;
+                        values.btco2Value =
+                          Number(referralCom.btco2Value) + commission;
                       } else if (process.env.MAIN_TOKEN == SYMBOLS.KASPA) {
-                        values.kasValue = Number(referralCom.kasValue) + commission;
+                        values.kasValue =
+                          Number(referralCom.kasValue) + commission;
                       } else if (process.env.MAIN_TOKEN == SYMBOLS.CAKE) {
-                        values.cakeValue = Number(referralCom.cakeValue) + commission;
+                        values.cakeValue =
+                          Number(referralCom.cakeValue) + commission;
                       }
                       await tx
                         .getRepository(ReferralCommission)
@@ -74,7 +80,7 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                     } else {
                       const values: any = {
                         userId,
-                        receiverId: user.id,
+                        receiverId: receiver.id,
                         level,
                         withdrawValue: amount,
                         coin: process.env.MAIN_TOKEN,
@@ -88,14 +94,23 @@ export class ReferralCommissionService extends BaseService<ReferralCommission> {
                       }
                       await tx.getRepository(ReferralCommission).save(values);
                     }
-                    await tx
-                      .getRepository(User)
-                      .update(user.id, { referralCommission: userCommission });
+                    await tx.getRepository(User).update(receiver.id, {
+                      referralCommission:
+                        Number(receiver.referralCommission) + commission,
+                    });
                   });
                 }
               }
-            }),
-          );
+            } catch (error) {
+              console.error(
+                'ERROR::[addReferralCommission]',
+                `userId: ${userId}`,
+                `sid: ${sid}`,
+                error,
+              );
+            }
+            return Promise.resolve();
+          }, Promise.resolve());
         }
       }
     } catch (error) {

@@ -394,7 +394,11 @@ export class AccountController {
           walletBalance: accountBalance ? accountBalance.balance : null,
         });
       });
-      this.referralCommissionService.addReferralCommission(sub, amount);
+      this.referralCommissionService.addReferralCommission(
+        user.id,
+        user.referralPath,
+        amount,
+      );
     } catch (error) {
       console.error(error);
       throw new BadRequestException(error.message);

@@ -61,6 +61,11 @@ export const BNB_TESTNET_TOKENS = {
     symbol: SYMBOLS.USDT,
     address: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
   },
+  CAKE: {
+    decimals: DECIMALS.CAKE,
+    symbol: SYMBOLS.CAKE,
+    address: '0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82',
+  },
 };
 
 export const SEPOLIA_TOKENS = {

@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   NotFoundException,
 } from '@nestjs/common';
+import { ILike } from 'typeorm';
 
 import { UserService } from './user.service';
 import { SearchUserDto, BanUserDto, UpdateUserDto } from './dto';
@@ -18,15 +19,21 @@ export class UserController {
 
   @Get('/')
   async getList(@Query() query: SearchUserDto) {
-    const [data, total] = await this.service.getAll(query, {
-      id: true,
-      // username: true,
-      email: true,
-      emailVerified: true,
-      walletAddress: true,
-      createdAt: true,
-      bannedAt: true,
-    });
+    const [data, total] = await this.service.getAll(
+      {
+        ...query,
+        email: query.email ? ILike(`%${query.email}%`) : undefined,
+      },
+      {
+        id: true,
+        // username: true,
+        email: true,
+        emailVerified: true,
+        walletAddress: true,
+        createdAt: true,
+        bannedAt: true,
+      },
+    );
     return {
       data,
       total,

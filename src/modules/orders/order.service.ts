@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, MoreThan, Repository } from 'typeorm';
+import { ILike, LessThanOrEqual, MoreThan, Repository } from 'typeorm';
 
 import { buildQueryFilter } from '../../common/helpers/query-builder';
 import { BaseService } from '../../common/base/base.service';
@@ -39,6 +39,14 @@ export class OrderService extends BaseService<Order> {
       user: true,
       product: true,
     };
+    if (query.email) {
+      qr.where = {
+        user: {
+          email: ILike(`%${query.email}%`),
+        },
+      };
+    }
+    delete qr.where['email'];
     return this.repository.findAndCount(qr);
   }
 
@@ -98,8 +106,8 @@ export class OrderService extends BaseService<Order> {
         chainId: true,
         txHash: true,
         expiredAt: true,
-        status: true
-      }
+        status: true,
+      },
     );
   }
 

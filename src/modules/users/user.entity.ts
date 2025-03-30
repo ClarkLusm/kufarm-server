@@ -77,6 +77,9 @@ export class User {
   @Column({ name: 'sync_at' })
   syncAt: Date;
 
+  @Column({ name: 'mining_at'})
+  miningAt: Date;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

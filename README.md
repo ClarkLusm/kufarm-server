@@ -10,23 +10,14 @@ The deployments below are probably in sleep mode and will take a minute to come 
 
 ```sh
 cp .env.example .env
-docker-compose up
-docker-compose exec web yarn lint
-docker-compose exec web yarn test
-docker-compose exec web yarn test:request
-docker-compose exec web yarn build
-docker run -it -v $PWD:/e2e -w /e2e --network="host" --entrypoint=cypress cypress/included:12.2.0 run
+yarn install
+yarn start:dev
 ```
 ### Useful commands
 
-Nest CLI:
-```
-docker-compose exec web yarn nest -- --help
-```
-
 TypeORM CLI:
 ```
-docker-compose exec web yarn typeorm -- --help
+yarn typeorm -- --help
 ```
 
 ## Requirements

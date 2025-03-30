@@ -19,7 +19,7 @@ export class UserProduct {
   id: number;
 
   @Column({ name: 'user_id', nullable: false })
-  userId: number;
+  userId: string;
 
   @Column({ name: 'product_id', nullable: false })
   productId: string;

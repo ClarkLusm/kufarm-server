@@ -7,6 +7,7 @@ import moment from 'moment';
 import { genReferralCode } from '../../utils/string.utils';
 import { BaseService } from '../..//common/base/base.service';
 import { UserProductStatusEnum } from '../../common/enums/user-product.enum';
+import { NEW_MINING_START_DATE } from '../../common/constants';
 import { SettingService } from '../settings/setting.service';
 import { UserProductService } from '../user-products/user-product.service';
 import { UserProduct } from '../user-products/user-product.entity';
@@ -103,7 +104,7 @@ export class UserService extends BaseService<User> {
     });
   }
 
-  async syncBalance(userId: string) {
+  async oldSyncBalance(userId: string) {
     const user = await this.getById(userId),
       userData = {
         income: Number(user.income || 0),
@@ -116,14 +117,14 @@ export class UserService extends BaseService<User> {
 
     if (userProducts.length) {
       if (user.income < user.maxOut) {
-        const daysDuration = moment().diff(user.syncAt, 'day', true);
-        const [dailyIncome, monthlyIncome, hashPower] = userProducts.reduce(
-          (a, b) => [
-            a[0] + Number(b.dailyIncome),
-            a[1] + Number(b.monthlyIncome),
-            a[2] + b.hashPower,
-          ],
-          [0, 0, 0],
+        const daysDuration = (
+          moment().isAfter(NEW_MINING_START_DATE)
+            ? moment(NEW_MINING_START_DATE)
+            : moment()
+        ).diff(user.syncAt, 'day', true);
+        const dailyIncome = userProducts.reduce(
+          (a, b) => a + Number(b.dailyIncome),
+          0,
         );
 
         let income = daysDuration * dailyIncome;
@@ -155,15 +156,6 @@ export class UserService extends BaseService<User> {
         if (reachMax) {
           return await this.syncBalance(userId);
         }
-
-        return {
-          dailyIncome,
-          monthlyIncome,
-          hashPower,
-          maxOut: user.maxOut,
-          income: userData.income,
-          balance: userData.balance,
-        };
       } else {
         await this.dataSource.getRepository(UserProduct).update(
           userProducts.map((up) => up.id),
@@ -173,13 +165,151 @@ export class UserService extends BaseService<User> {
         );
       }
     }
+  }
+
+  async syncBalance(userId: string) {
+    let user = await this.getById(userId);
+    if (!user.miningAt && moment(user.syncAt).isBefore(NEW_MINING_START_DATE)) {
+      await this.oldSyncBalance(userId);
+      user = await this.getById(userId);
+    }
+    if (!user.miningAt) return;
+    const userData = {
+        income: Number(user.income || 0),
+        balance: Number(user.balance || 0),
+        syncAt: new Date(),
+      },
+      userProducts = await this.userProductService.getRunningProductsByUserId(
+        userId,
+      );
+
+    if (userProducts.length && user.income < user.maxOut) {
+      const setting = await this.settingService.getAppSettings();
+      const sessionMiningDuration = setting?.sessionMiningDuration;
+      // Check if the user has been mining for more than x hours
+      const maxMiningAt = moment(user.miningAt).add(
+        sessionMiningDuration,
+        'hours',
+      );
+      if (moment(user.syncAt).isAfter(maxMiningAt)) {
+        return;
+      }
+
+      const startAt = moment(user.syncAt).isAfter(user.miningAt)
+        ? user.syncAt
+        : user.miningAt;
+      const endAt = moment().isAfter(maxMiningAt) ? maxMiningAt : moment();
+      let daysDuration = endAt.diff(startAt, 'day', true);
+      if (daysDuration > 1) daysDuration = 1;
+      const dailyIncome = userProducts.reduce(
+        (a, b) => a + Number(b.dailyIncome),
+        0,
+      );
+
+      let income = daysDuration * dailyIncome;
+      let incomeRemain = income;
+      const taskUserProducts = userProducts.reduce((a, b) => {
+        if (incomeRemain > 0) {
+          const incomeNeedToMax = b.maxOut - Number(b.income);
+          const reachMax = incomeRemain >= incomeNeedToMax; // true: the machine is fully
+          a.push({
+            id: b.id,
+            income: reachMax ? b.maxOut : Number(b.income) + incomeRemain,
+            status: reachMax
+              ? UserProductStatusEnum.Stop
+              : UserProductStatusEnum.Activated,
+          });
+          incomeRemain -= reachMax ? incomeNeedToMax : incomeRemain;
+        }
+        return a;
+      }, []);
+
+      await this.dataSource.transaction(async (tx) => {
+        taskUserProducts.forEach(async (up) => {
+          await tx.getRepository(UserProduct).update(up.id, {
+            income: up.income,
+            status: up.status,
+          });
+        });
+
+        // Reach user maxout
+        if (userData.income + income > user.maxOut) {
+          income = user.maxOut - userData.income;
+        }
+        // Update user data
+        userData.income += income;
+        userData.balance += income;
+        await tx.getRepository(User).update(userId, userData);
+      });
+
+      if (endAt.isSame(maxMiningAt)) {
+        await this.updateById(userId, { miningAt: null });
+      }
+    } else {
+      await this._stopMiningAndOffMachines(userId);
+    }
+  }
+
+  async _stopMiningAndOffMachines(userId: string) {
+    const user = await this.getById(userId);
+    if (!user.miningAt) return;
+    await this.dataSource.transaction(async (tx) => {
+      await tx.getRepository(User).update(userId, {
+        miningAt: null,
+      });
+      await tx.getRepository(UserProduct).update(
+        {
+          userId,
+          status: UserProductStatusEnum.Activated,
+        },
+        {
+          status: UserProductStatusEnum.Stop,
+        },
+      );
+    });
+  }
+
+  async getMiningInfo(userId: string) {
+    const user = await this.getById(userId),
+      res = {
+        income: Number(user.income || 0),
+        balance: Number(user.balance || 0),
+        syncAt: user.syncAt,
+        miningAt: user.miningAt,
+      },
+      userProducts = await this.userProductService.getRunningProductsByUserId(
+        userId,
+      );
+    let dailyIncome = 0,
+      monthlyIncome = 0,
+      hashPower = 0;
+
+    if (user.income < user.maxOut) {
+      let daysDuration = moment().diff(user.syncAt, 'day', true);
+      if (daysDuration > 1) daysDuration = 1;
+
+      [dailyIncome, monthlyIncome, hashPower] = userProducts.reduce(
+        (a, b) => [
+          a[0] + Number(b.dailyIncome),
+          a[1] + Number(b.monthlyIncome),
+          a[2] + b.hashPower,
+        ],
+        [0, 0, 0],
+      );
+    } else {
+      await this.dataSource.getRepository(UserProduct).update(
+        userProducts.map((up) => up.id),
+        {
+          status: UserProductStatusEnum.Stop,
+        },
+      );
+    }
     return {
-      dailyIncome: 0,
-      monthlyIncome: 0,
-      hashPower: 0,
+      dailyIncome,
+      monthlyIncome,
+      hashPower,
       maxOut: user.maxOut,
-      income: userData.income,
-      balance: userData.balance,
+      ...res,
     };
   }
 

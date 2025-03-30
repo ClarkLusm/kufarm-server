@@ -51,7 +51,11 @@ export class SettingService extends BaseService<Setting> {
     const setting = await this.repository.findOneBy({
       key: Constants.SETTING_SYSTEM,
     });
-    return setting?.value;
+    const res = setting?.value || {};
+    if (!res.sessionMiningDuration) {
+      res.sessionMiningDuration = Constants.SESSION_MINING_DURATION;
+    }
+    return res;
   }
 
   async getReferralIncomeSettings() {

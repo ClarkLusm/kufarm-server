@@ -12,7 +12,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ethers } from 'ethers';
+// import { ethers } from 'ethers';
 
 import { EthersService } from '../../libs/ethers/ethers.service';
 import {
@@ -166,11 +166,13 @@ export class AccountController {
   @Get('/profile')
   async getMyMining(@Req() req) {
     const { sub } = req.user;
-    const miningInfo = await this.userService.syncBalance(sub);
+    await this.userService.syncBalance(sub);
+    const miningInfo = await this.userService.getMiningInfo(sub);
     const user = await this.userService.getById(sub);
     const settings = await this.settingService.getAppSettings();
     return {
-      pool: settings?.poolSrc ?? '',
+      pool: settings.poolSrc ?? '',
+      sessionMiningDuration: settings.sessionMiningDuration,
       balance: user.balance,
       username: user.username,
       email: user.email,
@@ -178,6 +180,38 @@ export class AccountController {
       referralCode: user.referralCode,
       referralCommission: user.referralCommission,
       ...miningInfo,
+    };
+  }
+
+  @Post('/start-mining')
+  async startMining(@Req() req) {
+    const { sub } = req.user;
+    const user = await this.userService.getById(sub);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    const settings = await this.settingService.getAppSettings();
+    if (
+      user.miningAt &&
+      moment(user.miningAt)
+        .add(settings.sessionMiningDuration, 'hours')
+        .isAfter(moment())
+    ) {
+      throw new BadRequestException('Mining has started');
+    }
+    const userProducts =
+      await this.userProductService.getRunningProductsByUserId(sub);
+    if (!userProducts.length) {
+      throw new BadRequestException('You have no running product');
+    }
+    await this.userService.syncBalance(sub);
+    await this.userService.updateById(sub, {
+      miningAt: new Date(),
+      syncAt: new Date(),
+    });
+    return {
+      message: 'Mining started successfully',
+      miningAt: new Date(),
     };
   }
 
@@ -300,8 +334,9 @@ export class AccountController {
     try {
       const { sub } = req.user;
       const { amount, transactionFee } = body;
-      const { balance: userBalance } = await this.userService.syncBalance(sub);
+      await this.userService.syncBalance(sub);
       const user = await this.userService.getById(sub);
+      const userBalance = Number(user.balance || 0);
 
       const token = getContractToken(
         process.env.NODE_ENV === 'production' ? 56 : 97,

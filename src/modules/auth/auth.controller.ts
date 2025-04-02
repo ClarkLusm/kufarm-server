@@ -1,16 +1,18 @@
-import { BadRequestException, Body, Post } from '@nestjs/common';
+import { BadRequestException, Body, Get, Post } from '@nestjs/common';
 import { Controller } from '@nestjs/common';
 
 import { UserService } from '../users/user.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { SigninDto } from './dto/signin.dto';
 import { AuthService } from './auth.service';
+import { MailService } from '../mail/mail.service';
 
 @Controller()
 export class AuthController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly mailService: MailService,
   ) {}
 
   @Post('/signin')
@@ -44,5 +46,12 @@ export class AuthController {
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  @Post('send-otp')
+  async sendEmail(@Body() data) {
+    const {email} = data;
+
+    // this.mailService.sendOTP('');
   }
 }

@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  HttpStatus,
   Inject,
   Injectable,
   UnauthorizedException,
@@ -18,23 +17,37 @@ export class AuthService {
   ) {}
 
   async login(userData: any) {
-    const user = await this.validateUser(userData);
-    if (user.bannedAt)
-      throw new UnauthorizedException({
-        message: `Your account has been banned ${user.banReason}`,
-      });
-    // if (!user.emailVerified)
-    //   throw new UnauthorizedException({
-    //     message: `Your account has not yet activated`,
-    //   });
+    const user = await this._validateAuthUser(userData);
+    
     const userDataAndTokens = await this.tokenSession(user);
     return userDataAndTokens;
   }
 
-  async validateUser(userData: any): Promise<any> {
-    const user = await this.userService.findOneBy({
-      email: userData.email,
-    });
+  async loginWithOTP(email: string, opt: string) {
+    const user = await this._validateUser(email);
+    const userDataAndTokens = await this.tokenSession(user);
+    return userDataAndTokens;
+  }
+
+  async _validateUser(email: string) {
+    const user = await this.userService.findOneBy({ email });
+    if (!user)
+      throw new UnauthorizedException({
+        message: `User with email ${email} not found`,
+      });
+    if (user.bannedAt)
+      throw new UnauthorizedException({
+        message: `Your account has been banned ${user.banReason}`,
+      });
+    if (!user.emailVerified)
+      throw new UnauthorizedException({
+        message: `Your account has not yet activated`,
+      });
+    return user;
+  }
+
+  async _validateAuthUser(userData: any): Promise<any> {
+    const user = await this._validateUser(userData.email);
     if (!user)
       throw new UnauthorizedException({
         message: `User with email ${userData.email} not found`,

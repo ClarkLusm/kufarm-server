@@ -37,6 +37,7 @@ import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 import { Transaction } from '../transactions/transaction.entity';
 import { ReferralCommissionService } from '../referral-commissions/referral-commission.service';
 import { UserProduct } from '../user-products/user-product.entity';
+import { MailService } from '../mail/mail.service';
 import {
   CreateOrderDto,
   PayOrderDto,
@@ -61,6 +62,7 @@ export class AccountController {
     private readonly settingService: SettingService,
     private readonly referralCommissionService: ReferralCommissionService,
     private readonly ethersService: EthersService,
+    private readonly mailService: MailService,
   ) {}
 
   @Get('/referrals')
@@ -533,7 +535,13 @@ export class AccountController {
       await tx.getRepository(User).update(sub, {
         maxOut: user.maxOut + invoice.product.maxOut,
         syncAt: user.syncAt || new Date(),
+        hasPurchased: true,
       });
     });
+
+    if (!user.hasPurchased && user.referralPath.split('/').length > 2) {
+      const referralParentPath = user.referralPath.replace(`/${user.sid}`, '');
+      this.userService.increaseF1Count(referralParentPath);
+    }
   }
 }

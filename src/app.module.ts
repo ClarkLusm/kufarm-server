@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConsoleModule } from 'nestjs-console';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 import {
   AdminRouteModule,
@@ -29,6 +30,12 @@ import { ProductModule } from './modules/products/product.module';
             : false,
       }),
       inject: [ConfigService],
+    }),
+    MailerModule.forRoot({
+      transport: `smtps://${process.env.MAIL_USERNAME}:${process.env.MAIL_PASSWORD}@smtp.gmail.com`,
+      defaults: {
+        from: `"Miner86" <${process.env.MAIL_SENDER}>`,
+      },
     }),
     ConsoleModule,
     SettingModule,

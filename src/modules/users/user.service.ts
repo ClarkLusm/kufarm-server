@@ -66,13 +66,6 @@ export class UserService extends BaseService<User> {
       userData['maxOut'] = setting?.maxOutNewUser;
     }
     const user = await this.create(userData);
-
-    if (referralUser) {
-      //TODO: should check the f1 condition
-      referralUser.countF1Referral += 1;
-      this.save(referralUser);
-    }
-
     const createdUser = await this.getById(user.id);
 
     let referralPath = `${createdUser.sid}/`;
@@ -339,5 +332,55 @@ export class UserService extends BaseService<User> {
    */
   getReferralLevelByPath(parentPath: string, childPath: string) {
     return childPath?.replace(parentPath, '')?.split('/')?.length - 1;
+  }
+
+  // Increase countF1Referral for the parent user
+  // when a new user buys a product
+  async increaseF1Count(referralPath: string) {
+    const parentUser = await this.getOne({ referralPath });
+    if (parentUser) {
+      parentUser.countF1Referral += 1;
+      return await this.save(parentUser);
+    }
+  }
+
+  // Update hasPurchased for all users who have purchased products
+  async updateUsersHavePurchased() {
+    const query =
+      'SELECT id FROM users WHERE id IN (SELECT DISTINCT user_id FROM user_products) AND has_purchased = false;';
+    const users = await this.dataSource.query(query);
+    if (users.length) {
+      await users.reduce(async (prevPromise: Promise<any>, user: any) => {
+        await prevPromise;
+        return this.updateById(user.id, { hasPurchased: true });
+      }, Promise.resolve());
+    }
+  }
+
+  // Update countF1Referral for all users who have purchased
+  async updateF1CountByUserId(userId: string) {
+    const user = await this.getById(userId);
+    if (user) {
+      const referralPath = user.referralPath;
+      const countF1 = await this.repository
+        .createQueryBuilder('user')
+        .where('user.referralPath LIKE :path', { path: `${referralPath}%` })
+        .andWhere(
+          "LENGTH(user.referralPath) - LENGTH(REPLACE(user.referralPath, '/', '')) = :level",
+          { level: referralPath.split('/').length },
+        )
+        .getCount();
+      // const countF1 = await this.countBy({
+      //   referralPath: Like(`${referralPath}%`),
+      //   hasPurchased: true,
+      //   id: Not(userId),
+      // });
+      user.countF1Referral = countF1;
+      return await this.save(user);
+    }
+  }
+
+  async reUpdateF1CountForAllUsers() {
+    const users = await this.findBy({ hasPurchased: true });
   }
 }

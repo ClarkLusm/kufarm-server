@@ -30,15 +30,21 @@ export class UserProductService extends BaseService<UserProduct> {
     return result;
   }
 
-  async getRunningProductsByUserId(userId: string) {
-    return this.repository
+  async getRunningProductsByUserId(userId: string, createdAt?: Date) {
+    const query = this.repository
       .createQueryBuilder('user_product')
       .where('user_product.user_id = :userId', { userId })
       .andWhere('user_product.income < user_product.max_out')
       .andWhere('user_product.status != :stop', {
         stop: UserProductStatusEnum.Stop,
-      })
-      .orderBy('user_product.created_at', 'ASC')
-      .getMany();
+      });
+
+    if (createdAt) {
+      query.andWhere('user_product.created_at < :createdAt', {
+        createdAt,
+      });
+    }
+
+    return query.orderBy('user_product.created_at', 'ASC').getMany();
   }
 }

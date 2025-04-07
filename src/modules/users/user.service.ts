@@ -113,6 +113,7 @@ export class UserService extends BaseService<User> {
       },
       userProducts = await this.userProductService.getRunningProductsByUserId(
         userId,
+        moment(NEW_MINING_START_DATE).toDate(),
       );
 
     if (userProducts.length) {
@@ -191,6 +192,7 @@ export class UserService extends BaseService<User> {
         sessionMiningDuration,
         'hours',
       );
+      if (!user.syncAt) user.syncAt = user.miningAt;
       if (moment(user.syncAt).isAfter(maxMiningAt)) {
         return;
       }
@@ -297,12 +299,14 @@ export class UserService extends BaseService<User> {
         [0, 0, 0],
       );
     } else {
-      await this.dataSource.getRepository(UserProduct).update(
-        userProducts.map((up) => up.id),
-        {
-          status: UserProductStatusEnum.Stop,
-        },
-      );
+      if (userProducts.length) {
+        await this.dataSource.getRepository(UserProduct).update(
+          userProducts.map((up) => up.id),
+          {
+            status: UserProductStatusEnum.Stop,
+          },
+        );
+      }
     }
     return {
       dailyIncome,

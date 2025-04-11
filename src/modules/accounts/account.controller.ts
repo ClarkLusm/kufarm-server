@@ -43,7 +43,6 @@ import {
   RequestWithdrawDto,
   SearchOrderDto,
   SearchReferralDto,
-  VerifyAccountDto,
   SearchTransactionDto,
 } from './dto';
 
@@ -438,22 +437,6 @@ export class AccountController {
       console.error(error);
       throw new BadRequestException(error.message);
     }
-  }
-
-  @Post('/verify-account')
-  async verifyAccount(@Body() body: VerifyAccountDto) {
-    const { email, token } = body;
-    // TODO: Check token has expired
-    const user = await this.userService.getOne({
-      email,
-    });
-    if (!user) {
-      throw new BadRequestException('Invalid information');
-    }
-    if (user.emailVerified) {
-      throw new BadRequestException('Account has verified already');
-    }
-    await this.userService.updateById(user.id, { emailVerified: true });
   }
 
   @Get('invoice/:code')

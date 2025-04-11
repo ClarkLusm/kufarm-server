@@ -1,12 +1,13 @@
 import {
   BadRequestException,
-  HttpStatus,
   Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
+import { ACTIVE_ACCOUNT_TOKEN_EXPIRED_DURATION } from '../../common/constants';
 import { UserService } from '../users/user.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -23,12 +24,12 @@ export class AuthService {
       throw new UnauthorizedException({
         message: `Your account has been banned ${user.banReason}`,
       });
-    // if (!user.emailVerified)
-    //   throw new UnauthorizedException({
-    //     message: `Your account has not yet activated`,
-    //   });
-    const userDataAndTokens = await this.tokenSession(user);
-    return userDataAndTokens;
+    if (!user.emailVerified)
+      throw new UnauthorizedException({
+        message:
+          'Your account has not been activated yet.\nPlease verify your email before logging in',
+      });
+    return user;
   }
 
   async validateUser(userData: any): Promise<any> {
@@ -118,5 +119,33 @@ export class AuthService {
     await this.userService.updateById(user.id, user);
 
     return;
+  }
+
+  _createActivationToken(email: string): string {
+    return this.jwtService.sign(
+      {
+        email,
+      },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: `${ACTIVE_ACCOUNT_TOKEN_EXPIRED_DURATION}h`,
+      },
+    );
+  }
+
+  createActivationLink(email: string) {
+    const token = this._createActivationToken(email);
+    return `${process.env.FRONTEND_URL}/account-verification?token=${token}`;
+  }
+
+  verifyActivationToken(token: string) {
+    try {
+      this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET,
+      });
+      return this.jwtService.decode(token);
+    } catch (error) {
+      return null;
+    }
   }
 }

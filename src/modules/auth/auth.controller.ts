@@ -3,14 +3,16 @@ import { Controller } from '@nestjs/common';
 
 import { UserService } from '../users/user.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { SigninDto } from './dto/signin.dto';
+import { VerifyAccountDto } from '../accounts/dto';
 import { AuthService } from './auth.service';
+import { MailService } from '../mail/mail.service';
 
 @Controller()
 export class AuthController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly mailService: MailService,
   ) {}
 
   @Post('/signin')
@@ -40,8 +42,35 @@ export class AuthController {
         );
       }
       const user = await this.userService.createNewUser(data);
+      const activationLink = this.authService.createActivationLink(data.email);
+      this.mailService.sendMailVerifyAccount(data.email, activationLink);
       return user;
     } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Post('/active-account')
+  async activeAccount(@Body() data: VerifyAccountDto) {
+    try {
+      const { token } = data;
+      const decodeData = this.authService.verifyActivationToken(token);
+      if (decodeData) {
+        const user = await this.userService.getOne({ email: decodeData.email });
+        if (!user) {
+          throw new BadRequestException('Account does not exist');
+        }
+        if (user.emailVerified) {
+          throw new BadRequestException(
+            'Your account has already successfully been verified',
+          );
+        }
+        await this.userService.updateById(user.id, { emailVerified: true });
+        return;
+      }
+      throw new BadRequestException('Token invalid');
+    } catch (error) {
+      console.error(error);
       throw new BadRequestException(error.message);
     }
   }

@@ -7,6 +7,7 @@ import {
   Body,
   ParseUUIDPipe,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ILike } from 'typeorm';
 
@@ -30,8 +31,11 @@ export class UserController {
         email: true,
         emailVerified: true,
         walletAddress: true,
+        countF1Referral: true,
+        hasPurchased: true,
         createdAt: true,
         bannedAt: true,
+        banReason: true,
       },
     );
     return {
@@ -55,6 +59,17 @@ export class UserController {
       throw new NotFoundException('Not found user');
     }
     let letUpdate = false;
+    if (data.email && data.email !== user.email) {
+      const validEmail = await this.service.checkUpdateEmailValid(
+        user.id,
+        data.email,
+      );
+      if (!validEmail) {
+        throw new BadRequestException('Email has been used already');
+      }
+      user.email = data.email;
+      letUpdate = true;
+    }
     if (data.walletAddress) {
       user.walletAddress = data.walletAddress;
       letUpdate = true;
@@ -73,6 +88,13 @@ export class UserController {
       const [passwordHash, salt] = this.service.hashPassword(data.password);
       user.passwordHash = passwordHash;
       user.salt = salt;
+      letUpdate = true;
+    }
+    if (
+      typeof data.emailVerified === 'boolean' &&
+      data.emailVerified !== user.emailVerified
+    ) {
+      user.emailVerified = data.emailVerified;
       letUpdate = true;
     }
     if (letUpdate) {

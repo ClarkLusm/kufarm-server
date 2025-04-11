@@ -340,4 +340,13 @@ export class UserService extends BaseService<User> {
   getReferralLevelByPath(parentPath: string, childPath: string) {
     return childPath?.replace(parentPath, '')?.split('/')?.length - 1;
   }
+
+  async checkUpdateEmailValid(oldUserId: string, newEmail: string) {
+    const email = newEmail.trim();
+    const item = await this.getOne({
+      email,
+      id: Not(oldUserId),
+    });
+    return item == null;
+  }
 }

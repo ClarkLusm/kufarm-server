@@ -513,7 +513,7 @@ export class AccountController {
       },
     );
     if (!invoice) throw new NotFoundException('Not found invoice');
-    //TODO: check first order to count f1
+
     //TODO: Verify via txHash on the blockchain
     const user = await this.userService.getById(sub);
     await this.dataSource.transaction(async (tx) => {
@@ -533,7 +533,17 @@ export class AccountController {
       await tx.getRepository(User).update(sub, {
         maxOut: user.maxOut + invoice.product.maxOut,
         syncAt: user.syncAt || new Date(),
+        hasPurchased: true,
       });
     });
+
+    // check first order to plus countF1 for the parent account
+    if (!user.hasPurchased && user.referralPath.split('/').length > 2) {
+      const referralParentPath = user.referralPath.replace(
+        `/${user.sid}/`,
+        '/',
+      );
+      this.userService.increaseF1Count(referralParentPath);
+    }
   }
 }

@@ -176,7 +176,7 @@ export class AccountController {
       username: user.username,
       email: user.email,
       walletAddress: user.walletAddress,
-      referralCode: user.referralCode,
+      referralCode: user.hasPurchased ? user.referralCode : null,
       referralCommission: user.referralCommission,
       ...miningInfo,
     };

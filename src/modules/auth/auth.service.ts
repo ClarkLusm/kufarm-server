@@ -9,17 +9,42 @@ import { JwtService } from '@nestjs/jwt';
 
 import { ACTIVE_ACCOUNT_TOKEN_EXPIRED_DURATION } from '../../common/constants';
 import { UserService } from '../users/user.service';
-import { JwtService } from '@nestjs/jwt';
+import { OtpService } from '../otp/otp.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(UserService) private userService: UserService,
+    @Inject(OtpService) private otpService: OtpService,
     private jwtService: JwtService,
   ) {}
 
   async login(userData: any) {
-    const user = await this.validateUser(userData);
+    const user = await this._validateAuthUser(userData);
+    // hide the referral code if the user does not bought any product
+    if (!user.hasPurchased) {
+      delete user.referralCode;
+    }
+    const userDataAndTokens = await this.tokenSession(user);
+    return userDataAndTokens;
+  }
+
+  async loginWithOTP(email: string, otpCode: string) {
+    const user = await this._validateUser(email);
+    if (!user.hasPurchased) {
+      delete user.referralCode;
+    }
+    await this.otpService.checkOtpValid(user.id, otpCode);
+    const userDataAndTokens = await this.tokenSession(user);
+    return userDataAndTokens;
+  }
+
+  async _validateUser(email: string) {
+    const user = await this.userService.findOneBy({ email });
+    if (!user)
+      throw new UnauthorizedException({
+        message: `User with email ${email} not found`,
+      });
     if (user.bannedAt)
       throw new UnauthorizedException({
         message: `Your account has been banned ${user.banReason}`,
@@ -32,10 +57,8 @@ export class AuthService {
     return user;
   }
 
-  async validateUser(userData: any): Promise<any> {
-    const user = await this.userService.findOneBy({
-      email: userData.email,
-    });
+  async _validateAuthUser(userData: any): Promise<any> {
+    const user = await this._validateUser(userData.email);
     if (!user)
       throw new UnauthorizedException({
         message: `User with email ${userData.email} not found`,

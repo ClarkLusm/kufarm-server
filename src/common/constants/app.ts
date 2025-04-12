@@ -10,6 +10,7 @@ export const SETTING_REFERRAL_INCOME = 'referral_income';
 export const SETTING_SYSTEM = 'systems';
 
 export const ACTIVE_ACCOUNT_TOKEN_EXPIRED_DURATION = 24; // 24 hours
+export const OTP_LOGIN_EXPIRED_DURATION = 5; // minutes
 
 export const SYMBOLS = {
   USDT: 'USDT',

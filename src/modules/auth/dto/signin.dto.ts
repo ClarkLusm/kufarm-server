@@ -10,3 +10,13 @@ export class SigninDto {
   @IsNotEmpty()
   password: string;
 }
+
+export class SigninWithOTPDto {
+  @ApiProperty()
+  @IsEmail()
+  email: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  code: string;
+}

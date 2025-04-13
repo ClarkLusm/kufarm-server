@@ -66,13 +66,6 @@ export class UserService extends BaseService<User> {
       userData['maxOut'] = setting?.maxOutNewUser;
     }
     const user = await this.create(userData);
-
-    if (referralUser) {
-      //TODO: should check the f1 condition
-      referralUser.countF1Referral += 1;
-      this.save(referralUser);
-    }
-
     const createdUser = await this.getById(user.id);
 
     let referralPath = `${createdUser.sid}/`;
@@ -343,5 +336,24 @@ export class UserService extends BaseService<User> {
    */
   getReferralLevelByPath(parentPath: string, childPath: string) {
     return childPath?.replace(parentPath, '')?.split('/')?.length - 1;
+  }
+
+  // Increase countF1Referral for the parent user
+  // when a new user buys a product
+  async increaseF1Count(referralPath: string) {
+    const parentUser = await this.getOne({ referralPath });
+    if (parentUser) {
+      parentUser.countF1Referral += 1;
+      return await this.save(parentUser);
+    }
+  }
+
+  async checkUpdateEmailValid(oldUserId: string, newEmail: string) {
+    const email = newEmail.trim();
+    const item = await this.getOne({
+      email,
+      id: Not(oldUserId),
+    });
+    return item == null;
   }
 }

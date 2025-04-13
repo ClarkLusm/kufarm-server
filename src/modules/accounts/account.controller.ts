@@ -43,7 +43,6 @@ import {
   RequestWithdrawDto,
   SearchOrderDto,
   SearchReferralDto,
-  VerifyAccountDto,
   SearchTransactionDto,
 } from './dto';
 
@@ -177,7 +176,7 @@ export class AccountController {
       username: user.username,
       email: user.email,
       walletAddress: user.walletAddress,
-      referralCode: user.referralCode,
+      referralCode: user.hasPurchased ? user.referralCode : null,
       referralCommission: user.referralCommission,
       ...miningInfo,
     };
@@ -440,22 +439,6 @@ export class AccountController {
     }
   }
 
-  @Post('/verify-account')
-  async verifyAccount(@Body() body: VerifyAccountDto) {
-    const { email, token } = body;
-    // TODO: Check token has expired
-    const user = await this.userService.getOne({
-      email,
-    });
-    if (!user) {
-      throw new BadRequestException('Invalid information');
-    }
-    if (user.emailVerified) {
-      throw new BadRequestException('Account has verified already');
-    }
-    await this.userService.updateById(user.id, { emailVerified: true });
-  }
-
   @Get('invoice/:code')
   async getInvoice(@Req() req, @Param('code') code: string) {
     const { sub } = req.user;
@@ -513,7 +496,7 @@ export class AccountController {
       },
     );
     if (!invoice) throw new NotFoundException('Not found invoice');
-    //TODO: check first order to count f1
+
     //TODO: Verify via txHash on the blockchain
     const user = await this.userService.getById(sub);
     await this.dataSource.transaction(async (tx) => {
@@ -533,7 +516,17 @@ export class AccountController {
       await tx.getRepository(User).update(sub, {
         maxOut: user.maxOut + invoice.product.maxOut,
         syncAt: user.syncAt || new Date(),
+        hasPurchased: true,
       });
     });
+
+    // check first order to plus countF1 for the parent account
+    if (!user.hasPurchased && user.referralPath.split('/').length > 2) {
+      const referralParentPath = user.referralPath.replace(
+        `/${user.sid}/`,
+        '/',
+      );
+      this.userService.increaseF1Count(referralParentPath);
+    }
   }
 }

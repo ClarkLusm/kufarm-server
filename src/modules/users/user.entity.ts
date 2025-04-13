@@ -80,6 +80,9 @@ export class User {
   @Column({ name: 'mining_at'})
   miningAt: Date;
 
+  @Column({ name: 'has_purchased', default: false })
+  hasPurchased: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

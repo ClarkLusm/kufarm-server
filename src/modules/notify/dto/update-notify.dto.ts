@@ -1,5 +1,6 @@
 import { IsOptional } from 'class-validator';
-import { PlatformEnum } from 'src/common/enums';
+
+import { PlatformEnum } from '../../../common/enums';
 
 export class UpdateNotifyDto {
   @IsOptional()

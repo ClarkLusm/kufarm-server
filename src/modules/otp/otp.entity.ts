@@ -1,4 +1,4 @@
-import { OtpTypeEnum } from 'src/common/enums';
+import { OtpTypeEnum } from '../../common/enums';
 import {
   Entity,
   PrimaryGeneratedColumn,

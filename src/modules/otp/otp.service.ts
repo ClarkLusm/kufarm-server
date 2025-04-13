@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Otp } from './otp.entity';
-import { BaseService } from 'src/common/base/base.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { BaseService } from '../../common/base/base.service';
+import { Otp } from './otp.entity';
 
 @Injectable()
 export class OtpService extends BaseService<Otp> {

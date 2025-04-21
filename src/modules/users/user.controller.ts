@@ -54,53 +54,15 @@ export class UserController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() data: UpdateUserDto,
   ) {
-    const user = await this.service.getById(id);
-    if (!user) {
-      throw new NotFoundException('Not found user');
-    }
-    let letUpdate = false;
-    if (data.email && data.email !== user.email) {
-      const validEmail = await this.service.checkUpdateEmailValid(
-        user.id,
-        data.email,
-      );
-      if (!validEmail) {
-        throw new BadRequestException('Email has been used already');
+    try {
+      const user = await this.service.getById(id);
+      if (!user) {
+        throw new NotFoundException('Not found user');
       }
-      user.email = data.email;
-      letUpdate = true;
+      return await this.service.updateProfile(user, data);
+    } catch (error) {
+      throw new BadRequestException(error?.message ?? '');
     }
-    if (data.walletAddress) {
-      user.walletAddress = data.walletAddress;
-      letUpdate = true;
-    }
-    if (!user.bannedAt && data.banReason) {
-      user.bannedAt = new Date();
-      user.banReason = data.banReason;
-      letUpdate = true;
-    }
-    if (user.bannedAt && !data.banReason) {
-      user.bannedAt = null;
-      user.banReason = null;
-      letUpdate = true;
-    }
-    if (data.password) {
-      const [passwordHash, salt] = this.service.hashPassword(data.password);
-      user.passwordHash = passwordHash;
-      user.salt = salt;
-      letUpdate = true;
-    }
-    if (
-      typeof data.emailVerified === 'boolean' &&
-      data.emailVerified !== user.emailVerified
-    ) {
-      user.emailVerified = data.emailVerified;
-      letUpdate = true;
-    }
-    if (letUpdate) {
-      await this.service.save(user);
-    }
-    return user;
   }
 
   @Put(':id/ban-user')

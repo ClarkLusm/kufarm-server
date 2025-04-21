@@ -2,13 +2,14 @@ import { Module } from '@nestjs/common';
 import { RouterModule, Routes } from '@nestjs/core';
 
 import { UserModule } from '../modules/users/user.module';
-import { ProductModule } from '../modules/products/product.module';
-import { TransactionModule } from '../modules/transactions/transaction.module';
-import { PaymentWalletModule } from '../modules/payment-wallets/payment-wallet.module';
-import { SettingModule } from '../modules/settings/setting.module';
 import { OrderModule } from '../modules/orders/order.module';
-import { AdminAuthModule } from '../modules/admin-auth/admin-auth.module';
 import { NotifyModule } from '../modules/notify/notify.module';
+import { SettingModule } from '../modules/settings/setting.module';
+import { ProductModule } from '../modules/products/product.module';
+import { AdminAuthModule } from '../modules/admin-auth/admin-auth.module';
+import { TransactionModule } from '../modules/transactions/transaction.module';
+import { UserProductModule } from '../modules/user-products/user-product.module';
+import { PaymentWalletModule } from '../modules/payment-wallets/payment-wallet.module';
 
 const routes: Routes = [
   {
@@ -16,6 +17,7 @@ const routes: Routes = [
     children: [
       { path: '/users', module: UserModule },
       { path: '/products', module: ProductModule },
+      { path: '/user-products', module: UserProductModule },
       { path: '/transactions', module: TransactionModule },
       { path: '/wallets', module: PaymentWalletModule },
       { path: '/orders', module: OrderModule },

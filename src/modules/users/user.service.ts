@@ -11,7 +11,7 @@ import { NEW_MINING_START_DATE } from '../../common/constants';
 import { SettingService } from '../settings/setting.service';
 import { UserProductService } from '../user-products/user-product.service';
 import { UserProduct } from '../user-products/user-product.entity';
-import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto, CreateUserDto } from './dto';
 import { User } from './user.entity';
 
 @Injectable()
@@ -106,6 +106,7 @@ export class UserService extends BaseService<User> {
       },
       userProducts = await this.userProductService.getRunningProductsByUserId(
         userId,
+        user.customHashPower,
         moment(NEW_MINING_START_DATE).toDate(),
       );
 
@@ -117,7 +118,8 @@ export class UserService extends BaseService<User> {
             : moment()
         ).diff(user.syncAt, 'day', true);
         const dailyIncome = userProducts.reduce(
-          (a, b) => a + Number(b.dailyIncome),
+          (a, b) =>
+            a + Number(b.product ? b.product.dailyIncome : b.dailyIncome),
           0,
         );
 
@@ -175,6 +177,7 @@ export class UserService extends BaseService<User> {
       },
       userProducts = await this.userProductService.getRunningProductsByUserId(
         userId,
+        user.customHashPower,
       );
 
     if (userProducts.length && user.income < user.maxOut) {
@@ -197,7 +200,7 @@ export class UserService extends BaseService<User> {
       let daysDuration = endAt.diff(startAt, 'day', true);
       if (daysDuration > 1) daysDuration = 1;
       const dailyIncome = userProducts.reduce(
-        (a, b) => a + Number(b.dailyIncome),
+        (a, b) => a + Number(b.product ? b.product.dailyIncome : b.dailyIncome),
         0,
       );
 
@@ -274,6 +277,7 @@ export class UserService extends BaseService<User> {
       },
       userProducts = await this.userProductService.getRunningProductsByUserId(
         userId,
+        user.customHashPower,
       );
     let dailyIncome = 0,
       monthlyIncome = 0,
@@ -285,9 +289,9 @@ export class UserService extends BaseService<User> {
 
       [dailyIncome, monthlyIncome, hashPower] = userProducts.reduce(
         (a, b) => [
-          a[0] + Number(b.dailyIncome),
-          a[1] + Number(b.monthlyIncome),
-          a[2] + b.hashPower,
+          a[0] + Number(b.product ? b.product.dailyIncome : b.dailyIncome),
+          a[1] + Number(b.product ? b.product.monthlyIncome : b.monthlyIncome),
+          a[2] + Number(b.product ? b.product.hashPower : b.hashPower),
         ],
         [0, 0, 0],
       );
@@ -355,5 +359,47 @@ export class UserService extends BaseService<User> {
       id: Not(oldUserId),
     });
     return item == null;
+  }
+
+  async updateProfile(user: User, data: UpdateUserDto) {
+    let letUpdate = false;
+    if (data.email && data.email !== user.email) {
+      const validEmail = await this.checkUpdateEmailValid(user.id, data.email);
+      if (!validEmail) {
+        throw new Error('Email has been used already');
+      }
+      user.email = data.email;
+      letUpdate = true;
+    }
+    if (data.walletAddress) {
+      user.walletAddress = data.walletAddress;
+      letUpdate = true;
+    }
+    if (!user.bannedAt && data.banReason) {
+      user.bannedAt = new Date();
+      user.banReason = data.banReason;
+      letUpdate = true;
+    }
+    if (user.bannedAt && !data.banReason) {
+      user.bannedAt = null;
+      user.banReason = null;
+      letUpdate = true;
+    }
+    if (data.password) {
+      const [passwordHash, salt] = this.hashPassword(data.password);
+      user.passwordHash = passwordHash;
+      user.salt = salt;
+      letUpdate = true;
+    }
+    if (
+      typeof data.emailVerified === 'boolean' &&
+      data.emailVerified !== user.emailVerified
+    ) {
+      user.emailVerified = data.emailVerified;
+      letUpdate = true;
+    }
+    if (letUpdate) {
+      await this.save(user);
+    }
   }
 }

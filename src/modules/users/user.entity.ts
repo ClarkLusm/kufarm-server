@@ -83,6 +83,9 @@ export class User {
   @Column({ name: 'has_purchased', default: false })
   hasPurchased: boolean;
 
+  @Column({ name: 'custom_hash_power', default: false })
+  customHashPower: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

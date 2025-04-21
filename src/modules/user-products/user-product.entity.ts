@@ -58,7 +58,8 @@ export class UserProduct {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @OneToOne(() => Product)
+  @ManyToOne(() => Product, (product) => product.userProducts)
+  @JoinColumn({ name: 'product_id' })
   product: Product;
 
   @CreateDateColumn({ name: 'created_at' })

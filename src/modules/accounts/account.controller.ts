@@ -199,7 +199,10 @@ export class AccountController {
       throw new BadRequestException('Mining has started');
     }
     const userProducts =
-      await this.userProductService.getRunningProductsByUserId(sub);
+      await this.userProductService.getRunningProductsByUserId(
+        sub,
+        user.customHashPower,
+      );
     if (!userProducts.length) {
       throw new BadRequestException('You have no running product');
     }

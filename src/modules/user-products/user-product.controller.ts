@@ -39,7 +39,7 @@ export class UserProductController {
     @Body() data: UpdateUserProductsDto,
   ) {
     try {
-      const user = await this.service.getById(userId);
+      const user = await this.userService.getById(userId);
       if (!user) {
         throw new NotFoundException('Not found user');
       }

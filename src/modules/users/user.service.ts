@@ -8,11 +8,13 @@ import { genReferralCode } from '../../utils/string.utils';
 import { BaseService } from '../..//common/base/base.service';
 import { UserProductStatusEnum } from '../../common/enums/user-product.enum';
 import { NEW_MINING_START_DATE } from '../../common/constants';
+import { ReinvestService } from '../reinvest/reinvest.service';
 import { SettingService } from '../settings/setting.service';
 import { UserProductService } from '../user-products/user-product.service';
 import { UserProduct } from '../user-products/user-product.entity';
 import { UpdateUserDto, CreateUserDto } from './dto';
 import { User } from './user.entity';
+import { ReinvestStatusEnum } from 'src/common/enums/reinvest.enum';
 
 @Injectable()
 export class UserService extends BaseService<User> {
@@ -22,6 +24,7 @@ export class UserService extends BaseService<User> {
     private readonly dataSource: DataSource,
     private readonly settingService: SettingService,
     private readonly userProductService: UserProductService,
+    private readonly reinvestService: ReinvestService,
   ) {
     super(repository);
   }
@@ -170,7 +173,7 @@ export class UserService extends BaseService<User> {
       user = await this.getById(userId);
     }
     if (!user.miningAt) return;
-    const userData = {
+    const userData: any = {
         income: Number(user.income || 0),
         balance: Number(user.balance || 0),
         syncAt: new Date(),
@@ -180,7 +183,7 @@ export class UserService extends BaseService<User> {
         user.customHashPower,
       );
 
-    if (userProducts.length && user.income < user.maxOut) {
+    if (user.income < user.maxOut) {
       const setting = await this.settingService.getAppSettings();
       const sessionMiningDuration = setting?.sessionMiningDuration;
       // Check if the user has been mining for more than x hours
@@ -204,48 +207,50 @@ export class UserService extends BaseService<User> {
         0,
       );
 
-      let income = daysDuration * dailyIncome;
-      let incomeRemain = income;
-      const taskUserProducts = userProducts.reduce((a, b) => {
-        if (incomeRemain > 0) {
-          const incomeNeedToMax = b.maxOut - Number(b.income);
-          const reachMax = incomeRemain >= incomeNeedToMax; // true: the machine is fully
-          a.push({
-            id: b.id,
-            income: reachMax ? b.maxOut : Number(b.income) + incomeRemain,
-            status: reachMax
-              ? UserProductStatusEnum.Stop
-              : UserProductStatusEnum.Activated,
-          });
-          incomeRemain -= reachMax ? incomeNeedToMax : incomeRemain;
-        }
-        return a;
-      }, []);
+      if (userProducts.length) {
+        let income = daysDuration * dailyIncome;
+        let incomeRemain = income;
+        const taskUserProducts = userProducts.reduce((a, b) => {
+          if (incomeRemain > 0) {
+            const incomeNeedToMax = b.maxOut - Number(b.income);
+            const reachMax = incomeRemain >= incomeNeedToMax; // true: the machine is fully
+            a.push({
+              id: b.id,
+              income: reachMax ? b.maxOut : Number(b.income) + incomeRemain,
+              status: reachMax
+                ? UserProductStatusEnum.Stop
+                : UserProductStatusEnum.Activated,
+            });
+            incomeRemain -= reachMax ? incomeNeedToMax : incomeRemain;
+          }
+          return a;
+        }, []);
 
-      await this.dataSource.transaction(async (tx) => {
-        taskUserProducts.forEach(async (up) => {
-          await tx.getRepository(UserProduct).update(up.id, {
-            income: up.income,
-            status: up.status,
+        await this.dataSource.transaction(async (tx) => {
+          taskUserProducts.forEach(async (up) => {
+            await tx.getRepository(UserProduct).update(up.id, {
+              income: up.income,
+              status: up.status,
+            });
           });
+
+          // Reach user maxout
+          if (userData.income + income > user.maxOut) {
+            income = user.maxOut - userData.income;
+          }
+          // Update user data
+          userData.income += income;
+          userData.balance += income;
+          // Reset miningAt after ending mining session
+          if (endAt.isSame(maxMiningAt)) {
+            userData.miningAt = null;
+          }
+          await tx.getRepository(User).update(userId, userData);
         });
-
-        // Reach user maxout
-        if (userData.income + income > user.maxOut) {
-          income = user.maxOut - userData.income;
-        }
-        // Update user data
-        userData.income += income;
-        userData.balance += income;
-        await tx.getRepository(User).update(userId, userData);
-      });
-
-      if (endAt.isSame(maxMiningAt)) {
-        await this.updateById(userId, { miningAt: null });
+        return;
       }
-    } else {
-      await this._stopMiningAndOffMachines(userId);
     }
+    await this._stopMiningAndOffMachines(userId);
   }
 
   async _stopMiningAndOffMachines(userId: string) {
@@ -305,6 +310,22 @@ export class UserService extends BaseService<User> {
         );
       }
     }
+
+    const reinvestPackages =
+      await this.reinvestService.getReinvestPackagesByUserId(userId);
+    if (reinvestPackages.length) {
+      [dailyIncome, monthlyIncome, hashPower] = reinvestPackages
+        .filter((i) => i.status === ReinvestStatusEnum.Activated)
+        .reduce(
+          (a, b) => [
+            a[0] + Number(b.dailyIncome),
+            a[1] + Number(b.monthlyIncome),
+            a[2] + Number(b.hashPower),
+          ],
+          [0, 0, 0],
+        );
+    }
+
     return {
       dailyIncome,
       monthlyIncome,

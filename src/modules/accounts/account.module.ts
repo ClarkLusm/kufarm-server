@@ -11,6 +11,7 @@ import { JwtAuthModule } from '../auth/jwt/jwt-auth.module';
 import { ProductModule } from '../products/product.module';
 import { SettingModule } from '../settings/setting.module';
 import { ReferralCommissionModule } from '../referral-commissions/referral-commission.module';
+import { ReinvestModule } from '../reinvest/reinvest.module';
 
 @Module({
   controllers: [AccountController],
@@ -23,6 +24,7 @@ import { ReferralCommissionModule } from '../referral-commissions/referral-commi
     TransactionModule,
     SettingModule,
     ReferralCommissionModule,
+    ReinvestModule,
     EthersModule,
     JwtAuthModule,
   ],

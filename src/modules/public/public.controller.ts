@@ -82,6 +82,11 @@ export class PublicController {
     return this.settingService.getAppSettings();
   }
 
+  @Get('/reinvest-settings')
+  getReinvestSettings() {
+    return this.settingService.getReinvestSettings();
+  }
+
   @Get('/app-notify')
   getAppNotify(@Query() query) {
     return this.notifyService.getAppNotify({

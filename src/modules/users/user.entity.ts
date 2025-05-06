@@ -13,6 +13,7 @@ import { Order } from '../orders/order.entity';
 import { UserProduct } from '../user-products/user-product.entity';
 import { Transaction } from '../transactions/transaction.entity';
 import { ReferralCommission } from '../referral-commissions/referral-commission.entity';
+import { Reinvest } from '../reinvest/reinvest.entity';
 
 @Entity()
 export class User {
@@ -77,7 +78,7 @@ export class User {
   @Column({ name: 'sync_at' })
   syncAt: Date;
 
-  @Column({ name: 'mining_at'})
+  @Column({ name: 'mining_at' })
   miningAt: Date;
 
   @Column({ name: 'has_purchased', default: false })
@@ -85,6 +86,12 @@ export class User {
 
   @Column({ name: 'custom_hash_power', default: false })
   customHashPower: boolean;
+
+  @Column({ name: 'auto_reinvest_enabled', default: false })
+  autoReinvestEnabled: boolean;
+
+  @Column({ name: 'auto_reinvest_amount' })
+  autoReinvestAmount: number;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
@@ -103,4 +110,7 @@ export class User {
 
   @OneToOne(() => ReferralCommission, (ref) => ref.user)
   referredUser: ReferralCommission;
+
+  @OneToMany(() => Reinvest, (reinvest) => reinvest.user)
+  reinvests: Reinvest[];
 }

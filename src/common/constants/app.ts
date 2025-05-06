@@ -8,6 +8,7 @@ export const NEW_MINING_START_DATE = '2025-03-31T00:00:00+07:00';
 
 export const SETTING_REFERRAL_INCOME = 'referral_income';
 export const SETTING_SYSTEM = 'systems';
+export const SETTING_REINVEST = 'reinvest_config';
 
 export const ACTIVE_ACCOUNT_TOKEN_EXPIRED_DURATION = 24; // 24 hours
 export const OTP_LOGIN_EXPIRED_DURATION = 5; // minutes

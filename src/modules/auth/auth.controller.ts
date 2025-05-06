@@ -66,6 +66,11 @@ export class AuthController {
     }
   }
 
+  @Post('/refresh-token')
+  async refreshToken(@Body() data: SigninDto) {
+    // return this.authService.refreshToken(data);
+  }
+
   @Post('/active-account')
   async activeAccount(@Body() data: VerifyAccountDto) {
     try {

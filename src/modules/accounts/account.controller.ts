@@ -37,7 +37,9 @@ import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 import { Transaction } from '../transactions/transaction.entity';
 import { ReferralCommissionService } from '../referral-commissions/referral-commission.service';
 import { UserProduct } from '../user-products/user-product.entity';
+import { ReinvestService } from '../reinvest/reinvest.service';
 import {
+  ConfigReinvestmentDto,
   CreateOrderDto,
   PayOrderDto,
   RequestWithdrawDto,
@@ -59,6 +61,7 @@ export class AccountController {
     private readonly orderService: OrderService,
     private readonly settingService: SettingService,
     private readonly referralCommissionService: ReferralCommissionService,
+    private readonly reinvestService: ReinvestService,
     private readonly ethersService: EthersService,
   ) {}
 
@@ -165,9 +168,10 @@ export class AccountController {
   @Get('/profile')
   async getMyMining(@Req() req) {
     const { sub } = req.user;
-    await this.userService.syncBalance(sub);
-    const miningInfo = await this.userService.getMiningInfo(sub);
     const user = await this.userService.getById(sub);
+    await this.userService.syncBalance(sub);
+    await this.reinvestService.investBalance(user);
+    const miningInfo = await this.userService.getMiningInfo(sub);
     const settings = await this.settingService.getAppSettings();
     return {
       pool: settings.poolSrc ?? '',
@@ -207,10 +211,8 @@ export class AccountController {
       throw new BadRequestException('You have no running product');
     }
     await this.userService.syncBalance(sub);
-    await this.userService.updateById(sub, {
-      miningAt: new Date(),
-      syncAt: new Date(),
-    });
+    await this.userService.updateById(sub, { miningAt: new Date() });
+    await this.reinvestService.investBalance(user);
     return {
       message: 'Mining started successfully',
       miningAt: new Date(),
@@ -338,6 +340,7 @@ export class AccountController {
       const { amount, transactionFee } = body;
       await this.userService.syncBalance(sub);
       const user = await this.userService.getById(sub);
+      await this.reinvestService.investBalance(user);
       const userBalance = Number(user.balance || 0);
 
       const token = getContractToken(
@@ -530,6 +533,30 @@ export class AccountController {
         '/',
       );
       this.userService.increaseF1Count(referralParentPath);
+    }
+  }
+
+  @Post('/reinvest')
+  async configReinvestment(@Req() req, @Body() body: ConfigReinvestmentDto) {
+    const { sub } = req.user;
+    const user = await this.userService.getById(sub);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    let hasChanged = false;
+    if (user.autoReinvestEnabled !== body.autoReinvest) {
+      hasChanged = true;
+      user.autoReinvestEnabled = body.autoReinvest;
+    }
+    if (user.autoReinvestAmount !== body.amount) {
+      hasChanged = true;
+      user.autoReinvestAmount = body.amount;
+    }
+    // should syncing before changing reinvestment config
+    await this.userService.syncBalance(sub);
+    this.reinvestService.investBalance(user);
+    if (hasChanged) {
+      await this.userService.save(user);
     }
   }
 }

@@ -24,6 +24,7 @@ export class SettingService extends BaseService<Setting> {
     return setting?.value;
   }
 
+  // Convert token to USD or vice versa
   async convertUsdAndToken(
     tokenSymbol: string,
     amount: number,
@@ -75,5 +76,12 @@ export class SettingService extends BaseService<Setting> {
       console.error('>>>getExchangePrice', error);
       throw new Error('Cannot fetch exchange rate');
     }
+  }
+
+  async getReinvestConfig() {
+    const setting = await this.repository.findOneBy({
+      key: Constants.SETTING_REINVEST,
+    });
+    return setting?.value;
   }
 }

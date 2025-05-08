@@ -5,6 +5,9 @@ export class UpdateProductDto {
   name?: string;
 
   @IsOptional()
+  alias?: string;
+
+  @IsOptional()
   price?: number;
 
   @IsOptional()

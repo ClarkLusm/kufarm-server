@@ -10,7 +10,7 @@ export class CreateProductDto {
   @IsNotEmpty()
   name: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   alias: string;
 
   @IsNumber()

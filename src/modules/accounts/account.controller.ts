@@ -557,7 +557,7 @@ export class AccountController {
     }
     // should syncing before changing reinvestment config
     await this.userService.syncBalance(sub);
-    this.reinvestService.investBalance(user);
+    await this.reinvestService.investBalance(user);
     if (hasChanged) {
       await this.userService.save(user);
     }

@@ -16,8 +16,10 @@ export class SettingController {
         key: SETTING_REINVEST,
         name: 'Cấu hình tái đầu tư',
         value: {
-          autoReinvestEnabled: false,
-          autoReinvestAmount: 0,
+          dailyIncomePercent: 0,
+          monthlyIncomePercent: 0,
+          maxOutPercent: 0,
+          minAmount: 0,
         },
       });
       return this.service.find({});

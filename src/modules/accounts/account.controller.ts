@@ -180,6 +180,8 @@ export class AccountController {
       balance: user.balance,
       username: user.username,
       email: user.email,
+      autoReinvestEnabled: user.autoReinvestEnabled,
+      autoReinvestAmount: user.autoReinvestAmount,
       walletAddress: user.walletAddress,
       referralCode: user.hasPurchased ? user.referralCode : null,
       referralCommission: user.referralCommission,

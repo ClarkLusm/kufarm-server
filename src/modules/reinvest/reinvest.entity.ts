@@ -27,6 +27,12 @@ export class Reinvest {
   @Column({ nullable: false })
   amount: number;
 
+  @Column({ default: 1 })
+  quantity: number;
+
+  @Column({ name: 'hash_power' })
+  hashPower: number;
+
   @Column({ nullable: false })
   income: number;
 

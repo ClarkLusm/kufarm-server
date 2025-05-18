@@ -314,7 +314,7 @@ export class UserService extends BaseService<User> {
     const reinvestPackages =
       await this.reinvestService.getReinvestPackagesByUserId(userId);
     if (reinvestPackages.length) {
-      [dailyIncome, monthlyIncome, hashPower] = reinvestPackages
+      const [d, m, h] = reinvestPackages
         .filter((i) => i.status === ReinvestStatusEnum.Activated)
         .reduce(
           (a, b) => [
@@ -324,6 +324,9 @@ export class UserService extends BaseService<User> {
           ],
           [0, 0, 0],
         );
+      dailyIncome += d;
+      monthlyIncome += m;
+      hashPower += h;
     }
 
     return {

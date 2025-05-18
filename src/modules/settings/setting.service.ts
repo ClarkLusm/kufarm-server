@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { BaseService } from '../../common/base/base.service';
+import { Product } from '../products/product.entity';
 import * as Constants from '../../common/constants';
 import { Setting } from './setting.entity';
 
@@ -12,6 +13,7 @@ export class SettingService extends BaseService<Setting> {
   constructor(
     @InjectRepository(Setting)
     public repository: Repository<Setting>,
+    private readonly datasource: DataSource,
   ) {
     super(repository);
   }
@@ -63,7 +65,17 @@ export class SettingService extends BaseService<Setting> {
     const setting = await this.repository.findOneBy({
       key: Constants.SETTING_REINVEST,
     });
-    return setting?.value || {};
+    const products = await this.datasource.getRepository(Product)
+    .find({
+      select: {
+        hashPower: true,
+        price: true,
+      },
+      where: {
+        published: true,
+      }
+    })
+    return {...setting?.value , products};
   }
 
   async getReferralIncomeSettings() {

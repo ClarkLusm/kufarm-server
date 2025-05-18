@@ -10,9 +10,8 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "dev": "nest start --watch",
+    "prod": "node dist/main",
     "lint": "eslint \"{src,test}/**/*.{ts,tsx}\"",
     "console": "ts-node -r tsconfig-paths/register src/console.ts",
     "typeorm": "typeorm-ts-node-commonjs -d ormconfig.ts"

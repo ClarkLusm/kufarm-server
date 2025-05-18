@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, LessThan, MoreThanOrEqual, Repository } from 'typeorm';
+import { DataSource, MoreThanOrEqual, Repository } from 'typeorm';
 import moment from 'moment';
 
 import { BaseService } from '../../common/base/base.service';
-import { MiningParams } from '../../common/types/mining-params';
 import { ReinvestStatusEnum } from '../../common/enums/reinvest.enum';
+import { buildQueryFilter } from '../../common/helpers/query-builder';
 import { SettingService } from '../settings/setting.service';
+import { Product } from '../products/product.entity';
 import { User } from '../users/user.entity';
 import { Reinvest } from './reinvest.entity';
-import { buildQueryFilter } from 'src/common/helpers/query-builder';
 
 @Injectable()
 export class ReinvestService extends BaseService<Reinvest> {
@@ -38,32 +38,27 @@ export class ReinvestService extends BaseService<Reinvest> {
       packages.map(async (item) => {
         if (item.maxOut <= item.income) {
           item.status = ReinvestStatusEnum.Stop;
+          await this.repository.save(item);
+          return {
+            ...item,
+            dailyIncome: 0,
+            monthlyIncome: 0,
+            hashPower: 0,
+          };
         }
-        await this.repository.save(item);
-        const product = await this.dataSource.getRepository('Product').findOne({
-          select: {
-            id: true,
-            hashPower: true,
-          },
-          where: {
-            price: MoreThanOrEqual(item.amount),
-            published: true,
-          },
-          order: {
-            price: 'ASC',
-          },
-        });
         return {
           ...item,
-          dailyIncome: (reinvestmentConfig.dailyIncome * item.amount) / 100,
-          monthlyIncome: (reinvestmentConfig.monthlyIncome * item.amount) / 100,
-          hashPower: product ? product.hashPower : 0,
+          dailyIncome:
+            (reinvestmentConfig.dailyIncomePercent * item.amount) / 100,
+          monthlyIncome:
+            (reinvestmentConfig.monthlyIncomePercent * item.amount) / 100,
+          hashPower: item.hashPower,
         };
       }),
     );
   }
 
-  async syncReinvest(user: User, reinvestmentConfig: MiningParams) {
+  async syncReinvest(user: User, reinvestmentConfig: ReinvestConfiguration) {
     if (!user.miningAt) return;
     const reinvests = await this.repository.find({
       where: {
@@ -93,7 +88,7 @@ export class ReinvestService extends BaseService<Reinvest> {
         let daysDuration = endAt.diff(startAt, 'day', true);
         if (daysDuration > 1) daysDuration = 1;
 
-        const income = reinvestmentConfig.dailyIncome * daysDuration;
+        const income = reinvestmentConfig.dailyIncomePercent * daysDuration;
         const maxIncome = reinvest.maxOut - reinvest.income;
         if (income > maxIncome) {
           reinvest.income = reinvest.maxOut;
@@ -115,7 +110,7 @@ export class ReinvestService extends BaseService<Reinvest> {
   }
 
   async investBalance(user: User) {
-    const reinvestmentConfig =
+    const reinvestmentConfig: ReinvestConfiguration =
       await this.settingService.getReinvestmentConfig();
     if (!reinvestmentConfig) {
       console.error('ERROR::[ReinvestService] No reinvestment config found');
@@ -133,9 +128,8 @@ export class ReinvestService extends BaseService<Reinvest> {
       );
     const totalBalance = refUsdBalance + userBalance;
     if (totalBalance < user.autoReinvestAmount) return;
-    const reinvestUsdAmount = //USD amount
-      parseInt(`${totalBalance / user.autoReinvestAmount}`) *
-      user.autoReinvestAmount;
+    const quantity = parseInt(`${totalBalance / user.autoReinvestAmount}`);
+    const reinvestUsdAmount = quantity * user.autoReinvestAmount;
     let reinvestAmount = Number(reinvestUsdAmount);
     if (reinvestAmount >= refUsdBalance) {
       user.referralCommission = 0;
@@ -154,13 +148,27 @@ export class ReinvestService extends BaseService<Reinvest> {
     } else {
       user.balance -= reinvestAmount;
     }
+
+    const product = await this.dataSource.getRepository(Product).findOne({
+      where: {
+        published: true,
+        price: MoreThanOrEqual(user.autoReinvestAmount),
+      },
+      order: { price: 'ASC' },
+    });
+
+    const hashPowerPerOnce =
+      (user.autoReinvestAmount / product.price) * product.hashPower;
+
     await this.dataSource.transaction(async (tx) => {
       await tx.getRepository(Reinvest).save({
         userId: user.id,
         amount: reinvestUsdAmount,
+        quantity,
+        hashPower: hashPowerPerOnce * quantity,
         toUsdRate: tokenToUsdRate,
         income: 0,
-        maxOut: reinvestmentConfig.maxOut,
+        maxOut: (reinvestUsdAmount * reinvestmentConfig.maxOutPercent) / 100,
         status: ReinvestStatusEnum.Activated,
       });
       await tx.getRepository(User).save(user);

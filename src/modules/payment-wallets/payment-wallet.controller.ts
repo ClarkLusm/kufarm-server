@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   NotFoundException,
   Query,
+  Delete,
 } from '@nestjs/common';
 
 import { encryptedWalletKey } from '../../utils';
@@ -81,5 +82,14 @@ export class PaymentWalletController {
       updatedAt: new Date(),
     });
     return wallet;
+  }
+
+  @Delete(':id')
+  async deleteWallet(@Param('id', ParseUUIDPipe) id: string) {
+    const wallet = await this.service.getById(id);
+    if (!wallet) {
+      throw new NotFoundException('Not found the wallet');
+    }
+    await this.service.deleteById(id);
   }
 }
